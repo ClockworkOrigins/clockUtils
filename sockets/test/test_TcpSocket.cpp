@@ -17,29 +17,29 @@ bool operator==(const ClockError & a, const ClockError & b) {
 int connectCounter = 0;
 std::vector<std::string> messages = { "Hello", "World!", "This is a super nice message", "111elf!!!" };
 
-void connectionAccepted(TcpSocket &) {
+void connectionAccepted(TcpSocket *) {
 	connectCounter++;
 }
 
-void connectionAcceptedWrite(TcpSocket & ts) {
+void connectionAcceptedWrite(TcpSocket * ts) {
 	unsigned int counter = 0;
 
 	while (counter < messages.size()) {
 		std::string buffer;
 
-		ClockError e = ts.receivePacket(buffer);
+		ClockError e = ts->receivePacket(buffer);
 
 		EXPECT_EQ(ClockError::SUCCESS, e);
 		EXPECT_EQ(messages[counter], buffer);
 
-		e = ts.writePacket(buffer.c_str(), buffer.length());
+		e = ts->writePacket(buffer.c_str(), buffer.length());
 
 		EXPECT_EQ(ClockError::SUCCESS, e);
 
 		counter++;
 	}
 
-	ts.close();
+	ts->close();
 }
 
 TEST(TcpSocket, connect) { // tests connect with all possible errors
@@ -47,37 +47,30 @@ TEST(TcpSocket, connect) { // tests connect with all possible errors
 	ClockError e = ts.connect("1", 12345, 1000);
 
 	EXPECT_EQ(ClockError::INVALID_IP, e);
-	
 	e = ts.connect("127.0.0.1", 0, 1000);
 
 	EXPECT_EQ(ClockError::INVALID_PORT, e);
-
 	e = ts.connect("192.168.255.255", 12345, 1000);
 
 	EXPECT_EQ(ClockError::TIMEOUT, e);
-
 	ts.connect("127.0.0.1", 12345, 1000);
 
 	EXPECT_EQ(ClockError::TIMEOUT, e);
-
 	TcpSocket server;
 
-	e = server.listen(12345, 1, false, [](TcpSocket &) {});
+	e = server.listen(12345, 1, false, [](TcpSocket *) {});
 
 	e = ts.connect("127.0.0.1", 12345, 1000);
 
 	EXPECT_EQ(ClockError::SUCCESS, e);
-
 	e = ts.connect("127.0.0.1", 12345, 1000);
 
 	EXPECT_EQ(ClockError::INVALID_USAGE, e);
-
 	ts.close();
 
 	e = ts.connect("127.0.0.1", 12345, 1000);
 
 	EXPECT_EQ(ClockError::SUCCESS, e);
-
 	server.close();
 }
 
@@ -96,7 +89,7 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 
 	e = server2.listen(12345, 10, true, std::bind(connectionAccepted, std::placeholders::_1));
 
-	EXPECT_EQ(ClockError::PORT_INUSE, e);
+	EXPECT_EQ(ClockError::ADDRESS_INUSE, e);
 
 	connectCounter = 0;
 
@@ -205,10 +198,10 @@ TEST(TcpSocket, getIP) { // tests IP before and after connection
 	EXPECT_EQ(0, s3.length());
 
 	TcpSocket server;
-	server.listen(12345, 1, false, [](TcpSocket & client) {
-		std::string s4 = client.getRemoteIP();
-		std::string s5 = client.getPublicIP();
-		std::string s6 = client.getLocalIP();
+	server.listen(12345, 1, false, [](TcpSocket * client) {
+		std::string s4 = client->getRemoteIP();
+		std::string s5 = client->getPublicIP();
+		std::string s6 = client->getLocalIP();
 
 		EXPECT_NE(0, s4.length());
 		EXPECT_NE(0, s5.length());
@@ -241,14 +234,14 @@ TEST(TcpSocket, getPort) { // tests port before and after connection
 	EXPECT_EQ(0, s2);
 
 	TcpSocket server;
-	server.listen(12345, 1, false, [](TcpSocket & client) {
-		uint16_t s3 = client.getRemotePort();
-		uint16_t s4 = client.getLocalPort();
+	server.listen(12345, 1, false, [](TcpSocket * client) {
+		uint16_t s3 = client->getRemotePort();
+		uint16_t s4 = client->getLocalPort();
 
 		EXPECT_NE(0, s3);
 		EXPECT_EQ(12345, s4);
 
-		client.close();
+		client->close();
 	});
 
 	ts.connect("127.0.0.1", 12345, 1000);
@@ -329,7 +322,7 @@ TEST(TcpSocket, connectOnly) {
 	std::string str;
 	TcpSocket sock1, sock2;
 
-	sock1.listen(12345, 1, false, [](TcpSocket &){});
+	sock1.listen(12345, 1, false, [](TcpSocket *){});
 	sock2.connect("127.0.0.1", 12345, 1000);
 	
 	EXPECT_EQ(12345, sock2.getRemotePort());
@@ -340,8 +333,8 @@ TEST(TcpSocket, connectOnly) {
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-	EXPECT_EQ(ClockError::SUCCESS, sock1.listen(1025, 1, true, [](TcpSocket & sock){}));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.listen(1025, 1, true, [](TcpSocket & sock){}));
+	EXPECT_EQ(ClockError::SUCCESS, sock1.listen(1025, 1, true, [](TcpSocket * sock){}));
+	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.listen(1025, 1, true, [](TcpSocket * sock){}));
 	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.connect("127.0.0.1", 1026, 1000));
 	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.writePacket(buffer));
 	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.writePacket(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
@@ -358,7 +351,7 @@ TEST(TcpSocket, connectOnly) {
 	EXPECT_EQ(ClockError::INVALID_USAGE, sock2.read(str));
 	EXPECT_EQ(ClockError::INVALID_USAGE, sock2.receivePacket(buffer));
 	EXPECT_EQ(ClockError::INVALID_USAGE, sock2.receivePacket(str));
-	EXPECT_EQ(ClockError::SUCCESS, sock2.listen(1026, 1, true, [](TcpSocket & sock){}));
+	EXPECT_EQ(ClockError::SUCCESS, sock2.listen(1026, 1, true, [](TcpSocket * sock){}));
 	
 	sock1.close();
 	sock2.close();
@@ -367,7 +360,7 @@ TEST(TcpSocket, connectOnly) {
 TEST(TcpSocket, accept) {
 	TcpSocket sock1, sock2;
 	int a = 0;
-	sock1.listen(12345, 1, false, [a](TcpSocket & sock) mutable
+	sock1.listen(12345, 1, false, [a](TcpSocket * sock) mutable
 		{
 			a = 1;
 		});
@@ -383,9 +376,9 @@ TEST(TcpSocket, accept) {
 TEST(TcpSocket, write) {
 	TcpSocket sock1, sock2;
 	std::vector<uint8_t> v = {0x1, 0x2, 0x3, 0x4, 0x5, 0x0, 0x5, 0x4, 0x3, 0x2, 0x1};
-	sock1.listen(12345, 1, false, [v](TcpSocket & sock)
+	sock1.listen(12345, 1, false, [v](TcpSocket * sock)
 		{
-			sock.write(v);
+			sock->write(v);
 		});
 	sock2.connect("127.0.0.1", 12345, 1000);
 	
@@ -399,9 +392,9 @@ TEST(TcpSocket, write) {
 TEST(TcpSocket, write2) {
 	TcpSocket sock1, sock2;
 	std::string v = {0x1, 0x2, 0x3, 0x4, 0x5, 0x0, 0x5, 0x4, 0x3, 0x2, 0x1};
-	sock1.listen(12345, 1, false, [v](TcpSocket & sock)
+	sock1.listen(12345, 1, false, [v](TcpSocket * sock)
 		{
-			sock.write(&v[0], v.length());
+			sock->write(&v[0], v.length());
 		});
 	sock2.connect("127.0.0.1", 12345, 1000);
 
@@ -421,10 +414,10 @@ TEST(TcpSocket, writeMultiple) {
 	std::vector<uint8_t> vSum = v1;
 	vSum.insert(vSum.end(), v2.begin(), v2.end());
 
-	sock1.listen(12345, 1, false, [v1, v2](TcpSocket & sock)
+	sock1.listen(12345, 1, false, [v1, v2](TcpSocket * sock)
 		{
-			sock.write(v1);
-			sock.write(v2);
+			sock->write(v1);
+			sock->write(v2);
 		});
 	sock2.connect("127.0.0.1", 12345, 1000);
 	
@@ -439,7 +432,7 @@ TEST(TcpSocket, writeMultiple) {
 
 TEST(TcpSocket, connectDouble) {
 	TcpSocket sock1, sock2, sock3;
-	EXPECT_EQ(ClockError::SUCCESS, sock1.listen(12345, 1, false, [](TcpSocket &){}));
+	EXPECT_EQ(ClockError::SUCCESS, sock1.listen(12345, 1, false, [](TcpSocket *){}));
 	EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 1000));
 	EXPECT_EQ(ClockError::CONNECTION_FAILED, sock3.connect("127.0.0.1", 12345, 1000));
 	sock1.close();
@@ -450,9 +443,9 @@ TEST(TcpSocket, connectDouble) {
 TEST(TcpSocket, writePacket) {
 	TcpSocket sock1, sock2;
 	std::string v = {0x1, 0x2, 0x3, 0x4, 0x5, 0x0, 0x5, 0x4, 0x3, 0x2, 0x1};
-	sock1.listen(12345, 1, false, [v](TcpSocket & sock)
+	sock1.listen(12345, 1, false, [v](TcpSocket * sock)
 		{
-			sock.writePacket(&v[0], v.length());
+			sock->writePacket(&v[0], v.length());
 		});
 	sock2.connect("127.0.0.1", 12345, 1000);
 
@@ -470,10 +463,10 @@ TEST(TcpSocket, writePacketMultiple) {
 	std::vector<uint8_t> v1 = {0x1, 0x2, 0x3, 0x4, 0x5, 0x0, 0x5, 0x4, 0x3, 0x2, 0x1};
 	std::vector<uint8_t> v2 = {0x11, 0x12, 0x13, 0x14, 0x15, 0x0, 0x15, 0x14, 0x13, 0x12, 0x11};
 
-	sock1.listen(12345, 1, false, [v1, v2](TcpSocket & sock)
+	sock1.listen(12345, 1, false, [v1, v2](TcpSocket * sock)
 		{
-			sock.writePacket(v1);
-			sock.writePacket(v2);
+			sock->writePacket(v1);
+			sock->writePacket(v2);
 		});
 	sock2.connect("127.0.0.1", 12345, 1000);
 	
@@ -493,15 +486,15 @@ TEST(TcpSocket, writePacketMultipleSwapped) {
 	std::vector<uint8_t> v1 = {0x1, 0x2, 0x3, 0x4, 0x5, 0x0, 0x5, 0x4, 0x3, 0x2, 0x1};
 	std::vector<uint8_t> v2 = {0x11, 0x12, 0x13, 0x14, 0x15, 0x0, 0x15, 0x14, 0x13, 0x12, 0x11};
 
-	sock1.listen(12345, 1, false, [v1, v2](TcpSocket & sock)
+	sock1.listen(12345, 1, false, [v1, v2](TcpSocket * sock)
 		{
 			std::vector<uint8_t> v3, v4;
-			sock.receivePacket(v3);
-			sock.receivePacket(v4);
+			sock->receivePacket(v3);
+			sock->receivePacket(v4);
 			EXPECT_EQ(v1, v3);
 			EXPECT_EQ(v2, v4);
-			sock.close();
-			sock.close();
+			sock->close();
+			sock->close();
 		});
 	sock2.connect("127.0.0.1", 12345, 1000);
 	
@@ -516,10 +509,10 @@ TEST(TcpSocket, writeMass) {
 	std::vector<uint8_t> v1(10000, 'a');
 	std::vector<uint8_t> v2(10000, 'b');
 
-	sock1.listen(12345, 1, false, [v1, v2](TcpSocket & sock)
+	sock1.listen(12345, 1, false, [v1, v2](TcpSocket * sock)
 		{
-			sock.writePacket(v1);
-			sock.writePacket(v2);
+			sock->writePacket(v1);
+			sock->writePacket(v2);
 		});
 	sock2.connect("127.0.0.1", 12345, 1000);
 	

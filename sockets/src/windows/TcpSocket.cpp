@@ -29,6 +29,13 @@ namespace sockets {
 		_counter++;
 		_lock.unlock();
 	}
+	
+	void TcpSocket::close() {
+		if (_sock != -1) {
+			closesocket(_sock);
+			_sock = -1;
+		}
+	}
 
 	ClockError TcpSocket::getLastError() {
 		int error = WSAGetLastError();
@@ -54,7 +61,7 @@ namespace sockets {
 		} else if (error == WSAEWOULDBLOCK) {
 			return ClockError::NODATA;
 		} else if (error == WSAEINPROGRESS) {
-			return ClockError::NOT_READY;
+			return ClockError::IN_PROGRESS;
 		} else if (error == WSAEALREADY) {
 			return ClockError::NOT_READY;
 		} else if (error == WSAENOTSOCK) {
@@ -89,8 +96,6 @@ namespace sockets {
 			return ClockError::NOT_READY;
 		}
 		
-		std::cout << error << std::endl;
-
 		return ClockError::UNKNOWN;
 	}
 

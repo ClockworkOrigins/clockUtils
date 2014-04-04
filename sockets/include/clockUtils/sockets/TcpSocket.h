@@ -18,13 +18,13 @@ namespace sockets {
 
 class CLOCK_SOCKETS_API TcpSocket {
 public:
-	typedef std::function<void(TcpSocket &)> acceptCallback;
+	typedef std::function<void(TcpSocket *)> acceptCallback;
 
 	TcpSocket();
 
 	~TcpSocket();
 
-	ClockError listen(uint16_t listenPort, unsigned int maxParallelConnections, bool acceptMultiple, const acceptCallback & acb);
+	ClockError listen(uint16_t listenPort, int maxParallelConnections, bool acceptMultiple, const acceptCallback acb);
 	
 	ClockError connect(const std::string & remoteIP, uint16_t remotePort, unsigned int timeout);
 	
@@ -63,14 +63,16 @@ public:
 	void operator>>(int & a); */
 
 private:
+	TcpSocket(int fd);
+
 	ClockError getLastError();
 
 	/**
-	 * \brief stores the socket descriptor or -1 if not active
+	 * \brief stores the lokal socket descriptor or -1 if not active
 	 */
 	int _sock;
 
-#if CLOCKUTILS_MPLATFORM == CLOCKUTILS_MPLATFORM_WIN32
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 	static int _counter;
 	static std::mutex _lock;
 #endif
