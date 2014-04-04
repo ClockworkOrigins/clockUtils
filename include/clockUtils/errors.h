@@ -8,11 +8,14 @@ enum class ClockError {
 	// general
 	NOT_READY,
 	TIMEOUT,
+	INVALID_USAGE,
 	// sockets
 	INVALID_IP,
 	INVALID_PORT,
 	CONNECTION_FAILED,
+	PORT_INUSE,
 	//
+	UNKNOWN,
 	ERROR_COUNT
 };
 

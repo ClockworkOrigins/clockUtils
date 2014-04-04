@@ -14,7 +14,7 @@ namespace sockets {
 
 class CLOCK_SOCKETS_API TcpSocket {
 public:
-	typedef std::function<void(const TcpSocket &)> acceptCallback;
+	typedef std::function<void(TcpSocket &)> acceptCallback;
 
 	TcpSocket();
 
@@ -26,30 +26,34 @@ public:
 	
 	void close();
 	
-	std::string getRemoteIP();
+	std::string getRemoteIP() const;
 	
-	uint16_t getRemotePort();
+	uint16_t getRemotePort() const;
 	
 	static std::pair<std::string, std::string> enumerateLocalIPs();
 
-	std::string getLocalIP();
+	std::string getLocalIP() const;
 
-	std::string getPublicIP();
+	std::string getPublicIP() const;
 
-	uint16_t getLocalPort();
+	uint16_t getLocalPort() const;
 	
 	ClockError writePacket(const char * str, const size_t length);
 	
 	ClockError writePacket(const std::vector<uint8_t> & str);
-	
+
 	ClockError receivePacket(std::vector<uint8_t> & buffer);
-	
+
+	ClockError receivePacket(std::string & buffer);
+
 	ClockError write(const char * str, size_t length);
 	
 	ClockError write(const std::vector<uint8_t> & str);
 	
 	ClockError read(std::vector<uint8_t> & buffer);
-	
+
+	ClockError read(std::string & buffer);	
+
 	/* void operator<<(int a);
 	
 	void operator>>(int & a); */
