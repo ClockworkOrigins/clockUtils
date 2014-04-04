@@ -122,8 +122,10 @@ include_directories(${CMAKE_SOURCE_DIR}/include/)
 # sockets
 #####################################################################################
 
-add_subdirectory(sockets)
-set(SOCKETS_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/sockets/include)
+IF(WITH_LIBRARY_SOCKETS)
+	add_subdirectory(sockets)
+	set(SOCKETS_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/sockets/include)
+ENDIF(WITH_LIBRARY_SOCKETS)
 
 
 ###############################################################################

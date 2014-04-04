@@ -8,7 +8,7 @@ set(srcdir ./src)
 
 IF(WIN32)
 	set(srcdir ./src/windows)
-ELSEIF(LINUX)
+ELSEIF(UNIX)
 	set(srcdir ./src/linux)
 ENDIF()
 
