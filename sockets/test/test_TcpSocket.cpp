@@ -10,6 +10,10 @@
 using namespace clockUtils;
 using namespace clockUtils::sockets;
 
+bool operator==(const ClockError & a, const ClockError & b) {
+	return static_cast<int>(a) == static_cast<int>(b);
+}
+
 int connectCounter = 0;
 std::vector<std::string> messages = { "Hello", "World!", "This is a super nice message", "111elf!!!" };
 
@@ -54,7 +58,7 @@ TEST(TcpSocket, connect) { // tests connect with all possible errors
 
 	ts.connect("127.0.0.1", 12345, 1000);
 
-	EXPECT_EQ(ClockError::CONNECTION_FAILED, e);
+	EXPECT_EQ(ClockError::TIMEOUT, e);
 
 	TcpSocket server;
 
@@ -195,7 +199,8 @@ TEST(TcpSocket, getIP) { // tests IP before and after connection
 	std::string s2 = ts.getPublicIP();
 	std::string s3 = ts.getRemoteIP();
 
-	EXPECT_EQ(0, s.length());
+	EXPECT_NE(0, s.length());
+	EXPECT_EQ("192.168.", s.substr(0, 8));
 	EXPECT_EQ(0, s2.length());
 	EXPECT_EQ(0, s3.length());
 
@@ -209,6 +214,7 @@ TEST(TcpSocket, getIP) { // tests IP before and after connection
 		EXPECT_NE(0, s5.length());
 		EXPECT_NE(0, s6.length());
 		EXPECT_EQ("127.0.0.1", s4);
+		EXPECT_EQ("192.168.", s6.substr(0, 8));
 	});
 
 	ts.connect("127.0.0.1", 12345, 1000);
@@ -217,6 +223,7 @@ TEST(TcpSocket, getIP) { // tests IP before and after connection
 	s3 = ts.getRemoteIP();
 
 	EXPECT_NE(0, s.length());
+	EXPECT_EQ("192.168.", s.substr(0, 8));
 	EXPECT_NE(0, s2.length());
 	EXPECT_NE(0, s3.length());
 	EXPECT_EQ("127.0.0.1", s);

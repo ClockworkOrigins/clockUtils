@@ -2,6 +2,8 @@
 
 #include <WinSock2.h>
 
+#include <iostream>
+
 namespace clockUtils {
 namespace sockets {
 
@@ -19,6 +21,7 @@ namespace sockets {
 	}
 
 	TcpSocket::~TcpSocket() {
+		close();
 		_lock.lock();
 		if (_counter == 1) {
 			WSACleanup();
@@ -86,6 +89,8 @@ namespace sockets {
 			return ClockError::NOT_READY;
 		}
 		
+		std::cout << error << std::endl;
+
 		return ClockError::UNKNOWN;
 	}
 
