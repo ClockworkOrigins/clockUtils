@@ -2,6 +2,8 @@
 
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 	#include <WinSock2.h>
+
+	typedef int32_t socklen_t;
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 	#include <arpa/inet.h>
 	#include <cstring>
@@ -12,7 +14,8 @@
 	#include <sys/types.h>
 	#include <unistd.h>
 #endif
-	#include <errno.h>
+
+#include <errno.h>
 #include <thread>
 
 namespace clockUtils {
@@ -38,7 +41,11 @@ namespace sockets {
 		}
 
 		// set reusable
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+		char flag = 1;
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 		int flag = 1;
+#endif
 		setsockopt(_sock, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag));
 
 		struct sockaddr_in name = {AF_INET, htons(listenPort), INADDR_ANY, {0} };
@@ -117,9 +124,11 @@ namespace sockets {
 		}
 
 		// set socket non-blockable
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 		long arg = fcntl(_sock, F_GETFL, NULL); 
 		arg |= O_NONBLOCK; 
 		fcntl(_sock, F_SETFL, arg);
+#endif
 		
 		// connect
 		if (-1 == ::connect(_sock, reinterpret_cast<sockaddr *>(&addr), sizeof(sockaddr))) {
@@ -134,9 +143,15 @@ namespace sockets {
 				FD_SET(_sock, &myset); 
 				if (select(_sock+1, NULL, &myset, NULL, &tv) > 0) { 
 					socklen_t lon;
-					lon = sizeof(int); 
+					lon = sizeof(int);
+
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+					char valopt;
+					getsockopt(_sock, SOL_SOCKET, SO_ERROR, &valopt, &lon); 
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 					int valopt;
-					getsockopt(_sock, SOL_SOCKET, SO_ERROR, (void*)(&valopt), &lon); 
+					getsockopt(_sock, SOL_SOCKET, SO_ERROR, (void *)(&valopt), &lon);
+#endif
 					if (valopt) {
 						close();
 						return ClockError::CONNECTION_FAILED;
@@ -182,10 +197,11 @@ namespace sockets {
 			return "";
 		}
 
-		struct sockaddr_in addr;
+		/*struct sockaddr_in addr;
 		memset(&addr, 0, sizeof(sockaddr_in));
+
 		unsigned int len = sizeof(addr);
-		getsockname(_sock, reinterpret_cast<sockaddr *>(&addr), &len);
+		getsockname(_sock, reinterpret_cast<sockaddr *>(&addr), &len);*/
 
 		return "NOT IMPLEMENTED YET";
 	}
@@ -194,36 +210,166 @@ namespace sockets {
 		return 0;
 	}
 
-	ClockError TcpSocket::writePacket(const char * str, const size_t length) {
-		return ClockError::UNKNOWN;
+	ClockError TcpSocket::writePacket(const void * str, const size_t length) {
+		if (_sock == -1) {
+			return ClockError::NOT_READY;
+		}
+		// |size|str|
+		char * buf = new char[length + 7];
+
+		buf[0] = '|';
+		buf[1] = ((((length / 256) / 256) / 256) % 256);
+		buf[2] = (((length / 256) / 256) % 256);
+		buf[3] = ((length / 256) % 256);
+		buf[4] = (length % 256);
+		memcpy(reinterpret_cast<void *>(buf[5]), str, length);
+		buf[length + 6] = '|';
+
+		ClockError error = write(buf, length + 7);
+
+		delete[] buf;
+		return error;
 	}
 
 	ClockError TcpSocket::writePacket(const std::vector<uint8_t> & str) {
+		if (_sock == -1) {
+			return ClockError::NOT_READY;
+		}
 		return ClockError::UNKNOWN;
 	}
 
 	ClockError TcpSocket::receivePacket(std::vector<uint8_t> & buffer) {
-		return ClockError::UNKNOWN;
+		if (_sock == -1) {
+			return ClockError::NOT_READY;
+		}
+
+		std::string s;
+
+		ClockError error = receivePacket(s);
+
+		if (error == ClockError::SUCCESS) {
+			buffer = std::vector<uint8_t>(s.begin(), s.end());
+		}
+
+		return error;
 	}
 
 	ClockError TcpSocket::receivePacket(std::string & buffer) {
-		return ClockError::UNKNOWN;
+		if (_sock == -1) {
+			return ClockError::NOT_READY;
+		}
+
+		std::string result;
+		int length = -1;
+
+		while (true) {
+			std::string s;
+
+			ClockError error = read(s);
+
+			if (error != ClockError::SUCCESS) {
+				return error;
+			}
+
+			if (result.length() == 0) {
+				if (s[0] == '|') {
+					result = s;
+				} else {
+					return ClockError::UNKNOWN;
+				}
+			}
+
+			if (length == -1) {
+				if (result.length() >= 5) {
+					length = result[1] * 256 * 256 * 256 + result[2] * 256 * 256 + result[3] * 256 + result[4];
+				}
+			}
+
+			if (result.length() == length + 7) {
+				buffer = result.substr(6, length);
+			} else if (result.length() > static_cast<unsigned int>(length + 7)) {
+				return ClockError::UNKNOWN;
+			}
+		}
+
+		return ClockError::SUCCESS;
 	}
 
 	ClockError TcpSocket::write(const void * str, size_t length) {
-		return ClockError::UNKNOWN;
+		if (_sock == -1) {
+			return ClockError::NOT_READY;
+		}
+		int rc = send(_sock, reinterpret_cast<const char *>(str), length, 0);
+
+		if (rc == -1) {
+			return getLastError();
+		}
+
+		return ClockError::SUCCESS;
 	}
 
 	ClockError TcpSocket::write(const std::vector<uint8_t> & str) {
+		if (_sock == -1) {
+			return ClockError::NOT_READY;
+		}
 		return write(const_cast<const unsigned char *>(&str[0]), str.size());
 	}
 
 	ClockError TcpSocket::read(std::vector<uint8_t> & buffer) {
-		return ClockError::UNKNOWN;
+		if (_sock == -1) {
+			return ClockError::NOT_READY;
+		}
+		char buf[256];
+		int rc = -1;
+
+		do {
+			rc = recv(_sock, buf, 256, 0);
+
+			if (rc == -1) {
+				ClockError error = getLastError();
+
+				if (error == ClockError::NODATA) {
+					continue;
+				}
+
+				return error;
+			}
+
+			break;
+		} while (true);
+
+		for (int i = 0; i < rc; i++) {
+			buffer.push_back(buf[i]);
+		}
+
+		return ClockError::SUCCESS;
 	}
 
 	ClockError TcpSocket::read(std::string & buffer) {
-		return ClockError::UNKNOWN;
+		if (_sock == -1) {
+			return ClockError::NOT_READY;
+		}
+		char buf[256];
+
+		do {
+			int rc = recv(_sock, buf, 256, 0);
+
+			if (rc == -1) {
+				ClockError error = getLastError();
+
+				if (error == ClockError::NODATA) {
+					continue;
+				}
+
+				return error;
+			}
+
+			break;
+		} while (true);
+		
+		buffer = std::string(buf);
+
+		return ClockError::SUCCESS;
 	}
 
 } /* namespace sockets */
