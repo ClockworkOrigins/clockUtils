@@ -201,14 +201,14 @@ TEST(TcpSocket, getIP) { // tests IP before and after connection
 
 	TcpSocket server;
 	server.listen(12345, 1, false, [](TcpSocket & client) {
-		std::string s = client.getRemoteIP();
-		std::string s2 = client.getPublicIP();
-		std::string s3 = client.getLocalIP();
+		std::string s4 = client.getRemoteIP();
+		std::string s5 = client.getPublicIP();
+		std::string s6 = client.getLocalIP();
 
-		EXPECT_NE(0, s.length());
-		EXPECT_NE(0, s2.length());
-		EXPECT_NE(0, s3.length());
-		EXPECT_EQ("127.0.0.1", s);
+		EXPECT_NE(0, s4.length());
+		EXPECT_NE(0, s5.length());
+		EXPECT_NE(0, s6.length());
+		EXPECT_EQ("127.0.0.1", s4);
 	});
 
 	ts.connect("127.0.0.1", 12345, 1000);
@@ -235,11 +235,11 @@ TEST(TcpSocket, getPort) { // tests port before and after connection
 
 	TcpSocket server;
 	server.listen(12345, 1, false, [](TcpSocket & client) {
-		uint16_t s = client.getRemotePort();
-		uint16_t s2 = client.getLocalPort();
+		uint16_t s3 = client.getRemotePort();
+		uint16_t s4 = client.getLocalPort();
 
-		EXPECT_NE(0, s);
-		EXPECT_EQ(12345, s2);
+		EXPECT_NE(0, s3);
+		EXPECT_EQ(12345, s4);
 
 		client.close();
 	});
@@ -357,6 +357,22 @@ TEST(TcpSocket, connectOnly) {
 	sock2.close();
 }
 
+TEST(TcpSocket, accept) {
+	TcpSocket sock1, sock2;
+	int a = 0;
+	sock1.listen(12345, 1, false, [a](TcpSocket & sock) mutable
+		{
+			a = 1;
+		});
+	sock2.connect("127.0.0.1", 12345, 1000);
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	
+	EXPECT_EQ(1, a);
+	sock1.close();
+	sock2.close();
+}
+
 TEST(TcpSocket, write) {
 	TcpSocket sock1, sock2;
 	std::vector<uint8_t> v = {0x1, 0x2, 0x3, 0x4, 0x5, 0x0, 0x5, 0x4, 0x3, 0x2, 0x1};
@@ -463,6 +479,29 @@ TEST(TcpSocket, writePacketMultiple) {
 	EXPECT_EQ(v2, v4);
 	sock1.close();
 	sock2.close();
+}
+
+TEST(TcpSocket, writePacketMultipleSwapped) {
+	TcpSocket sock1, sock2;
+	std::vector<uint8_t> v1 = {0x1, 0x2, 0x3, 0x4, 0x5, 0x0, 0x5, 0x4, 0x3, 0x2, 0x1};
+	std::vector<uint8_t> v2 = {0x11, 0x12, 0x13, 0x14, 0x15, 0x0, 0x15, 0x14, 0x13, 0x12, 0x11};
+
+	sock1.listen(12345, 1, false, [v1, v2](TcpSocket & sock)
+		{
+			std::vector<uint8_t> v3, v4;
+			sock.receivePacket(v3);
+			sock.receivePacket(v4);
+			EXPECT_EQ(v1, v3);
+			EXPECT_EQ(v2, v4);
+			sock.close();
+			sock.close();
+		});
+	sock2.connect("127.0.0.1", 12345, 1000);
+	
+	sock2.writePacket(v1);
+	sock2.writePacket(v2);
+	
+	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 }
 
 TEST(TcpSocket, writeMass) {

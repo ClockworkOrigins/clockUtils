@@ -7,13 +7,14 @@ include_directories("include")
 set(srcdir ./src)
 
 IF(WIN32)
-	set(srcdir ./src/windows)
+	set(srcdirPlatform ./src/windows)
 ELSEIF(UNIX)
-	set(srcdir ./src/linux)
+	set(srcdirPlatform ./src/linux)
 ENDIF()
 
 set(socketsSrc
 	${srcdir}/TcpSocket.cpp
+	${srcdirPlatform}/TcpSocket.cpp
 )
 
 SOURCE_GROUP(sockets FILES ${socketsSrc})

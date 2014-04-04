@@ -20,7 +20,7 @@ public:
 
 	~TcpSocket();
 
-	ClockError listen(uint16_t listenPort, unsigned int maxParallelConnections, bool acceptMultiple, const acceptCallback & acb); // bind, listen, [accept]+
+	ClockError listen(uint16_t listenPort, unsigned int maxParallelConnections, bool acceptMultiple, const acceptCallback & acb);
 	
 	ClockError connect(const std::string & remoteIP, uint16_t remotePort, unsigned int timeout);
 	
@@ -30,7 +30,7 @@ public:
 	
 	uint16_t getRemotePort() const;
 	
-	static std::pair<std::string, std::string> enumerateLocalIPs();
+	static std::vector<std::pair<std::string, std::string>> enumerateLocalIPs();
 
 	std::string getLocalIP() const;
 
@@ -59,6 +59,8 @@ public:
 	void operator>>(int & a); */
 
 private:
+	ClockError getLastError();
+
 	TcpSocket(const TcpSocket &) = delete;
 	TcpSocket & operator=(const TcpSocket &) = delete;
 };
