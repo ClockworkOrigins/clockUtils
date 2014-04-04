@@ -9,6 +9,9 @@
 #include <string>
 #include <vector>
 
+namespace clockUtils {
+namespace sockets {
+
 class CLOCK_SOCKETS_API TcpSocket {
 public:
 	typedef std::function<void(const TcpSocket &)> acceptCallback;
@@ -19,7 +22,7 @@ public:
 
 	ClockError listen(uint16_t listenPort, unsigned int maxParallelConnections, bool acceptMultiple, const acceptCallback & acb); // bind, listen, [accept]+
 	
-	ClockError connect(const std::string & remoteIP, uint16_t remotePort);
+	ClockError connect(const std::string & remoteIP, uint16_t remotePort, unsigned int timeout);
 	
 	void close();
 	
@@ -27,7 +30,7 @@ public:
 	
 	uint16_t getRemotePort();
 	
-	std::pair<std::string, std::string> enumerateLocalIPs();
+	static std::pair<std::string, std::string> enumerateLocalIPs();
 
 	std::string getLocalIP();
 
@@ -47,13 +50,16 @@ public:
 	
 	ClockError read(std::vector<uint8_t> & buffer);
 	
-	void operator<<(int a);	
+	/* void operator<<(int a);
 	
-	void operator>>(int a);
+	void operator>>(int & a); */
 
 private:
 	TcpSocket(const TcpSocket &) = delete;
 	TcpSocket & operator=(const TcpSocket &) = delete;
 };
+
+} /* namespace sockets */
+} /* namespace clockUtils */
 
 #endif /* __SOCKETS_TCP_SOCKET_H__ */

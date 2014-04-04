@@ -19,3 +19,16 @@ TEST(TcpSocket, getIP) { // tests IP before and after connection
 
 TEST(TcpSocket, getPort) { // tests port before and after connection
 }
+
+TEST(TcpSocket, useUnready) {
+	std::vector<uint8_t> buffer = { 0x10, 0x11, 0x12 };
+	int a;
+
+	TcpSocket sock1;
+	EXPECT_EQ(ClockErros::NOT_READY, sock1.writePacket(buffer));
+	EXPECT_EQ(ClockErros::NOT_READY, sock1.writePacket(static_cast<char *>(&buffer[0]), buffer.size()));
+	EXPECT_EQ(ClockErros::NOT_READY, sock1.read(buffer));
+	EXPECT_EQ(ClockErros::NOT_READY, sock1.receivePacket(buffer));
+}
+
+s
