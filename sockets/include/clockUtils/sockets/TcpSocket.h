@@ -62,7 +62,7 @@ public:
 	
 		void operator>>(int & a); */
 
-private:
+//private:
 	TcpSocket(int fd);
 
 	ClockError getLastError();

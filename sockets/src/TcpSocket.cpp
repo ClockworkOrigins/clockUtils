@@ -78,6 +78,7 @@ namespace sockets {
 					}
 				} else {
 					int clientSock = ::accept(_sock, nullptr, nullptr);
+					close();
 					if (clientSock == -1) {
 						close();
 						return;
@@ -165,6 +166,9 @@ namespace sockets {
 				return error;
 			}
 		}
+		
+		arg &= (~O_NONBLOCK); 
+		fcntl(_sock, F_SETFL, arg);
 
 		return ClockError::SUCCESS;
 	}
