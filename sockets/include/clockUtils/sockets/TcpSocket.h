@@ -1,13 +1,17 @@
 #ifndef __SOCKETS_TCPSOCKET_H__
 #define __SOCKETS_TCPSOCKET_H__
 
-#include "clockUtils/sockets/socketsParameters.h"
-#include "clockUtils/errors.h"
-
 #include <cstdint>
 #include <functional>
 #include <string>
 #include <vector>
+
+#include "clockUtils/errors.h"
+#include "clockUtils/sockets/socketsParameters.h"
+
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+	#include <mutex>
+#endif
 
 namespace clockUtils {
 namespace sockets {
@@ -65,6 +69,11 @@ private:
 	 * \brief stores the socket descriptor or -1 if not active
 	 */
 	int _sock;
+
+#if CLOCKUTILS_MPLATFORM == CLOCKUTILS_MPLATFORM_WIN32
+	static int _counter;
+	static std::mutex _lock;
+#endif
 
 	TcpSocket(const TcpSocket &) = delete;
 	TcpSocket & operator=(const TcpSocket &) = delete;
