@@ -10,8 +10,32 @@
 using namespace clockUtils;
 using namespace clockUtils::sockets;
 
-void connectionAccepted(const TcpSocket &) {
+int connectCounter = 0;
+std::vector<std::string> messages = { "Hello", "World!", "This is a super nice message", "111elf!!!" };
 
+void connectionAccepted(TcpSocket &) {
+	connectCounter++;
+}
+
+void connectionAcceptedWrite(TcpSocket & ts) {
+	unsigned int counter = 0;
+
+	while (counter < messages.size()) {
+		std::string buffer;
+
+		ClockError e = ts.receivePacket(buffer);
+
+		EXPECT_EQ(ClockError::SUCCESS, e);
+		EXPECT_EQ(messages[counter], buffer);
+
+		e = ts.writePacket(buffer.c_str(), buffer.length());
+
+		EXPECT_EQ(ClockError::SUCCESS, e);
+
+		counter++;
+	}
+
+	ts.close();
 }
 
 TEST(TcpSocket, connect) { // tests connect with all possible errors
@@ -34,26 +58,201 @@ TEST(TcpSocket, connect) { // tests connect with all possible errors
 
 	TcpSocket server;
 
-	e = server.listen(12345, 1, false, std::bind(connectionAccepted, std::placeholders::_1));
+	e = server.listen(12345, 1, false, [](TcpSocket &) {});
 
 	e = ts.connect("127.0.0.1", 12345, 1000);
 
 	EXPECT_EQ(ClockError::SUCCESS, e);
+
+	e = ts.connect("127.0.0.1", 12345, 1000);
+
+	EXPECT_EQ(ClockError::INVALID_USAGE, e);
+
+	ts.close();
+
+	e = ts.connect("127.0.0.1", 12345, 1000);
+
+	EXPECT_EQ(ClockError::SUCCESS, e);
+
+	server.close();
 }
 
 TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on a port and five or something like that joining
+	TcpSocket server1;
+
+	ClockError e = server1.listen(0, 10, true, std::bind(connectionAccepted, std::placeholders::_1));
+
+	EXPECT_EQ(ClockError::INVALID_PORT, e);
+
+	e = server1.listen(12345, 10, true, std::bind(connectionAccepted, std::placeholders::_1));
+
+	EXPECT_EQ(ClockError::SUCCESS, e);
+
+	TcpSocket server2;
+
+	e = server2.listen(12345, 10, true, std::bind(connectionAccepted, std::placeholders::_1));
+
+	EXPECT_EQ(ClockError::PORT_INUSE, e);
+
+	connectCounter = 0;
+
+	TcpSocket client1;
+	e = client1.connect("127.0.0.1", 12345, 1000);
+
+	EXPECT_EQ(ClockError::SUCCESS, e);
+
+	EXPECT_EQ(connectCounter, 1);
+
+	TcpSocket client2;
+	e = client2.connect("127.0.0.1", 12345, 1000);
+
+	EXPECT_EQ(ClockError::SUCCESS, e);
+
+	EXPECT_EQ(connectCounter, 2);
+
+	TcpSocket client3;
+	e = client3.connect("127.0.0.1", 12345, 1000);
+
+	EXPECT_EQ(ClockError::SUCCESS, e);
+
+	EXPECT_EQ(connectCounter, 3);
+
+	e = server2.listen(12346, 10, false, std::bind(connectionAccepted, std::placeholders::_1));
+
+	EXPECT_EQ(ClockError::SUCCESS, e);
+
+	TcpSocket client4;
+	e = client4.connect("127.0.0.1", 12346, 1000);
+
+	EXPECT_EQ(ClockError::SUCCESS, e);
+
+	EXPECT_EQ(connectCounter, 4);
+
+	TcpSocket client5;
+	e = client5.connect("127.0.0.1", 12346, 1000);
+
+	EXPECT_EQ(ClockError::CONNECTION_FAILED, e);
+
+	EXPECT_EQ(connectCounter, 4);
+
+	client1.close();
+	client2.close();
+	client3.close();
+	client4.close();
+	client5.close();
+	server1.close();
+	server2.close();
+
+	TcpSocket client6;
+	e = client6.connect("127.0.0.1", 12345, 1000);
+
+	EXPECT_EQ(ClockError::CONNECTION_FAILED, e);
+
+	EXPECT_EQ(connectCounter, 4);
 }
 
 TEST(TcpSocket, sendRead) { // tests communication between two sockets
-}
+	TcpSocket server;
+	TcpSocket client;
 
-TEST(TcpSocket, close) { // tests closing of a connection and if it is registered in socket on the other side
+	std::vector<std::string> results;
+
+	ClockError e = server.listen(12345, 10, false, std::bind(connectionAcceptedWrite, std::placeholders::_1));
+
+	EXPECT_EQ(ClockError::SUCCESS, e);
+
+	e = client.connect("127.0.0.1", 12345, 1000);
+
+	EXPECT_EQ(ClockError::SUCCESS, e);
+
+	for (std::string s : messages) {
+		client.writePacket(s.c_str(), s.length());
+
+		std::string buffer;
+
+		client.receivePacket(buffer);
+
+		EXPECT_EQ(s, buffer);
+	}
+
+	std::string errorMessage = "Error: Mustn't arrive, has to return error!";
+
+	e = client.write(errorMessage.c_str(), errorMessage.length());
+
+	EXPECT_EQ(ClockError::NOT_READY, e);
+
+	e = client.read(errorMessage);
+
+	EXPECT_EQ(ClockError::NOT_READY, e);
+
+	server.close();
+	client.close();
 }
 
 TEST(TcpSocket, getIP) { // tests IP before and after connection
+	TcpSocket ts;
+	std::string s = ts.getLocalIP();
+	std::string s2 = ts.getPublicIP();
+	std::string s3 = ts.getRemoteIP();
+
+	EXPECT_EQ(0, s.length());
+	EXPECT_EQ(0, s2.length());
+	EXPECT_EQ(0, s3.length());
+
+	TcpSocket server;
+	server.listen(12345, 1, false, [](TcpSocket & client) {
+		std::string s = client.getRemoteIP();
+		std::string s2 = client.getPublicIP();
+		std::string s3 = client.getLocalIP();
+
+		EXPECT_NE(0, s.length());
+		EXPECT_NE(0, s2.length());
+		EXPECT_NE(0, s3.length());
+		EXPECT_EQ("127.0.0.1", s);
+	});
+
+	ts.connect("127.0.0.1", 12345, 1000);
+	s = ts.getLocalIP();
+	s2 = ts.getPublicIP();
+	s3 = ts.getRemoteIP();
+
+	EXPECT_NE(0, s.length());
+	EXPECT_NE(0, s2.length());
+	EXPECT_NE(0, s3.length());
+	EXPECT_EQ("127.0.0.1", s);
+
+	ts.close();
+	server.close();
 }
 
 TEST(TcpSocket, getPort) { // tests port before and after connection
+	TcpSocket ts;
+	uint16_t s = ts.getLocalPort();
+	uint16_t s2 = ts.getRemotePort();
+
+	EXPECT_EQ(0, s);
+	EXPECT_EQ(0, s2);
+
+	TcpSocket server;
+	server.listen(12345, 1, false, [](TcpSocket & client) {
+		uint16_t s = client.getRemotePort();
+		uint16_t s2 = client.getLocalPort();
+
+		EXPECT_NE(0, s);
+		EXPECT_EQ(12345, s2);
+
+		client.close();
+	});
+
+	ts.connect("127.0.0.1", 12345, 1000);
+	s = ts.getLocalPort();
+	s2 = ts.getRemotePort();
+
+	EXPECT_NE(0, s);
+	EXPECT_EQ(12345, s2);
+
+	ts.close();
+	server.close();
 }
 
 TEST(TcpSocket, useUnready) {
