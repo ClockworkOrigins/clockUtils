@@ -54,7 +54,7 @@ namespace sockets {
 		return ClockError::UNKNOWN;
 	}
 
-	ClockError TcpSocket::write(const char * str, size_t length) {
+	ClockError TcpSocket::write(const void * str, size_t length) {
 		return ClockError::UNKNOWN;
 	}
 

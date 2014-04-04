@@ -12,7 +12,9 @@ enum class ClockError {
 	// sockets
 	INVALID_IP,
 	INVALID_PORT,
+	ADDRESS_INUSE,
 	CONNECTION_FAILED,
+	NO_DATA,
 	PORT_INUSE,
 	//
 	UNKNOWN,

@@ -46,7 +46,7 @@ public:
 
 	ClockError receivePacket(std::string & buffer);
 
-	ClockError write(const char * str, size_t length);
+	ClockError write(const void * str, size_t length);
 	
 	ClockError write(const std::vector<uint8_t> & str);
 	
@@ -60,6 +60,11 @@ public:
 
 private:
 	ClockError getLastError();
+
+	/**
+	 * \brief stores the socket descriptor or -1 if not active
+	 */
+	int _sock;
 
 	TcpSocket(const TcpSocket &) = delete;
 	TcpSocket & operator=(const TcpSocket &) = delete;

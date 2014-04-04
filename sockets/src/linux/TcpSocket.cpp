@@ -3,7 +3,7 @@
 namespace clockUtils {
 namespace sockets {
 
-TcpSocket::TcpSocket() {
+TcpSocket::TcpSocket() : _sock(-1) {
 }
 
 TcpSocket::~TcpSocket() {
