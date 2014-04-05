@@ -98,21 +98,21 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(600));
 	EXPECT_EQ(ClockError::SUCCESS, e);
-	EXPECT_EQ(connectCounter, 1);
+	EXPECT_EQ(1, connectCounter);
 
 	TcpSocket client2;
 	e = client2.connect("127.0.0.1", 12345, 500);
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(600));
 	EXPECT_EQ(ClockError::SUCCESS, e);
-	EXPECT_EQ(connectCounter, 2);
+	EXPECT_EQ(2, connectCounter);
 
 	TcpSocket client3;
 	e = client3.connect("127.0.0.1", 12345, 500);
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(600));
 	EXPECT_EQ(ClockError::SUCCESS, e);
-	EXPECT_EQ(connectCounter, 3);
+	EXPECT_EQ(3, connectCounter);
 
 	e = server2.listen(12346, 10, false, std::bind(connectionAccepted, std::placeholders::_1));
 
@@ -123,14 +123,14 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(600));
 	EXPECT_EQ(ClockError::SUCCESS, e);
-	EXPECT_EQ(connectCounter, 4);
+	EXPECT_EQ(4, connectCounter);
 
 	TcpSocket client5;
 	e = client5.connect("127.0.0.1", 12346, 500);
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(600));
 	EXPECT_EQ(ClockError::CONNECTION_FAILED, e);
-	EXPECT_EQ(connectCounter, 4);
+	EXPECT_EQ(4, connectCounter);
 
 	client1.close();
 	client2.close();
@@ -146,7 +146,7 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(600));
 	EXPECT_EQ(ClockError::CONNECTION_FAILED, e);
-	EXPECT_EQ(connectCounter, 4);
+	EXPECT_EQ(4, connectCounter);
 
 	client6.close();
 }
