@@ -156,9 +156,6 @@ namespace sockets {
 #endif
 					if (valopt) {
 						close();
-						//std::cout << valopt << std::endl;
-						//errno = valopt;
-						//perror("connect: ");
 						return ClockError::CONNECTION_FAILED;
 					}
 				} else { 

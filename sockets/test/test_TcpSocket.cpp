@@ -58,7 +58,7 @@ TEST(TcpSocket, connect) { // tests connect with all possible errors
 	EXPECT_EQ(ClockError::TIMEOUT, e);
 	TcpSocket server;
 
-	e = server.listen(12345, 1, false, [](TcpSocket *) {});
+	e = server.listen(12345, 1, true, [](TcpSocket *) {});
 
 	e = ts.connect("127.0.0.1", 12345, 500);
 
@@ -166,11 +166,13 @@ TEST(TcpSocket, sendRead) { // tests communication between two sockets
 	EXPECT_EQ(ClockError::SUCCESS, e);
 
 	for (std::string s : messages) {
-		client.writePacket(s.c_str(), s.length());
+		e = client.writePacket(s.c_str(), s.length());
+		EXPECT_EQ(ClockError::SUCCESS, e);
 
 		std::string buffer;
 
-		server.receivePacket(buffer);
+		e = client.receivePacket(buffer); // the accept functions is an echo function
+		EXPECT_EQ(ClockError::SUCCESS, e);
 
 		EXPECT_EQ(s, buffer);
 	}
@@ -181,7 +183,7 @@ TEST(TcpSocket, sendRead) { // tests communication between two sockets
 
 	EXPECT_EQ(ClockError::NOT_READY, e);
 
-	e = server.read(errorMessage);
+	e = client.read(errorMessage);
 
 	EXPECT_EQ(ClockError::NOT_READY, e);
 
