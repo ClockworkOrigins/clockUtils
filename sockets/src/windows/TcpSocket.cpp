@@ -10,7 +10,7 @@ namespace sockets {
 	int TcpSocket::_counter = 0;
 	std::mutex TcpSocket::_lock;
 
-	TcpSocket::TcpSocket() : _sock(-1) {
+	TcpSocket::TcpSocket() : _sock(-1), _buffer() {
 		_lock.lock();
 		if (_counter == 0) {
 			WSADATA wsa;
@@ -32,6 +32,7 @@ namespace sockets {
 	
 	void TcpSocket::close() {
 		if (_sock != -1) {
+			shutdown(_sock, SD_BOTH);
 			closesocket(_sock);
 			_sock = -1;
 		}
@@ -59,7 +60,7 @@ namespace sockets {
 		} else if (error == WSAEINVAL) {
 			return ClockError::INVALID_USAGE;
 		} else if (error == WSAEWOULDBLOCK) {
-			return ClockError::NODATA;
+			return ClockError::IN_PROGRESS;
 		} else if (error == WSAEINPROGRESS) {
 			return ClockError::IN_PROGRESS;
 		} else if (error == WSAEALREADY) {

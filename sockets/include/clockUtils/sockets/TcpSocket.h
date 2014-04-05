@@ -24,7 +24,7 @@ public:
 
 		~TcpSocket();
 
-	ClockError listen(uint16_t listenPort, int maxParallelConnections, bool acceptMultiple, const acceptCallback acb);
+		ClockError listen(uint16_t listenPort, int maxParallelConnections, bool acceptMultiple, const acceptCallback acb);
 	
 		ClockError connect(const std::string & remoteIP, uint16_t remotePort, unsigned int timeout);
 	
@@ -63,19 +63,21 @@ public:
 		void operator>>(int & a); */
 
 //private:
-	TcpSocket(int fd);
+		TcpSocket(int fd);
 
-	ClockError getLastError();
+		ClockError getLastError();
 
-	/**
-	 * \brief stores the lokal socket descriptor or -1 if not active
-	 */
-	int _sock;
+		/**
+		 * \brief stores the lokal socket descriptor or -1 if not active
+		 */
+		int _sock;
 
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
-	static int _counter;
-	static std::mutex _lock;
+		static int _counter;
+		static std::mutex _lock;
 #endif
+
+		std::vector<uint8_t> _buffer;
 
 		TcpSocket(const TcpSocket &) = delete;
 		TcpSocket & operator=(const TcpSocket &) = delete;

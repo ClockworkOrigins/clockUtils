@@ -126,7 +126,10 @@ namespace sockets {
 		}
 
 		// set socket non-blockable
-#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+		u_long iMode = 1;
+		ioctlsocket(_sock, FIONBIO, &iMode);
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 		long arg = fcntl(_sock, F_GETFL, NULL); 
 		arg |= O_NONBLOCK; 
 		fcntl(_sock, F_SETFL, arg);
@@ -142,8 +145,8 @@ namespace sockets {
 				tv.tv_sec = timeout / 1000;
 				tv.tv_usec = timeout % 1000;
 				FD_ZERO(&myset); 
-				FD_SET(_sock, &myset); 
-				if (select(_sock+1, NULL, &myset, NULL, &tv) > 0) { 
+				FD_SET(_sock, &myset);
+				if (select(_sock + 1, NULL, &myset, NULL, &tv) > 0) { 
 					socklen_t lon;
 					lon = sizeof(int);
 
@@ -168,8 +171,12 @@ namespace sockets {
 			}
 		}
 		
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+		iMode = 0;
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 		arg &= (~O_NONBLOCK); 
 		fcntl(_sock, F_SETFL, arg);
+#endif
 
 		return ClockError::SUCCESS;
 	}
@@ -240,7 +247,7 @@ namespace sockets {
 		if (_sock == -1) {
 			return ClockError::NOT_READY;
 		}
-		return ClockError::UNKNOWN;
+		return writePacket(const_cast<const unsigned char *>(&str[0]), str.size());
 	}
 
 	ClockError TcpSocket::receivePacket(std::vector<uint8_t> & buffer) {
@@ -264,12 +271,20 @@ namespace sockets {
 			return ClockError::NOT_READY;
 		}
 
-		std::vector<uint8_t> result;
-		int length = -1;
+		std::vector<uint8_t> result(_buffer);
+
+		bool skipFirstRead = !result.empty();
+
+		size_t length = 0;
 
 		while (true) {
 			std::vector<uint8_t> s;
-			ClockError error = read(s);
+			ClockError error = ClockError::SUCCESS;
+			
+			if (!skipFirstRead) {
+				error = read(s);
+			}
+			skipFirstRead = false;
 
 			if (error != ClockError::SUCCESS) {
 				return error;
@@ -281,19 +296,24 @@ namespace sockets {
 				} else {
 					return ClockError::UNKNOWN;
 				}
+			} else {
+				result.insert(result.end(), s.begin(), s.end());
 			}
 
-			if (length == -1) {
+			if (length == 0) {
 				if (result.size() >= 5) {
 					length = result[1] * 256 * 256 * 256 + result[2] * 256 * 256 + result[3] * 256 + result[4];
 				}
 			}
 
-			if (result.size() == length + 6) {
+			if (result.size() >= length + 6) {
 				buffer = std::string(result.begin() + 5, result.begin() + 5 + length);
+
+				if (result.size() > length + 6) {
+					_buffer = std::vector<uint8_t>(result.begin() + length + 6, result.end());
+				}
+
 				return ClockError::SUCCESS;
-			} else if (result.size() > static_cast<unsigned int>(length + 6)) {
-				return ClockError::UNKNOWN;
 			}
 		}
 
@@ -334,7 +354,7 @@ namespace sockets {
 			if (rc == -1) {
 				ClockError error = getLastError();
 
-				if (error == ClockError::NODATA) {
+				if (error == ClockError::NODATA || error == ClockError::IN_PROGRESS) {
 					continue;
 				}
 
@@ -363,7 +383,7 @@ namespace sockets {
 			if (rc == -1) {
 				ClockError error = getLastError();
 
-				if (error == ClockError::NODATA) {
+				if (error == ClockError::NODATA || error == ClockError::IN_PROGRESS) {
 					continue;
 				}
 

@@ -40,6 +40,7 @@ void connectionAcceptedWrite(TcpSocket * ts) {
 	}
 
 	ts->close();
+	delete ts;
 }
 
 TEST(TcpSocket, connect) { // tests connect with all possible errors
@@ -87,9 +88,17 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 
 	TcpSocket server2;
 
+	std::this_thread::sleep_for(std::chrono::milliseconds(600));
+
 	e = server2.listen(12345, 10, true, std::bind(connectionAccepted, std::placeholders::_1));
 
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 	EXPECT_EQ(ClockError::ADDRESS_INUSE, e);
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+	EXPECT_EQ(ClockError::SUCCESS, e);
+#endif
+
+	server2.close();
 
 	connectCounter = 0;
 
@@ -129,7 +138,11 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 	e = client5.connect("127.0.0.1", 12346, 500);
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(600));
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 	EXPECT_EQ(ClockError::CONNECTION_FAILED, e);
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+	EXPECT_EQ(ClockError::TIMEOUT, e);
+#endif
 	EXPECT_EQ(4, connectCounter);
 
 	client1.close();
@@ -145,7 +158,11 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 	e = client6.connect("127.0.0.1", 12345, 500);
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(600));
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 	EXPECT_EQ(ClockError::CONNECTION_FAILED, e);
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+	EXPECT_EQ(ClockError::TIMEOUT, e);
+#endif
 	EXPECT_EQ(4, connectCounter);
 
 	client6.close();
@@ -281,7 +298,11 @@ TEST(TcpSocket, invalidParameters) {
 
 	EXPECT_EQ(ClockError::INVALID_PORT, sock1.connect("127.0.0.1", 0, 500));
 
-	EXPECT_EQ(ClockError::INVALID_IP, sock1.connect("127.0.0.1", 1, 500));
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
+	EXPECT_EQ(ClockError::CONNECTION_FAILED, sock1.connect("127.0.0.1", 1, 500));
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+	EXPECT_EQ(ClockError::TIMEOUT, sock1.connect("127.0.0.1", 1, 500));
+#endif
 	EXPECT_EQ(ClockError::INVALID_IP, sock1.connect("127.0.0.", 1, 500));
 	EXPECT_EQ(ClockError::INVALID_IP, sock1.connect("127.0.0", 1, 500));
 	EXPECT_EQ(ClockError::INVALID_IP, sock1.connect("-12.0.0.1", 1, 500));
@@ -365,7 +386,7 @@ TEST(TcpSocket, connectOnly) {
 TEST(TcpSocket, accept) {
 	TcpSocket sock1, sock2;
 	int a = 0;
-	sock1.listen(12345, 1, false, [a](TcpSocket * sock) mutable
+	sock1.listen(12345, 1, false, [&a](TcpSocket * sock) mutable
 		{
 			a = 1;
 		});
@@ -439,7 +460,11 @@ TEST(TcpSocket, connectDouble) {
 	TcpSocket sock1, sock2, sock3;
 	EXPECT_EQ(ClockError::SUCCESS, sock1.listen(12345, 1, false, [](TcpSocket *){}));
 	EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 	EXPECT_EQ(ClockError::CONNECTION_FAILED, sock3.connect("127.0.0.1", 12345, 500));
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+	EXPECT_EQ(ClockError::TIMEOUT, sock3.connect("127.0.0.1", 12345, 500));
+#endif
 	sock1.close();
 	sock2.close();
 	sock3.close();
@@ -479,8 +504,8 @@ TEST(TcpSocket, writePacketMultiple) {
 
 	std::vector<uint8_t> v3, v4;
 	sock2.receivePacket(v3);
-	sock2.receivePacket(v4);
 	EXPECT_EQ(v1, v3);
+	sock2.receivePacket(v4);
 	EXPECT_EQ(v2, v4);
 	sock1.close();
 	sock2.close();
@@ -507,6 +532,9 @@ TEST(TcpSocket, writePacketMultipleSwapped) {
 	sock2.writePacket(v2);
 	
 	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+	sock1.close();
+	sock2.close();
 }
 
 TEST(TcpSocket, writeMass) {
@@ -525,8 +553,8 @@ TEST(TcpSocket, writeMass) {
 
 	std::vector<uint8_t> v3, v4;
 	sock2.receivePacket(v3);
-	sock2.receivePacket(v4);
 	EXPECT_EQ(v1, v3);
+	sock2.receivePacket(v4);
 	EXPECT_EQ(v2, v4);
 	sock1.close();
 	sock2.close();
