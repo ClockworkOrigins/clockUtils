@@ -21,14 +21,6 @@ void connectionAccepted(TcpSocket *) {
 	connectCounter++;
 }
 
-void connectionAccepted2(TcpSocket * a) {
-	std::cout << "BLA" << std::endl;
-	connectCounter++;
-	char buf[10];
-	read(a->_sock, buf, 10);
-	std::cout << "READ: " << buf << std::endl;
-}
-
 void connectionAcceptedWrite(TcpSocket * ts) {
 	unsigned int counter = 0;
 
@@ -122,7 +114,7 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 	EXPECT_EQ(ClockError::SUCCESS, e);
 	EXPECT_EQ(connectCounter, 3);
 
-	e = server2.listen(12346, 10, false, std::bind(connectionAccepted2, std::placeholders::_1));
+	e = server2.listen(12346, 10, false, std::bind(connectionAccepted, std::placeholders::_1));
 
 	EXPECT_EQ(ClockError::SUCCESS, e);
 
@@ -147,6 +139,7 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 	client5.close();
 	server1.close();
 	server2.close();
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 	TcpSocket client6;
 	e = client6.connect("127.0.0.1", 12345, 500);
@@ -177,7 +170,7 @@ TEST(TcpSocket, sendRead) { // tests communication between two sockets
 
 		std::string buffer;
 
-		client.receivePacket(buffer);
+		server.receivePacket(buffer);
 
 		EXPECT_EQ(s, buffer);
 	}
@@ -188,7 +181,7 @@ TEST(TcpSocket, sendRead) { // tests communication between two sockets
 
 	EXPECT_EQ(ClockError::NOT_READY, e);
 
-	e = client.read(errorMessage);
+	e = server.read(errorMessage);
 
 	EXPECT_EQ(ClockError::NOT_READY, e);
 

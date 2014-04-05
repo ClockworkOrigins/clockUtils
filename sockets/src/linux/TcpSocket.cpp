@@ -2,7 +2,11 @@
 
 #define _GLIBCXX_USE_NANOSLEEP // needed for sleep_for, see http://stackoverflow.com/questions/4438084/stdthis-threadsleep-for-and-gcc
 
-#include <unistd.h>
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
+	#include <sys/socket.h>
+	#include <unistd.h>
+#endif
+
 #include <chrono>
 #include <thread>
 
@@ -19,7 +23,9 @@ namespace sockets {
 
 	void TcpSocket::close() {
 		if (_sock != -1) {
-			::close(_sock);
+			// needed to stop pending accept operations
+			::shutdown(_sock, SHUT_RDWR); // FIXME: only do this if connected?, check for errorcode than
+			if (-1 == ::close(_sock)) perror("close");
 			_sock = -1;
 		}
 	}

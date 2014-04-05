@@ -17,6 +17,7 @@
 
 #include <errno.h>
 #include <thread>
+#include <iostream>
 
 namespace clockUtils {
 namespace sockets {
@@ -155,6 +156,9 @@ namespace sockets {
 #endif
 					if (valopt) {
 						close();
+						//std::cout << valopt << std::endl;
+						//errno = valopt;
+						//perror("connect: ");
 						return ClockError::CONNECTION_FAILED;
 					}
 				} else { 
@@ -226,7 +230,7 @@ namespace sockets {
 		buf[2] = (((length / 256) / 256) % 256);
 		buf[3] = ((length / 256) % 256);
 		buf[4] = (length % 256);
-		memcpy(reinterpret_cast<void *>(buf[5]), str, length);
+		memcpy(reinterpret_cast<void *>(&buf[5]), str, length);
 		buf[length + 6] = '|';
 
 		ClockError error = write(buf, length + 7);
