@@ -219,8 +219,8 @@ namespace sockets {
 		if (_sock == -1) {
 			return ClockError::NOT_READY;
 		}
-		// |size|str|
-		char * buf = new char[length + 7];
+		// | + size + str + |
+		char * buf = new char[length + 6];
 
 		buf[0] = '|';
 		buf[1] = ((((length / 256) / 256) / 256) % 256);
@@ -228,9 +228,9 @@ namespace sockets {
 		buf[3] = ((length / 256) % 256);
 		buf[4] = (length % 256);
 		memcpy(reinterpret_cast<void *>(&buf[5]), str, length);
-		buf[length + 6] = '|';
+		buf[length + 5] = '|';
 
-		ClockError error = write(buf, length + 7);
+		ClockError error = write(buf, length + 6);
 
 		delete[] buf;
 		return error;
@@ -264,19 +264,18 @@ namespace sockets {
 			return ClockError::NOT_READY;
 		}
 
-		std::string result;
+		std::vector<uint8_t> result;
 		int length = -1;
 
 		while (true) {
-			std::string s;
-
+			std::vector<uint8_t> s;
 			ClockError error = read(s);
 
 			if (error != ClockError::SUCCESS) {
 				return error;
 			}
 
-			if (result.length() == 0) {
+			if (result.size() == 0) {
 				if (s[0] == '|') {
 					result = s;
 				} else {
@@ -285,14 +284,15 @@ namespace sockets {
 			}
 
 			if (length == -1) {
-				if (result.length() >= 5) {
+				if (result.size() >= 5) {
 					length = result[1] * 256 * 256 * 256 + result[2] * 256 * 256 + result[3] * 256 + result[4];
 				}
 			}
 
-			if (result.length() == length + 7) {
-				buffer = result.substr(6, length);
-			} else if (result.length() > static_cast<unsigned int>(length + 7)) {
+			if (result.size() == length + 6) {
+				buffer = std::string(result.begin() + 5, result.begin() + 5 + length);
+				return ClockError::SUCCESS;
+			} else if (result.size() > static_cast<unsigned int>(length + 6)) {
 				return ClockError::UNKNOWN;
 			}
 		}
@@ -304,6 +304,7 @@ namespace sockets {
 		if (_sock == -1) {
 			return ClockError::NOT_READY;
 		}
+		
 		int rc = send(_sock, reinterpret_cast<const char *>(str), length, 0);
 
 		if (rc == -1) {
