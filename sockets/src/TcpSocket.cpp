@@ -311,6 +311,8 @@ namespace sockets {
 
 				if (result.size() > length + 6) {
 					_buffer = std::vector<uint8_t>(result.begin() + length + 6, result.end());
+				} else {
+					_buffer.clear();
 				}
 
 				return ClockError::SUCCESS;
