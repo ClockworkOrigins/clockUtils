@@ -44,7 +44,7 @@ namespace sockets {
 		} else if (errno == EINVAL) {
 			return ClockError::INVALID_USAGE;
 		} else if (errno == EWOULDBLOCK) {
-			return ClockError::NODATA;
+			return ClockError::IN_PROGRESS;
 		} else if (errno == EINPROGRESS) {
 			return ClockError::IN_PROGRESS;
 		} else if (errno == EALREADY) {
@@ -77,6 +77,8 @@ namespace sockets {
 			return ClockError::CONNECTION_FAILED;
 		} else if (errno == EHOSTUNREACH) {
 			return ClockError::CONNECTION_FAILED;
+		} else if (errno == ECONNABORTED) {
+			return ClockError::NOT_CONNECTED;
 		}
 		
 		return ClockError::UNKNOWN;
