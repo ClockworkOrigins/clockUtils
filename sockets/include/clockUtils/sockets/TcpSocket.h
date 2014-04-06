@@ -86,11 +86,15 @@ namespace sockets {
 	
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
+		 *
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
 		ClockError writePacket(const void * str, const size_t length);
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
+		 *
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
 		ClockError writePacket(const std::vector<uint8_t> & str);
 
@@ -106,11 +110,15 @@ namespace sockets {
 
 		/**
 		 * \brief sends a message, doesn't work with receivePacket
+		 *
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
 		ClockError write(const void * str, size_t length);
 
 		/**
 		 * \brief sends a message, doesn't work with receivePacket
+		 *
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
 		ClockError write(const std::vector<uint8_t> & str);
 
