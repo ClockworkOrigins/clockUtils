@@ -16,9 +16,9 @@
 namespace clockUtils {
 namespace sockets {
 
-class CLOCK_SOCKETS_API TcpSocket {
-public:
-	typedef std::function<void(TcpSocket *)> acceptCallback;
+	class CLOCK_SOCKETS_API TcpSocket {
+	public:
+		typedef std::function<void(TcpSocket *)> acceptCallback;
 
 		TcpSocket();
 
@@ -62,7 +62,7 @@ public:
 	
 		void operator>>(int & a); */
 
-private:
+	private:
 		enum class SocketStatus {
 			INACTIVE,
 			LISTENING,

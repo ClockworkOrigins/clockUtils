@@ -50,7 +50,7 @@ namespace sockets {
 #endif
 		setsockopt(_sock, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag));
 
-		struct sockaddr_in name = {AF_INET, htons(listenPort), INADDR_ANY, {0} };
+		struct sockaddr_in name = { AF_INET, htons(listenPort), INADDR_ANY, {0} };
 		errno = 0;
 		if (-1 == bind(_sock, reinterpret_cast<struct sockaddr *>(&name), sizeof(name))) {
 			ClockError error = getLastError();
@@ -108,6 +108,7 @@ namespace sockets {
 			return ClockError::INVALID_IP;
 		}
 
+		errno = 0;
 		_sock = socket(PF_INET, SOCK_STREAM, 0);
 
 		if (_sock == -1) {
@@ -137,6 +138,7 @@ namespace sockets {
 #endif
 		
 		// connect
+		errno = 0;
 		if (-1 == ::connect(_sock, reinterpret_cast<sockaddr *>(&addr), sizeof(sockaddr))) {
 			ClockError error = getLastError();
 			if (error == ClockError::IN_PROGRESS) {
@@ -144,19 +146,17 @@ namespace sockets {
 				struct timeval tv;
 				fd_set myset;
 				tv.tv_sec = timeout / 1000;
-				tv.tv_usec = timeout % 1000;
+				tv.tv_usec = (timeout % 1000) * 1000;
 				FD_ZERO(&myset); 
 				FD_SET(_sock, &myset);
 				if (select(_sock + 1, NULL, &myset, NULL, &tv) > 0) { 
-					socklen_t lon;
-					lon = sizeof(int);
+					socklen_t lon = sizeof(int);
+					int valopt;
 
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
-					char valopt;
-					getsockopt(_sock, SOL_SOCKET, SO_ERROR, &valopt, &lon); 
+					getsockopt(_sock, SOL_SOCKET, SO_ERROR, (char *) &valopt, &lon); 
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
-					int valopt;
-					getsockopt(_sock, SOL_SOCKET, SO_ERROR, (void *)(&valopt), &lon);
+					getsockopt(_sock, SOL_SOCKET, SO_ERROR, (void *) &valopt, &lon);
 #endif
 					if (valopt) {
 						close();
@@ -175,7 +175,7 @@ namespace sockets {
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 		iMode = 0;
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
-		arg &= (~O_NONBLOCK); 
+		arg &= (~O_NONBLOCK);
 		fcntl(_sock, F_SETFL, arg);
 #endif
 
@@ -292,7 +292,7 @@ namespace sockets {
 				return error;
 			}
 
-			if (s.size() == 0) {
+			if (!skipFirstRead && s.empty()) {
 				continue;
 			}
 			skipFirstRead = false;
@@ -334,11 +334,11 @@ namespace sockets {
 			return ClockError::NOT_READY;
 		}
 		
-//		fd_set read_sd;
-//		FD_ZERO(&read_sd);
-//		FD_SET(sd, &read_sd);
-//		int sel = select(sd + 1, &rsd, 0, 0, 0);
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 		int rc = send(_sock, reinterpret_cast<const char *>(str), length, MSG_NOSIGNAL);
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+		int rc = send(_sock, reinterpret_cast<const char *>(str), length, 0);
+#endif
 
 		if (rc == -1) {
 			return getLastError();

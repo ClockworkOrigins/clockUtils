@@ -16,9 +16,11 @@ bool operator==(const ClockError & a, const ClockError & b) {
 
 int connectCounter = 0;
 std::vector<std::string> messages = { "Hello", "World!", "This is a super nice message", "111elf!!!" };
+std::vector<TcpSocket *> _socketList;
 
-void connectionAccepted(TcpSocket *) {
+void connectionAccepted(TcpSocket * sock) {
 	connectCounter++;
+	_socketList.push_back(sock);
 }
 
 void connectionAcceptedWrite(TcpSocket * ts) {
@@ -59,7 +61,9 @@ TEST(TcpSocket, connect) { // tests connect with all possible errors
 	EXPECT_EQ(ClockError::TIMEOUT, e);
 	TcpSocket server;
 
-	e = server.listen(12345, 1, true, [](TcpSocket *) {});
+	e = server.listen(12345, 1, true, [](TcpSocket * sock) {
+		_socketList.push_back(sock);
+	});
 
 	e = ts.connect("127.0.0.1", 12345, 500);
 
@@ -73,6 +77,12 @@ TEST(TcpSocket, connect) { // tests connect with all possible errors
 
 	EXPECT_EQ(ClockError::SUCCESS, e);
 	server.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on a port and five or something like that joining
@@ -166,6 +176,12 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 	EXPECT_EQ(4, connectCounter);
 
 	client6.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 TEST(TcpSocket, sendRead) { // tests communication between two sockets
@@ -206,6 +222,12 @@ TEST(TcpSocket, sendRead) { // tests communication between two sockets
 
 	server.close();
 	client.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 TEST(TcpSocket, getIP) { // tests IP before and after connection
@@ -230,6 +252,7 @@ TEST(TcpSocket, getIP) { // tests IP before and after connection
 		EXPECT_NE(0, s6.length());
 		EXPECT_EQ("127.0.0.1", s4);
 		EXPECT_EQ("192.168.", s6.substr(0, 8));
+		_socketList.push_back(client);
 	});
 
 	ts.connect("127.0.0.1", 12345, 500);
@@ -245,6 +268,12 @@ TEST(TcpSocket, getIP) { // tests IP before and after connection
 
 	ts.close();
 	server.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 TEST(TcpSocket, getPort) { // tests port before and after connection
@@ -264,6 +293,7 @@ TEST(TcpSocket, getPort) { // tests port before and after connection
 		EXPECT_EQ(12345, s4);
 
 		client->close();
+		delete client;
 	});
 
 	ts.connect("127.0.0.1", 12345, 500);
@@ -275,6 +305,12 @@ TEST(TcpSocket, getPort) { // tests port before and after connection
 
 	ts.close();
 	server.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 TEST(TcpSocket, useUnready) {
@@ -289,6 +325,12 @@ TEST(TcpSocket, useUnready) {
 	EXPECT_EQ(ClockError::NOT_READY, sock1.read(str));
 	EXPECT_EQ(ClockError::NOT_READY, sock1.receivePacket(buffer));
 	EXPECT_EQ(ClockError::NOT_READY, sock1.receivePacket(str));
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 TEST(TcpSocket, invalidParameters) {
@@ -310,6 +352,12 @@ TEST(TcpSocket, invalidParameters) {
 	EXPECT_EQ(ClockError::INVALID_IP, sock1.connect("127.0.0.1.9", 1, 500));
 	EXPECT_EQ(ClockError::INVALID_IP, sock1.connect("256.0.0.1", 1, 500));
 	EXPECT_EQ(ClockError::INVALID_IP, sock1.connect("127.1234.0.1", 1, 500));
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 TEST(TcpSocket, invalidUse) {
@@ -317,16 +365,24 @@ TEST(TcpSocket, invalidUse) {
 	std::string str;
 
 	TcpSocket sock1;
-	EXPECT_EQ(ClockError::SUCCESS, sock1.listen(1025, 1, true, [](TcpSocket *){}));
+	EXPECT_EQ(ClockError::SUCCESS, sock1.listen(1025, 1, true, [](TcpSocket * sock) {
+		_socketList.push_back(sock); 
+	}));
 	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.listen(1025, 1, true, [](TcpSocket *){}));
 	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.connect("127.0.0.1", 1026, 500));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.writePacket(buffer));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.writePacket(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.write(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.read(buffer));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.read(str));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.receivePacket(buffer));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.receivePacket(str));
+	EXPECT_EQ(ClockError::NOT_READY, sock1.writePacket(buffer));
+	EXPECT_EQ(ClockError::NOT_READY, sock1.writePacket(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
+	EXPECT_EQ(ClockError::NOT_READY, sock1.write(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
+	EXPECT_EQ(ClockError::NOT_READY, sock1.read(buffer));
+	EXPECT_EQ(ClockError::NOT_READY, sock1.read(str));
+	EXPECT_EQ(ClockError::NOT_READY, sock1.receivePacket(buffer));
+	EXPECT_EQ(ClockError::NOT_READY, sock1.receivePacket(str));
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 TEST(TcpSocket, getterUnused) {
@@ -334,12 +390,24 @@ TEST(TcpSocket, getterUnused) {
 	EXPECT_EQ("", sock1.getRemoteIP());
 	EXPECT_EQ(0, sock1.getLocalPort());
 	EXPECT_EQ(0, sock1.getRemotePort());
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 TEST(TcpSocket, closeFails) {
 	TcpSocket sock1;
 	sock1.close();
 	sock1.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 TEST(TcpSocket, connectOnly) {
@@ -365,13 +433,13 @@ TEST(TcpSocket, connectOnly) {
 	EXPECT_EQ(ClockError::SUCCESS, sock1.listen(1025, 1, true, [](TcpSocket * sock){}));
 	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.listen(1025, 1, true, [](TcpSocket * sock){}));
 	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.connect("127.0.0.1", 1026, 500));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.writePacket(buffer));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.writePacket(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.write(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.read(buffer));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.read(str));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.receivePacket(buffer));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.receivePacket(str));
+	EXPECT_EQ(ClockError::NOT_READY, sock1.writePacket(buffer));
+	EXPECT_EQ(ClockError::NOT_READY, sock1.writePacket(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
+	EXPECT_EQ(ClockError::NOT_READY, sock1.write(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
+	EXPECT_EQ(ClockError::NOT_READY, sock1.read(buffer));
+	EXPECT_EQ(ClockError::NOT_READY, sock1.read(str));
+	EXPECT_EQ(ClockError::NOT_READY, sock1.receivePacket(buffer));
+	EXPECT_EQ(ClockError::NOT_READY, sock1.receivePacket(str));
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
@@ -386,6 +454,12 @@ TEST(TcpSocket, connectOnly) {
 	
 	sock1.close();
 	sock2.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 TEST(TcpSocket, accept) {
@@ -394,6 +468,7 @@ TEST(TcpSocket, accept) {
 	sock1.listen(12345, 1, false, [&a](TcpSocket * sock) mutable
 		{
 			a = 1;
+			_socketList.push_back(sock);
 		});
 	sock2.connect("127.0.0.1", 12345, 500);
 
@@ -402,6 +477,12 @@ TEST(TcpSocket, accept) {
 	EXPECT_EQ(1, a);
 	sock1.close();
 	sock2.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 TEST(TcpSocket, write) {
@@ -410,6 +491,7 @@ TEST(TcpSocket, write) {
 	sock1.listen(12345, 1, false, [v](TcpSocket * sock)
 		{
 			sock->write(v);
+			_socketList.push_back(sock);
 		});
 	sock2.connect("127.0.0.1", 12345, 500);
 	
@@ -418,6 +500,12 @@ TEST(TcpSocket, write) {
 	EXPECT_EQ(v, v2);
 	sock1.close();
 	sock2.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 TEST(TcpSocket, write2) {
@@ -426,6 +514,7 @@ TEST(TcpSocket, write2) {
 	sock1.listen(12345, 1, false, [v](TcpSocket * sock)
 		{
 			sock->write(&v[0], v.length());
+			_socketList.push_back(sock);
 		});
 	sock2.connect("127.0.0.1", 12345, 500);
 
@@ -436,6 +525,12 @@ TEST(TcpSocket, write2) {
 	EXPECT_EQ(v, v2);
 	sock1.close();
 	sock2.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 TEST(TcpSocket, writeMultiple) {
@@ -449,6 +544,7 @@ TEST(TcpSocket, writeMultiple) {
 		{
 			sock->write(v1);
 			sock->write(v2);
+			_socketList.push_back(sock);
 		});
 	sock2.connect("127.0.0.1", 12345, 500);
 	
@@ -459,11 +555,19 @@ TEST(TcpSocket, writeMultiple) {
 	EXPECT_EQ(vSum, v3);
 	sock1.close();
 	sock2.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 TEST(TcpSocket, connectDouble) {
 	TcpSocket sock1, sock2, sock3;
-	EXPECT_EQ(ClockError::SUCCESS, sock1.listen(12345, 1, false, [](TcpSocket *){}));
+	EXPECT_EQ(ClockError::SUCCESS, sock1.listen(12345, 1, false, [](TcpSocket * sock) {
+		_socketList.push_back(sock); 
+	}));
 	EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 	EXPECT_EQ(ClockError::CONNECTION_FAILED, sock3.connect("127.0.0.1", 12345, 500));
@@ -473,6 +577,12 @@ TEST(TcpSocket, connectDouble) {
 	sock1.close();
 	sock2.close();
 	sock3.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 TEST(TcpSocket, writePacket) {
@@ -481,6 +591,7 @@ TEST(TcpSocket, writePacket) {
 	sock1.listen(12345, 1, false, [v](TcpSocket * sock)
 		{
 			sock->writePacket(&v[0], v.length());
+			_socketList.push_back(sock);
 		});
 	sock2.connect("127.0.0.1", 12345, 500);
 
@@ -491,6 +602,12 @@ TEST(TcpSocket, writePacket) {
 	EXPECT_EQ(v, v2);
 	sock1.close();
 	sock2.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 TEST(TcpSocket, writePacketMultiple) {
@@ -502,6 +619,7 @@ TEST(TcpSocket, writePacketMultiple) {
 		{
 			sock->writePacket(v1);
 			sock->writePacket(v2);
+			_socketList.push_back(sock);
 		});
 	sock2.connect("127.0.0.1", 12345, 500);
 	
@@ -514,6 +632,12 @@ TEST(TcpSocket, writePacketMultiple) {
 	EXPECT_EQ(v2, v4);
 	sock1.close();
 	sock2.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 TEST(TcpSocket, writePacketMultipleSwapped) {
@@ -530,6 +654,7 @@ TEST(TcpSocket, writePacketMultipleSwapped) {
 			EXPECT_EQ(v2, v4);
 			sock->close();
 			sock->close();
+			delete sock;
 		});
 	sock2.connect("127.0.0.1", 12345, 500);
 	
@@ -540,6 +665,12 @@ TEST(TcpSocket, writePacketMultipleSwapped) {
 
 	sock1.close();
 	sock2.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 TEST(TcpSocket, writeMass) {
@@ -551,6 +682,7 @@ TEST(TcpSocket, writeMass) {
 		{
 			sock->writePacket(v1);
 			sock->writePacket(v2);
+			_socketList.push_back(sock);
 		});
 	sock2.connect("127.0.0.1", 12345, 500);
 	
@@ -563,4 +695,10 @@ TEST(TcpSocket, writeMass) {
 	EXPECT_EQ(v2, v4);
 	sock1.close();
 	sock2.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
