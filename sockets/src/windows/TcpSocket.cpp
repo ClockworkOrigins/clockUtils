@@ -95,6 +95,8 @@ namespace sockets {
 			return ClockError::CONNECTION_FAILED;
 		} else if (error == WSASYSNOTREADY) {
 			return ClockError::NOT_READY;
+		} else if (error == WSAECONNABORTED) {
+			return ClockError::NOT_CONNECTED;
 		}
 		
 		return ClockError::UNKNOWN;

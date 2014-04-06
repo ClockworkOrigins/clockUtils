@@ -348,7 +348,11 @@ TEST(TcpSocket, connectOnly) {
 	std::string str;
 	TcpSocket sock1, sock2;
 
-	sock1.listen(12345, 1, false, [](TcpSocket *){});
+	sock1.listen(12345, 1, false, [](TcpSocket * sock)
+		{
+			sock->close();
+			delete sock;
+		});
 	sock2.connect("127.0.0.1", 12345, 500);
 	
 	EXPECT_EQ(12345, sock2.getRemotePort());
@@ -370,13 +374,15 @@ TEST(TcpSocket, connectOnly) {
 	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.receivePacket(buffer));
 	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.receivePacket(str));
 
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock2.writePacket(buffer));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock2.writePacket(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock2.write(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock2.read(buffer));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock2.read(str));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock2.receivePacket(buffer));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock2.receivePacket(str));
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.writePacket(buffer));
+	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.writePacket(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
+	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.write(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
+	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.read(buffer));
+	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.read(str));
+	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.receivePacket(buffer));
+	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.receivePacket(str));
 	EXPECT_EQ(ClockError::SUCCESS, sock2.listen(1026, 1, true, [](TcpSocket * sock){}));
 	
 	sock1.close();

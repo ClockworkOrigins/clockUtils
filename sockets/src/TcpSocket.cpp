@@ -331,6 +331,8 @@ namespace sockets {
 
 		if (rc == -1) {
 			return getLastError();
+		} else if (rc == 0) {
+			return ClockError::NOT_CONNECTED;
 		}
 
 		return ClockError::SUCCESS;
@@ -356,11 +358,13 @@ namespace sockets {
 			if (rc == -1) {
 				ClockError error = getLastError();
 
-				if (error == ClockError::NODATA || error == ClockError::IN_PROGRESS) {
+				if (error == ClockError::IN_PROGRESS) {
 					continue;
 				}
 
 				return error;
+			} else if (rc == 0) {
+				ClockError::NOT_CONNECTED;
 			}
 
 			break;
@@ -385,11 +389,13 @@ namespace sockets {
 			if (rc == -1) {
 				ClockError error = getLastError();
 
-				if (error == ClockError::NODATA || error == ClockError::IN_PROGRESS) {
+				if (error == ClockError::IN_PROGRESS) {
 					continue;
 				}
 
 				return error;
+			} else if (rc == 0) {
+				ClockError::NOT_CONNECTED;
 			}
 
 			break;
