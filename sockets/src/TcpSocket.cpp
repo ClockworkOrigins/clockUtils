@@ -24,13 +24,14 @@ namespace sockets {
 
 	TcpSocket::TcpSocket(int fd) : TcpSocket() {
 		_sock = fd;
+		_status = SocketStatus::CONNECTED;
 	}
 
 	ClockError TcpSocket::listen(uint16_t listenPort, int maxParallelConnections, bool acceptMultiple, const acceptCallback acb) {
 		if (listenPort == 0) {
 			return ClockError::INVALID_PORT;
 		}
-		if (_sock != -1) {
+		if (_status != SocketStatus::INACTIVE) {
 			return ClockError::INVALID_USAGE;
 		}
 		if (maxParallelConnections < 0) {
@@ -89,11 +90,13 @@ namespace sockets {
 			});
 		thrd.detach();
 
+		_status = SocketStatus::LISTENING;
+
 		return ClockError::SUCCESS;
 	}
 
 	ClockError TcpSocket::connect(const std::string & remoteIP, uint16_t remotePort, unsigned int timeout) {
-		if (_sock != -1) {
+		if (_status != SocketStatus::INACTIVE) {
 			return ClockError::INVALID_USAGE;
 		}
 
@@ -108,8 +111,6 @@ namespace sockets {
 		_sock = socket(PF_INET, SOCK_STREAM, 0);
 
 		if (_sock == -1) {
-			_sock = -1;
-
 			return getLastError();
 		}
 
@@ -178,6 +179,8 @@ namespace sockets {
 		fcntl(_sock, F_SETFL, arg);
 #endif
 
+		_status = SocketStatus::CONNECTED;
+
 		return ClockError::SUCCESS;
 	}
 
@@ -223,7 +226,7 @@ namespace sockets {
 	}
 
 	ClockError TcpSocket::writePacket(const void * str, const size_t length) {
-		if (_sock == -1) {
+		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
 		// | + size + str + |
@@ -244,14 +247,14 @@ namespace sockets {
 	}
 
 	ClockError TcpSocket::writePacket(const std::vector<uint8_t> & str) {
-		if (_sock == -1) {
+		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
 		return writePacket(const_cast<const unsigned char *>(&str[0]), str.size());
 	}
 
 	ClockError TcpSocket::receivePacket(std::vector<uint8_t> & buffer) {
-		if (_sock == -1) {
+		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
 
@@ -267,7 +270,7 @@ namespace sockets {
 	}
 
 	ClockError TcpSocket::receivePacket(std::string & buffer) {
-		if (_sock == -1) {
+		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
 
@@ -284,11 +287,15 @@ namespace sockets {
 			if (!skipFirstRead) {
 				error = read(s);
 			}
-			skipFirstRead = false;
 
 			if (error != ClockError::SUCCESS) {
 				return error;
 			}
+
+			if (s.size() == 0) {
+				continue;
+			}
+			skipFirstRead = false;
 
 			if (result.size() == 0) {
 				if (s[0] == '|') {
@@ -323,11 +330,15 @@ namespace sockets {
 	}
 
 	ClockError TcpSocket::write(const void * str, size_t length) {
-		if (_sock == -1) {
+		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
 		
-		int rc = send(_sock, reinterpret_cast<const char *>(str), length, 0);
+//		fd_set read_sd;
+//		FD_ZERO(&read_sd);
+//		FD_SET(sd, &read_sd);
+//		int sel = select(sd + 1, &rsd, 0, 0, 0);
+		int rc = send(_sock, reinterpret_cast<const char *>(str), length, MSG_NOSIGNAL);
 
 		if (rc == -1) {
 			return getLastError();
@@ -339,14 +350,14 @@ namespace sockets {
 	}
 
 	ClockError TcpSocket::write(const std::vector<uint8_t> & str) {
-		if (_sock == -1) {
+		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
 		return write(const_cast<const unsigned char *>(&str[0]), str.size());
 	}
 
 	ClockError TcpSocket::read(std::vector<uint8_t> & buffer) {
-		if (_sock == -1) {
+		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
 		char buf[256];
@@ -378,7 +389,7 @@ namespace sockets {
 	}
 
 	ClockError TcpSocket::read(std::string & buffer) {
-		if (_sock == -1) {
+		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
 		char buf[256];

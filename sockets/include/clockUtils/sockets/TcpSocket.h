@@ -62,7 +62,13 @@ public:
 	
 		void operator>>(int & a); */
 
-//private:
+private:
+		enum class SocketStatus {
+			INACTIVE,
+			LISTENING,
+			CONNECTED
+		};
+
 		TcpSocket(int fd);
 
 		ClockError getLastError();
@@ -71,6 +77,11 @@ public:
 		 * \brief stores the lokal socket descriptor or -1 if not active
 		 */
 		int _sock;
+
+		/**
+		 * \brief current socket status
+		 */
+		SocketStatus _status;
 
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 		static int _counter;
