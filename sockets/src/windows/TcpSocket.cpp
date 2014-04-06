@@ -10,7 +10,7 @@ namespace sockets {
 	int TcpSocket::_counter = 0;
 	std::mutex TcpSocket::_lock;
 
-	TcpSocket::TcpSocket() : _sock(-1), _buffer() {
+	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _buffer() {
 		_lock.lock();
 		if (_counter == 0) {
 			WSADATA wsa;
@@ -35,6 +35,7 @@ namespace sockets {
 			shutdown(_sock, SD_BOTH);
 			closesocket(_sock);
 			_sock = -1;
+			_status = SocketStatus::INACTIVE;
 		}
 	}
 

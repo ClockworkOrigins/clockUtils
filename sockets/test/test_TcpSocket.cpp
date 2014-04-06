@@ -317,9 +317,8 @@ TEST(TcpSocket, invalidUse) {
 	std::string str;
 
 	TcpSocket sock1;
-	TcpSocket::acceptCallback acb;
-	EXPECT_EQ(ClockError::SUCCESS, sock1.listen(1025, 1, true, acb));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.listen(1025, 1, true, acb));
+	EXPECT_EQ(ClockError::SUCCESS, sock1.listen(1025, 1, true, [](TcpSocket *){}));
+	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.listen(1025, 1, true, [](TcpSocket *){}));
 	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.connect("127.0.0.1", 1026, 500));
 	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.writePacket(buffer));
 	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.writePacket(reinterpret_cast<char *>(&buffer[0]), buffer.size()));

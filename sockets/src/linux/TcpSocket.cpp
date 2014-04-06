@@ -13,7 +13,7 @@
 namespace clockUtils {
 namespace sockets {
 
-	TcpSocket::TcpSocket() : _sock(-1) {
+	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE) {
 	}
 
 	TcpSocket::~TcpSocket() {
@@ -22,11 +22,12 @@ namespace sockets {
 	}
 
 	void TcpSocket::close() {
-		if (_sock != -1) {
+		if (_status != SocketStatus::INACTIVE) {
 			// needed to stop pending accept operations
 			::shutdown(_sock, SHUT_RDWR); // FIXME: only do this if connected?, check for errorcode than
 			if (-1 == ::close(_sock)) perror("close");
 			_sock = -1;
+			_status = SocketStatus::INACTIVE;
 		}
 	}
 
