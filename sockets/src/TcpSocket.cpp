@@ -17,7 +17,6 @@
 
 #include <errno.h>
 #include <thread>
-#include <iostream>
 
 namespace clockUtils {
 namespace sockets {
@@ -214,7 +213,6 @@ namespace sockets {
 		for (int i = 0; *(localHost->h_addr_list + i) != nullptr; i++) {
 			char * localIP = inet_ntoa(*reinterpret_cast<struct in_addr *>(*(localHost->h_addr_list + i)));
 
-			//result.push_back(std::make_pair(std::string(*(localHost->h_aliases + i)), std::string(localIP)));
 			result.push_back(std::make_pair(std::string(localHost->h_name), std::string(localIP)));
 		}
 

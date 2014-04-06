@@ -231,12 +231,6 @@ TEST(TcpSocket, getIP) { // tests IP before and after connection
 	std::string s2 = ts.getPublicIP();
 	std::string s3 = ts.getRemoteIP();
 
-	std::cout << TcpSocket::enumerateLocalIPs().size() << std::endl;
-
-	for (std::pair<std::string, std::string> p : TcpSocket::enumerateLocalIPs()) {
-		std::cout << p.first << " hat IP: " << p.second << std::endl;
-	}
-
 	EXPECT_EQ(0, s2.length());
 	EXPECT_EQ(0, s3.length());
 
