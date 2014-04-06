@@ -205,7 +205,20 @@ namespace sockets {
 	}
 
 	std::vector<std::pair<std::string, std::string>> TcpSocket::enumerateLocalIPs() {
-		return std::vector<std::pair<std::string, std::string>>();
+		char buffer[256];
+		gethostname(buffer, 256);
+		hostent * localHost = gethostbyname(buffer);
+
+		std::vector<std::pair<std::string, std::string>> result;
+
+		for (int i = 0; *(localHost->h_addr_list + i) != nullptr; i++) {
+			char * localIP = inet_ntoa(*reinterpret_cast<struct in_addr *>(*(localHost->h_addr_list + i)));
+
+			//result.push_back(std::make_pair(std::string(*(localHost->h_aliases + i)), std::string(localIP)));
+			result.push_back(std::make_pair(std::string(localHost->h_name), std::string(localIP)));
+		}
+
+		return result;
 	}
 
 	std::string TcpSocket::getLocalIP() const {

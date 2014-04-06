@@ -228,12 +228,15 @@ TEST(TcpSocket, sendRead) { // tests communication between two sockets
 
 TEST(TcpSocket, getIP) { // tests IP before and after connection
 	TcpSocket ts;
-	std::string s = ts.getLocalIP();
 	std::string s2 = ts.getPublicIP();
 	std::string s3 = ts.getRemoteIP();
 
-	EXPECT_NE(0, s.length());
-	EXPECT_EQ("192.168.", s.substr(0, 8));
+	std::cout << TcpSocket::enumerateLocalIPs().size() << std::endl;
+
+	for (std::pair<std::string, std::string> p : TcpSocket::enumerateLocalIPs()) {
+		std::cout << p.first << " hat IP: " << p.second << std::endl;
+	}
+
 	EXPECT_EQ(0, s2.length());
 	EXPECT_EQ(0, s3.length());
 
@@ -241,23 +244,17 @@ TEST(TcpSocket, getIP) { // tests IP before and after connection
 	server.listen(12345, 1, false, [](TcpSocket * client) {
 		std::string s4 = client->getRemoteIP();
 		std::string s5 = client->getPublicIP();
-		std::string s6 = client->getLocalIP();
 
 		EXPECT_NE(0, s4.length());
 		EXPECT_NE(0, s5.length());
-		EXPECT_NE(0, s6.length());
 		EXPECT_EQ("127.0.0.1", s4);
-		EXPECT_EQ("192.168.", s6.substr(0, 8));
 		_socketList.push_back(client);
 	});
 
 	ts.connect("127.0.0.1", 12345, 500);
-	s = ts.getLocalIP();
 	s2 = ts.getPublicIP();
 	s3 = ts.getRemoteIP();
 
-	EXPECT_NE(0, s.length());
-	EXPECT_EQ("192.168.", s.substr(0, 8));
 	EXPECT_NE(0, s2.length());
 	EXPECT_NE(0, s3.length());
 
