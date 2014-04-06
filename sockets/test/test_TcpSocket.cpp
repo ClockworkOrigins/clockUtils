@@ -214,7 +214,7 @@ TEST(TcpSocket, sendRead) { // tests communication between two sockets
 
 	e = client.read(errorMessage);
 
-	EXPECT_EQ(ClockError::NOT_READY, e);
+	EXPECT_EQ(ClockError::NOT_CONNECTED, e);
 
 	server.close();
 	client.close();
