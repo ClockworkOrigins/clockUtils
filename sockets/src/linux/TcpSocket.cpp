@@ -7,13 +7,14 @@
 	#include <unistd.h>
 #endif
 
+#include <iostream>
 #include <chrono>
 #include <thread>
 
 namespace clockUtils {
 namespace sockets {
 
-	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE) {
+	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _buffer() {
 	}
 
 	TcpSocket::~TcpSocket() {
@@ -79,6 +80,8 @@ namespace sockets {
 		} else if (errno == EHOSTUNREACH) {
 			return ClockError::CONNECTION_FAILED;
 		} else if (errno == ECONNABORTED) {
+			return ClockError::NOT_CONNECTED;
+		} else if (errno == EPIPE) {
 			return ClockError::NOT_CONNECTED;
 		}
 		

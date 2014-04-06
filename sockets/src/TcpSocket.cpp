@@ -375,7 +375,7 @@ namespace sockets {
 
 				return error;
 			} else if (rc == 0) {
-				ClockError::NOT_CONNECTED;
+				return ClockError::NOT_CONNECTED;
 			}
 
 			break;
@@ -406,7 +406,7 @@ namespace sockets {
 
 				return error;
 			} else if (rc == 0) {
-				ClockError::NOT_CONNECTED;
+				return ClockError::NOT_CONNECTED;
 			}
 
 			break;
