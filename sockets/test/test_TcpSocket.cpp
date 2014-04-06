@@ -210,11 +210,7 @@ TEST(TcpSocket, sendRead) { // tests communication between two sockets
 		EXPECT_EQ(s, buffer);
 	}
 
-	std::string errorMessage = "Error: Mustn't arrive, has to return error!";
-
-	e = client.write(errorMessage.c_str(), errorMessage.length());
-
-	EXPECT_EQ(ClockError::NOT_READY, e);
+	std::string errorMessage;
 
 	e = client.read(errorMessage);
 
