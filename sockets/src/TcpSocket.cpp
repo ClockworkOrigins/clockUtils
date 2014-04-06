@@ -8,8 +8,8 @@
 	#include <arpa/inet.h>
 	#include <cstring>
 	#include <fcntl.h>
-	#include <netinet/in.h>
 	#include <netdb.h>
+	#include <netinet/in.h>
 	#include <sys/socket.h>
 	#include <sys/types.h>
 	#include <unistd.h>
