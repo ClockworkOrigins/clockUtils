@@ -1,12 +1,11 @@
-#ifndef __SOCKETS_TCPSOCKET_H__
-#define __SOCKETS_TCPSOCKET_H__
+#ifndef __CLOCKUTILS_SOCKETS_TCPSOCKET_H__
+#define __CLOCKUTILS_SOCKETS_TCPSOCKET_H__
 
 #include <cstdint>
 #include <functional>
 #include <string>
 #include <vector>
 
-#include "clockUtils/errors.h"
 #include "clockUtils/sockets/socketsParameters.h"
 
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
@@ -14,6 +13,8 @@
 #endif
 
 namespace clockUtils {
+	enum class ClockError;
+
 namespace sockets {
 
 	class CLOCK_SOCKETS_API TcpSocket {
@@ -185,4 +186,4 @@ namespace sockets {
 } /* namespace sockets */
 } /* namespace clockUtils */
 
-#endif /* __SOCKETS_TCP_SOCKET_H__ */
+#endif /* __CLOCKUTILS_SOCKETS_TCPSOCKET_H__ */

@@ -1,5 +1,7 @@
 #include "clockUtils/sockets/TcpSocket.h"
 
+#include "clockUtils/errors.h"
+
 #include <WinSock2.h>
 
 namespace clockUtils {

@@ -18,6 +18,8 @@
 #include <errno.h>
 #include <thread>
 
+#include "clockUtils/errors.h"
+
 namespace clockUtils {
 namespace sockets {
 

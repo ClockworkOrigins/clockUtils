@@ -7,9 +7,10 @@
 	#include <unistd.h>
 #endif
 
-#include <iostream>
 #include <chrono>
 #include <thread>
+
+#include "clockUtils/errors.h"
 
 namespace clockUtils {
 namespace sockets {
