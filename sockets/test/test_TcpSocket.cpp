@@ -260,7 +260,6 @@ TEST(TcpSocket, getIP) { // tests IP before and after connection
 	EXPECT_EQ("192.168.", s.substr(0, 8));
 	EXPECT_NE(0, s2.length());
 	EXPECT_NE(0, s3.length());
-	EXPECT_EQ("127.0.0.1", s);
 
 	ts.close();
 	server.close();
@@ -413,16 +412,23 @@ TEST(TcpSocket, connectOnly) {
 
 	sock1.listen(12345, 1, false, [](TcpSocket * sock)
 		{
-			sock->close();
-			delete sock;
+		_socketList.push_back(sock);
 		});
 	sock2.connect("127.0.0.1", 12345, 500);
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	
 	EXPECT_EQ(12345, sock2.getRemotePort());
-	EXPECT_EQ(sock1.getLocalPort(), sock2.getRemotePort());
-	EXPECT_EQ(sock2.getLocalPort(), sock1.getRemotePort());
+	EXPECT_EQ(_socketList[0]->getLocalPort(), sock2.getRemotePort());
+	EXPECT_EQ(sock2.getLocalPort(), _socketList[0]->getRemotePort());
 	
 	sock1.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 

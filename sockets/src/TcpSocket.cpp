@@ -185,11 +185,23 @@ namespace sockets {
 	}
 
 	std::string TcpSocket::getRemoteIP() const {
-		return "NOT IMPLEMENTED YET";
+		if (_status == SocketStatus::INACTIVE) {
+			return "";
+		}
+		struct sockaddr_in localAddress;
+		socklen_t addressLength = sizeof(localAddress);
+		getpeername(_sock, reinterpret_cast<struct sockaddr *>(&localAddress), &addressLength);
+		return inet_ntoa(localAddress.sin_addr);
 	}
 
 	uint16_t TcpSocket::getRemotePort() const {
-		return 0;
+		if (_status == SocketStatus::INACTIVE) {
+			return 0;
+		}
+		struct sockaddr_in localAddress;
+		socklen_t addressLength = sizeof(localAddress);
+		getpeername(_sock, reinterpret_cast<struct sockaddr *>(&localAddress), &addressLength);
+		return static_cast<uint16_t>(ntohs(localAddress.sin_port));
 	}
 
 	std::vector<std::pair<std::string, std::string>> TcpSocket::enumerateLocalIPs() {
@@ -208,21 +220,23 @@ namespace sockets {
 	}
 
 	std::string TcpSocket::getPublicIP() const {
-		if (_sock == -1) {
+		if (_status == SocketStatus::INACTIVE) {
 			return "";
 		}
-
-		/*struct sockaddr_in addr;
-		memset(&addr, 0, sizeof(sockaddr_in));
-
-		unsigned int len = sizeof(addr);
-		getsockname(_sock, reinterpret_cast<sockaddr *>(&addr), &len);*/
-
-		return "NOT IMPLEMENTED YET";
+		struct sockaddr_in localAddress;
+		socklen_t addressLength = sizeof(localAddress);
+		getsockname(_sock, reinterpret_cast<struct sockaddr *>(&localAddress), &addressLength);
+		return inet_ntoa(localAddress.sin_addr);
 	}
 
 	uint16_t TcpSocket::getLocalPort() const {
-		return 0;
+		if (_status == SocketStatus::INACTIVE) {
+			return 0;
+		}
+		struct sockaddr_in localAddress;
+		socklen_t addressLength = sizeof(localAddress);
+		getsockname(_sock, reinterpret_cast<struct sockaddr *>(&localAddress), &addressLength);
+		return static_cast<uint16_t>(ntohs(localAddress.sin_port));
 	}
 
 	ClockError TcpSocket::writePacket(const void * str, const size_t length) {
