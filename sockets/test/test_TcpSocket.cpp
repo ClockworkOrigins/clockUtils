@@ -439,14 +439,19 @@ TEST(TcpSocket, connectOnly) {
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.writePacket(buffer));
-	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.writePacket(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
-	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.write(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
+	sock2.writePacket(buffer);
 	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.read(buffer));
 	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.read(str));
 	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.receivePacket(buffer));
 	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.receivePacket(str));
-	EXPECT_EQ(ClockError::SUCCESS, sock2.listen(1026, 1, true, [](TcpSocket * sock){}));
+	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.writePacket(buffer));
+	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.writePacket(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
+	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.write(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
+	EXPECT_EQ(ClockError::INVALID_USAGE, sock2.listen(1026, 1, true, [](TcpSocket * sock) {}));
+
+	sock2.close();
+
+	EXPECT_EQ(ClockError::SUCCESS, sock2.listen(1026, 1, true, [](TcpSocket * sock) {}));
 	
 	sock1.close();
 	sock2.close();
