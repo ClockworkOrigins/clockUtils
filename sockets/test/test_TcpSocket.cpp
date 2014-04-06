@@ -508,31 +508,6 @@ TEST(TcpSocket, write) {
 	_socketList.clear();
 }
 
-TEST(TcpSocket, write2) {
-	TcpSocket sock1, sock2;
-	std::string v = {0x1, 0x2, 0x3, 0x4, 0x5, 0x0, 0x5, 0x4, 0x3, 0x2, 0x1};
-	sock1.listen(12345, 1, false, [v](TcpSocket * sock)
-		{
-			sock->write(&v[0], v.length());
-			_socketList.push_back(sock);
-		});
-	sock2.connect("127.0.0.1", 12345, 500);
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-	
-	std::string v2;
-	sock2.read(v2);
-	EXPECT_EQ(v, v2);
-	sock1.close();
-	sock2.close();
-
-	for (TcpSocket * sock : _socketList) {
-		delete sock;
-	}
-
-	_socketList.clear();
-}
-
 TEST(TcpSocket, writeMultiple) {
 	TcpSocket sock1, sock2;
 	std::vector<uint8_t> v1 = {0x1, 0x2, 0x3, 0x4, 0x5, 0x0, 0x5, 0x4, 0x3, 0x2, 0x1};
