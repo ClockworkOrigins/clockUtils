@@ -83,7 +83,6 @@ namespace sockets {
 					int clientSock = ::accept(_sock, nullptr, nullptr);
 					close();
 					if (clientSock == -1) {
-						close();
 						return;
 					}
 					acb(new TcpSocket(clientSock));
