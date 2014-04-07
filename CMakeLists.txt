@@ -119,6 +119,8 @@ ENDIF(WITH_TESTING)
 
 include_directories(${CMAKE_SOURCE_DIR}/include/)
 
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include DESTINATION ${CMAKE_INSTALL_PREFIX})
+
 #####################################################################################
 # sockets
 #####################################################################################

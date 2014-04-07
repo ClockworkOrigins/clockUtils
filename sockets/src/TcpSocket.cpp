@@ -154,7 +154,7 @@ namespace sockets {
 					int valopt;
 
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
-					getsockopt(_sock, SOL_SOCKET, SO_ERROR, (char *) &valopt, &lon); 
+					getsockopt(_sock, SOL_SOCKET, SO_ERROR, reinterpret_cast<char *>(&valopt), &lon); 
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 					getsockopt(_sock, SOL_SOCKET, SO_ERROR, static_cast<void *>(&valopt), &lon);
 #endif
@@ -390,7 +390,11 @@ namespace sockets {
 		int rc = -1;
 
 		do {
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 			rc = recv(_sock, buf, 256, 0);
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+			rc = recv(_sock, reinterpret_cast<char *>(buf), 256, 0);
+#endif
 
 			if (rc == -1) {
 				ClockError error = getLastError();
