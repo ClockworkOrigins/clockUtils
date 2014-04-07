@@ -46,6 +46,19 @@ void connectionAcceptedWrite(TcpSocket * ts) {
 	delete ts;
 }
 
+size_t receivedCounter = 0;
+
+void receiveMessage(const std::vector<uint8_t> & message, TcpSocket * sock, ClockError error) {
+	if (receivedCounter == messages.size()) {
+		EXPECT_EQ(ClockError::NOT_CONNECTED, error);
+	} else {
+		ASSERT_EQ(ClockError::SUCCESS, error);
+		EXPECT_EQ(messages[receivedCounter], std::string(message.begin(), message.end()));
+
+		receivedCounter++;
+	}
+}
+
 TEST(TcpSocket, connect) { // tests connect with all possible errors
 	TcpSocket ts;
 	ClockError e = ts.connect("1", 12345, 500);
@@ -652,14 +665,13 @@ TEST(TcpSocket, writeMass) {
 	std::vector<uint8_t> v1(100000, 'a');
 	std::vector<uint8_t> v2(100000, 'b');
 
-	sock1.listen(12345, 1, false, [v1, v2](TcpSocket * sock)
-		{
-			sock->writePacket(v1);
-			sock->writePacket(v2);
-			_socketList.push_back(sock);
-		});
+	sock1.listen(12345, 1, false, [v1, v2](TcpSocket * sock) {
+		sock->writePacket(v1);
+		sock->writePacket(v2);
+		_socketList.push_back(sock);
+	});
 	sock2.connect("127.0.0.1", 12345, 500);
-	
+
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 	std::vector<uint8_t> v3, v4;
@@ -667,6 +679,33 @@ TEST(TcpSocket, writeMass) {
 	EXPECT_EQ(v1, v3);
 	sock2.receivePacket(v4);
 	EXPECT_EQ(v2, v4);
+	sock1.close();
+	sock2.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
+}
+
+TEST(TcpSocket, receiveCallback) {
+	TcpSocket sock1, sock2;
+
+	sock1.listen(12345, 1, false, [](TcpSocket * sock) {
+		sock->receiveCallback(std::bind(receiveMessage, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+		_socketList.push_back(sock);
+	});
+	sock2.connect("127.0.0.1", 12345, 500);
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+	for (std::string s : messages) {
+		EXPECT_EQ(ClockError::SUCCESS, sock2.writePacket(s.c_str(), s.length()));
+	}
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
 	sock1.close();
 	sock2.close();
 
