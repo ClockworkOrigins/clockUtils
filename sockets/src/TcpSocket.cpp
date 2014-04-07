@@ -443,6 +443,22 @@ namespace sockets {
 
 		return ClockError::SUCCESS;
 	}
+	
+	ClockError TcpSocket::receiveCallback(packetCallback pcb) {
+		std::thread thrd([pcb, this]()
+			{
+				while (1) {
+					std::vector<uint8_t> buffer;
+					ClockError err = receivePacket(buffer);
+					pcb(buffer, this, err);
+					if (err != ClockError::SUCCESS) {
+						break;
+					}
+				}
+			});
+		thrd.detach();
+		return ClockError::SUCCESS;
+	}
 
 } /* namespace sockets */
 } /* namespace clockUtils */

@@ -20,6 +20,8 @@ namespace sockets {
 	class CLOCK_SOCKETS_API TcpSocket {
 	public:
 		typedef std::function<void(TcpSocket *)> acceptCallback;
+		
+		typedef std::function<void(std::vector<uint8_t> packet, TcpSocket * socket, ClockError err)> packetCallback;
 
 		/**
 		 * \brief constructor
@@ -101,8 +103,15 @@ namespace sockets {
 
 		/**
 		 * \brief receives a packet sent with writePacket, doesn't work with write
+		 * this functions blocks until a packet is received
 		 */
 		ClockError receivePacket(std::vector<uint8_t> & buffer);
+
+		/**
+		 * \brief calls the callback for every packet that is received on this socket
+		 * This function will return immediately
+		 */
+		ClockError receiveCallback(packetCallback pcb);
 
 		/**
 		 * \brief receives a packet sent with writePacket, doesn't work with write
