@@ -649,8 +649,8 @@ TEST(TcpSocket, writePacketMultipleSwapped) {
 
 TEST(TcpSocket, writeMass) {
 	TcpSocket sock1, sock2;
-	std::vector<uint8_t> v1(10000, 'a');
-	std::vector<uint8_t> v2(10000, 'b');
+	std::vector<uint8_t> v1(100000, 'a');
+	std::vector<uint8_t> v2(100000, 'b');
 
 	sock1.listen(12345, 1, false, [v1, v2](TcpSocket * sock)
 		{

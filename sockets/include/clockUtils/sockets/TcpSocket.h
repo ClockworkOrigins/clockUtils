@@ -90,7 +90,7 @@ namespace sockets {
 		 *
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
-		ClockError writePacket(const void * str, const size_t length);
+		ClockError writePacket(const void * str, const uint32_t length);
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
@@ -114,7 +114,7 @@ namespace sockets {
 		 *
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
-		ClockError write(const void * str, size_t length);
+		ClockError write(const void * str, uint32_t length);
 
 		/**
 		 * \brief sends a message, doesn't work with receivePacket

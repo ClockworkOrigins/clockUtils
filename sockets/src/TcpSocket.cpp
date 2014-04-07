@@ -157,7 +157,7 @@ namespace sockets {
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 					getsockopt(_sock, SOL_SOCKET, SO_ERROR, (char *) &valopt, &lon); 
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
-					getsockopt(_sock, SOL_SOCKET, SO_ERROR, (void *) &valopt, &lon);
+					getsockopt(_sock, SOL_SOCKET, SO_ERROR, static_cast<void *>(&valopt), &lon);
 #endif
 					if (valopt) {
 						close();
@@ -252,7 +252,7 @@ namespace sockets {
 		return static_cast<uint16_t>(ntohs(localAddress.sin_port));
 	}
 
-	ClockError TcpSocket::writePacket(const void * str, const size_t length) {
+	ClockError TcpSocket::writePacket(const void * str, const uint32_t length) {
 		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
@@ -305,7 +305,7 @@ namespace sockets {
 
 		bool skipFirstRead = !result.empty();
 
-		size_t length = 0;
+		uint32_t length = 0;
 
 		while (true) {
 			std::vector<uint8_t> s;
@@ -336,7 +336,7 @@ namespace sockets {
 
 			if (length == 0) {
 				if (result.size() >= 5) {
-					length = result[1] * 256 * 256 * 256 + result[2] * 256 * 256 + result[3] * 256 + result[4];
+					length = static_cast<uint32_t>(result[1] * 256 * 256 * 256 + result[2] * 256 * 256 + result[3] * 256 + result[4]);
 				}
 			}
 
@@ -356,7 +356,7 @@ namespace sockets {
 		return ClockError::SUCCESS;
 	}
 
-	ClockError TcpSocket::write(const void * str, size_t length) {
+	ClockError TcpSocket::write(const void * str, uint32_t length) {
 		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
@@ -387,7 +387,7 @@ namespace sockets {
 		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
-		char buf[256];
+		unsigned char buf[256];
 		int rc = -1;
 
 		do {
