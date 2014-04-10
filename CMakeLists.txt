@@ -12,6 +12,7 @@ cmake_minimum_required (VERSION 2.8)
 
 option(WITH_TESTING "build clockUtils with tests" OFF)
 option(WITH_LIBRARY_SOCKETS "builds sockets library" ON)
+option(WITH_LIBRARY_ARGPARSER "builds argument parser library" ON)
 
 IF(WITH_TESTING AND NOT WIN32)
 	# static for gmock
@@ -129,6 +130,15 @@ IF(WITH_LIBRARY_SOCKETS)
 	add_subdirectory(sockets)
 	set(SOCKETS_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/sockets/include)
 ENDIF(WITH_LIBRARY_SOCKETS)
+
+#####################################################################################
+# argument parser
+#####################################################################################
+
+IF(WITH_LIBRARY_ARGPARSER)
+	add_subdirectory(argparser)
+	set(SOCKETS_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/argparser/include)
+ENDIF(WITH_LIBRARY_ARGPARSER)
 
 
 ###############################################################################
