@@ -27,7 +27,7 @@ namespace argparser {
 
 				for (BasicVariable * bv : Parser::variableList) {
 					if (name == bv->getName()) {
-						if (bv->getType() == "bool") {
+						if (bv->isBool()) {
 							bv->setValue("1");
 						} else {
 							if (argc == 1) {

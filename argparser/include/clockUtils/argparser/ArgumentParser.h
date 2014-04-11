@@ -37,6 +37,6 @@ namespace argparser {
 #define REGISTER_VARIABLE(type, name, value, description)\
 	type name = value;\
 	clockUtils::argparser::RemoveHelper(#name);\
-	clockUtils::argparser::Parser::variableList.push_back(new clockUtils::argparser::Variable<type>(#name, description, &name, #type));
+	clockUtils::argparser::Parser::variableList.push_back(new clockUtils::argparser::Variable<type>(#name, description, &name));
 
 #endif /* __CLOCKUTILS_ARGPARSER_ARGUMENTPARSER_H__ */
