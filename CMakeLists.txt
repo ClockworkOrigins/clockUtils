@@ -145,7 +145,7 @@ ENDIF(WITH_LIBRARY_ARGPARSER)
 # Docs
 ###############################################################################
 
-#add_subdirectory(docs)
+add_subdirectory(docs)
 
 IF(WIN32)
 	file(GLOB_RECURSE files "${CMAKE_SOURCE_DIR}/dependencies/*.dll")
