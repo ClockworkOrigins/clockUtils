@@ -45,6 +45,12 @@ TEST(ArgumentParser, parseString) {
 	char * buffer3[] = { "-s", "blafoo" };
 	int length3 = sizeof(buffer3) / sizeof(char *);
 
+	char * buffer4[] = { "-sblafoo" };
+	int length4 = sizeof(buffer4) / sizeof(char *);
+
+	char * buffer5[] = { "-s=blafoo" };
+	int length5 = sizeof(buffer5) / sizeof(char *);
+
 	std::stringstream buffer;
 	std::streambuf * sbuf = std::cerr.rdbuf();
 	std::cerr.rdbuf(buffer.rdbuf());
@@ -62,10 +68,30 @@ TEST(ArgumentParser, parseString) {
 	EXPECT_FALSE(buffer.str().empty());
 
 	EXPECT_EQ("test", s);
-	EXPECT_EQ("s requires a value: -s <value>\n", buffer.str());
+	EXPECT_EQ("s requires a value: -s <value> or -s<value> or -s=<value>\n", buffer.str());
 	buffer.str("");
 
+	s = "";
+
 	PARSE_ARGUMENTS(buffer3, length3);
+
+	std::cout << buffer.str() << std::endl;
+
+	EXPECT_TRUE(buffer.str().empty());
+
+	EXPECT_EQ("blafoo", s);
+
+	s = "";
+
+	PARSE_ARGUMENTS(buffer4, length4);
+
+	EXPECT_TRUE(buffer.str().empty());
+
+	EXPECT_EQ("blafoo", s);
+
+	s = "";
+
+	PARSE_ARGUMENTS(buffer5, length5);
 
 	EXPECT_TRUE(buffer.str().empty());
 
@@ -89,6 +115,12 @@ TEST(ArgumentParser, parseInt) {
 	char * buffer4[] = { "-i", "0" };
 	int length4 = sizeof(buffer4) / sizeof(char *);
 
+	char * buffer5[] = { "-i0" };
+	int length5 = sizeof(buffer5) / sizeof(char *);
+
+	char * buffer6[] = { "-i=0" };
+	int length6 = sizeof(buffer6) / sizeof(char *);
+
 	std::stringstream buffer;
 	std::streambuf * sbuf = std::cerr.rdbuf();
 	std::cerr.rdbuf(buffer.rdbuf());
@@ -98,14 +130,14 @@ TEST(ArgumentParser, parseInt) {
 	PARSE_ARGUMENTS(buffer1, length1);
 
 	EXPECT_TRUE(buffer.str().empty());
-	buffer.str().clear();
+	buffer.str("");
 
 	EXPECT_EQ(-1, i);
 
 	PARSE_ARGUMENTS(buffer2, length2);
 
 	EXPECT_FALSE(buffer.str().empty());
-	EXPECT_EQ("i requires a value: -i <value>\n", buffer.str());
+	EXPECT_EQ("i requires a value: -i <value> or -i<value> or -i=<value>\n", buffer.str());
 	buffer.str("");
 
 	EXPECT_EQ(-1, i);
@@ -118,7 +150,27 @@ TEST(ArgumentParser, parseInt) {
 
 	EXPECT_EQ(-1, i);
 
+	i = -1;
+
 	PARSE_ARGUMENTS(buffer4, length4);
+
+	EXPECT_TRUE(buffer.str().empty());
+	buffer.str("");
+
+	EXPECT_EQ(0, i);
+
+	i = -1;
+
+	PARSE_ARGUMENTS(buffer5, length5);
+
+	EXPECT_TRUE(buffer.str().empty());
+	buffer.str("");
+
+	EXPECT_EQ(0, i);
+
+	i = -1;
+
+	PARSE_ARGUMENTS(buffer6, length6);
 
 	EXPECT_TRUE(buffer.str().empty());
 	buffer.str("");

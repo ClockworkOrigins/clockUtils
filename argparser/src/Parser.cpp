@@ -15,18 +15,27 @@ namespace argparser {
 				std::string name(&argv[0][1]);
 
 				for (BasicVariable * bv : Parser::variableList) {
-					if (name == bv->getName()) {
+					if (name.find(bv->getName()) == 0) {
 						if (bv->isBool()) {
 							bv->setValue("1");
 						} else {
-							if (argc == 1) {
-								std::cerr << name << " requires a value: -" << name << " <value>" << std::endl;
+							if (name.length() > bv->getName().length()) {
+								size_t startIndex = bv->getName().length();
+								if (name.at(startIndex) == '=') {
+									startIndex++;
+								}
+								if (!bv->setValue(name.substr(startIndex, name.length()))) {
+									std::cerr << argv[1] << " is not a valid value for variable " << name << std::endl;
+								}
+							} else if (argc == 1) {
+								std::cerr << name << " requires a value: -" << name << " <value> or -" << name << "<value> or -" << name << "=<value>" << std::endl;
 								argv++;
 								argc--;
 								continue;
-							}
-							if (!bv->setValue(argv[1])) {
-								std::cerr << argv[1] << " is not a valid value for variable " << name << std::endl;
+							} else {
+								if (!bv->setValue(argv[1])) {
+									std::cerr << argv[1] << " is not a valid value for variable " << name << std::endl;
+								}
 							}
 						}
 					}
