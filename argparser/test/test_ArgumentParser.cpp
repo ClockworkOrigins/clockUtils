@@ -80,8 +80,6 @@ TEST(ArgumentParser, parseString) {
 
 	PARSE_ARGUMENTS(buffer3, length3);
 
-	std::cout << buffer.str() << std::endl;
-
 	EXPECT_TRUE(buffer.str().empty());
 
 	EXPECT_EQ("blafoo", s);
