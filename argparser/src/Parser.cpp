@@ -11,11 +11,14 @@ namespace argparser {
 
 	void Parser::parseArguments(char ** argv, int argc) {
 		while (argc > 0) {
-			if (argv[0][0] == '-') {
+			if (argv[0][0] == '-' && strlen(argv[0]) > 1) {
 				std::string name(&argv[0][1]);
+
+				bool found = false;
 
 				for (BasicVariable * bv : Parser::variableList) {
 					if (name.find(bv->getName()) == 0) {
+						found = true;
 						if (bv->isBool()) {
 							bv->setValue("1");
 						} else {
@@ -31,7 +34,7 @@ namespace argparser {
 								std::cerr << name << " requires a value: -" << name << " <value> or -" << name << "<value> or -" << name << "=<value>" << std::endl;
 								argv++;
 								argc--;
-								continue;
+								break;
 							} else {
 								if (!bv->setValue(argv[1])) {
 									std::cerr << argv[1] << " is not a valid value for variable " << name << std::endl;
@@ -40,6 +43,12 @@ namespace argparser {
 						}
 					}
 				}
+
+				if (!found) {
+					std::cerr << "argument -" << name << " not registered!" << std::endl;
+				}
+			} else {
+				// TODO: (Daniel) found a single value, but no argument before
 			}
 
 			argv++;
