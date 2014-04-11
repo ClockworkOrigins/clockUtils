@@ -13,6 +13,8 @@ namespace argparser {
 	public:
 		BasicVariable(const std::string & name, const std::string & description);
 
+		~BasicVariable();
+
 		std::string getName() const {
 			return _name;
 		}
@@ -29,7 +31,7 @@ namespace argparser {
 	template<typename T>
 	class Variable : public BasicVariable {
 	public:
-		Variable(const std::string & name, const std::string & description, T * reference) : BasicVariable(name, description), _reference(reference) {
+		Variable(const std::string & name, const std::string & description, T value) : BasicVariable(name, description), _value(value) {
 		}
 
 		bool isBool() const {
@@ -38,11 +40,24 @@ namespace argparser {
 
 		bool setValue(const std::string & value) {
 			std::stringstream ss(value);
-			return !(ss >> (*_reference)).fail();
+			return !(ss >> (_value)).fail();
+		}
+
+		friend bool operator==(const T & first, const Variable<T> & second) {
+			return first == second._value;
+		}
+
+		T & operator=(const T & val) {
+			_value = val;
+			return _value;
+		}
+
+		operator T() const {
+			return _value;
 		}
 
 	private:
-		T * _reference;
+		T _value;
 	};
 
 	template<>

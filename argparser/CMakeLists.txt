@@ -9,6 +9,7 @@ set(srcdir ./src)
 set(argparserSrc
 	${srcdir}/ArgumentParser.cpp
 	${srcdir}/BasicVariable.cpp
+	${srcdir}/Parser.cpp
 )
 
 SOURCE_GROUP(argparser FILES ${argparserSrc})
