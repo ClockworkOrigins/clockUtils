@@ -109,6 +109,12 @@ namespace argparser {
 		T _value;
 	};
 
+	/**
+	* \brief specialization of isBool method for type bool, returns always true
+	*/
+	template<>
+	bool CLOCK_ARGPARSER_API Variable<bool>::isBool() const;
+
 } /* namespace argparser */
 } /* namespace clockUtils */
 

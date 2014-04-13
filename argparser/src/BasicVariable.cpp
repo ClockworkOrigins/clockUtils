@@ -18,9 +18,6 @@ namespace argparser {
 		}
 	}
 
-	/**
-	 * \brief specialization of isBool method for type bool, returns always true
-	 */
 	template<>
 	bool Variable<bool>::isBool() const {
 		return true;
