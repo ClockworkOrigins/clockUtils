@@ -6,6 +6,7 @@
 #include <vector>
 
 namespace clockUtils {
+	enum class ClockError;
 namespace argparser {
 
 	class BasicVariable;
@@ -23,7 +24,7 @@ namespace argparser {
 		 * \param[in] argv list of all strings in the argument line
 		 * \param[in] argc amount of entries in the list
 		 */
-		static void parseArguments(char ** argv, int argc);
+		static ClockError parseArguments(char ** argv, int argc);
 
 	private:
 		/**
