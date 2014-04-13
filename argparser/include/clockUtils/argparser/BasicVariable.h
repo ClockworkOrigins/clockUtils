@@ -22,7 +22,7 @@ namespace argparser {
 		/**
 		 * \brief destructor, removes variable of the variableList of the Parser
 		 */
-		~BasicVariable();
+		virtual ~BasicVariable();
 
 		/**
 		 * \brief returns the argument of the variable
@@ -108,14 +108,6 @@ namespace argparser {
 		 */
 		T _value;
 	};
-
-	/**
-	 * \brief specialization of isBool method for type bool, returns always true
-	 */
-	template<>
-	bool Variable<bool>::isBool() const {
-		return true;
-	}
 
 } /* namespace argparser */
 } /* namespace clockUtils */

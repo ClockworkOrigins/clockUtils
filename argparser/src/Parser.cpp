@@ -1,8 +1,8 @@
 #include "clockUtils/argparser/Parser.h"
 
-#include "clockUtils/argparser/BasicVariable.h"
-
 #include <iostream>
+
+#include "clockUtils/argparser/BasicVariable.h"
 
 namespace clockUtils {
 namespace argparser {
@@ -11,7 +11,7 @@ namespace argparser {
 
 	void Parser::parseArguments(char ** argv, int argc) {
 		while (argc > 0) {
-			if (argv[0][0] == '-' && strlen(argv[0]) > 1) {
+			if (argv[0][0] == '-' && argv[0][1] != '\0') {
 				std::string name(&argv[0][1]);
 
 				bool found = false;
