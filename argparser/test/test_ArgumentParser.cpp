@@ -23,7 +23,7 @@ TEST(ArgumentParser, parseBool) {
 	EXPECT_EQ(clockUtils::ClockError::INVALID_ARGUMENT, PARSE_ARGUMENTS(buffer1, length1));
 
 	EXPECT_FALSE(buffer.str().empty());
-	EXPECT_EQ("argument -c not registered!\n", buffer.str());
+	EXPECT_EQ("argument -c not registered!\nargument -e not registered!\n", buffer.str());
 	EXPECT_EQ(false, b);
 	buffer.str("");
 
@@ -64,7 +64,7 @@ TEST(ArgumentParser, parseString) {
 	EXPECT_EQ(clockUtils::ClockError::INVALID_ARGUMENT, PARSE_ARGUMENTS(buffer1, length1));
 
 	EXPECT_FALSE(buffer.str().empty());
-	EXPECT_EQ("argument -c not registered!\n", buffer.str());
+	EXPECT_EQ("argument -c not registered!\nargument -e not registered!\n", buffer.str());
 	buffer.str("");
 
 	EXPECT_EQ("test", s);
@@ -134,7 +134,7 @@ TEST(ArgumentParser, parseInt) {
 	EXPECT_EQ(clockUtils::ClockError::INVALID_ARGUMENT, PARSE_ARGUMENTS(buffer1, length1));
 
 	EXPECT_FALSE(buffer.str().empty());
-	EXPECT_EQ("argument -c not registered!\n", buffer.str());
+	EXPECT_EQ("argument -c not registered!\nargument -e not registered!\n", buffer.str());
 	buffer.str("");
 
 	EXPECT_EQ(-1, i);

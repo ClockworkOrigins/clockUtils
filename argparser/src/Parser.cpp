@@ -11,6 +11,7 @@ namespace argparser {
 	std::vector<BasicVariable *> Parser::variableList = std::vector<BasicVariable *>();
 
 	ClockError Parser::parseArguments(char ** argv, int argc) {
+		ClockError result = ClockError::SUCCESS;
 		while (argc > 0) {
 			if (argv[0][0] == '-' && argv[0][1] != '\0') {
 				std::string name(&argv[0][1]);
@@ -30,24 +31,29 @@ namespace argparser {
 								}
 								if (!bv->setValue(name.substr(startIndex, name.length()))) {
 									std::cerr << argv[1] << " is not a valid value for variable " << name << std::endl;
-									return ClockError::INVALID_USAGE;
+									result = ClockError::INVALID_USAGE;
+									argc--;
+									argv++;
 								}
 							} else if (argc == 1) {
 								std::cerr << name << " requires a value: -" << name << " <value> or -" << name << "<value> or -" << name << "=<value>" << std::endl;
-								return ClockError::INVALID_USAGE;
+								result = ClockError::INVALID_USAGE;
 							} else {
 								if (!bv->setValue(argv[1])) {
 									std::cerr << argv[1] << " is not a valid value for variable " << name << std::endl;
-									return ClockError::INVALID_USAGE;
+									result = ClockError::INVALID_USAGE;
+									argc--;
+									argv++;
 								}
 							}
 						}
+						break;
 					}
 				}
 
 				if (!found) {
 					std::cerr << "argument -" << name << " not registered!" << std::endl;
-					return ClockError::INVALID_ARGUMENT;
+					result = ClockError::INVALID_ARGUMENT;
 				}
 			} else {
 				// TODO: (Daniel) found a single value, but no argument before
@@ -57,7 +63,7 @@ namespace argparser {
 			argc--;
 		}
 
-		return ClockError::SUCCESS;
+		return result;
 	}
 
 } /* namespace argparser */
