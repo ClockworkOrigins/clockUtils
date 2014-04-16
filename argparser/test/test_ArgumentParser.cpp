@@ -200,3 +200,29 @@ TEST(ArgumentParser, parseInt) {
 
 	std::cerr.rdbuf(sbuf);
 }
+
+TEST(ArgumentParser, parseMultiple) {
+	REGISTER_VARIABLE(int32_t, i, -1, "A test integer");
+	REGISTER_VARIABLE(std::string, s, "empty", "A test string");
+	REGISTER_VARIABLE(bool, b, false, "A test bool");
+	REGISTER_VARIABLE(double, d, 1.23, "A test double");
+
+	char * buffer1[] = { "-i", "1234", "-s", "readString", "-b", "-d=3.14" };
+	int length1 = sizeof(buffer1) / sizeof(char *);
+
+	std::stringstream buffer;
+	std::streambuf * sbuf = std::cerr.rdbuf();
+	std::cerr.rdbuf(buffer.rdbuf());
+
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer1, length1));
+
+	EXPECT_TRUE(buffer.str().empty());
+	buffer.str("");
+
+	EXPECT_EQ(1234, i);
+	EXPECT_EQ("readString", s);
+	EXPECT_EQ(true, b);
+	EXPECT_DOUBLE_EQ(3.14, d);
+
+	std::cerr.rdbuf(sbuf);
+}
