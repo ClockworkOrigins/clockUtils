@@ -7,12 +7,18 @@
 
 TEST(ArgumentParser, parseBool) {
 	REGISTER_VARIABLE(bool, b, false, "A test boolean");
+	REGISTER_VARIABLE(bool, d, false, "A test boolean");
+	REGISTER_VARIABLE(bool, foo, false, "A test boolean");
+	REGISTER_VARIABLE(bool, bar, false, "A test boolean");
 
 	char * buffer1[] = { "-c", "-e", "3" };
 	int length1 = sizeof(buffer1) / sizeof(char *);
 
 	char * buffer2[] = { "-b" };
 	int length2 = sizeof(buffer2) / sizeof(char *);
+
+	char * buffer3[] = { "-b", "-d", "-foo", "-bar" };
+	int length3 = sizeof(buffer3) / sizeof(char *);
 
 	std::stringstream buffer;
 	std::streambuf * sbuf = std::cerr.rdbuf();
@@ -33,6 +39,18 @@ TEST(ArgumentParser, parseBool) {
 	buffer.str("");
 
 	EXPECT_EQ(true, b);
+
+	b = false;
+
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer3, length3));
+
+	EXPECT_TRUE(buffer.str().empty());
+	buffer.str("");
+
+	EXPECT_EQ(true, b);
+	EXPECT_EQ(true, d);
+	EXPECT_EQ(true, foo);
+	EXPECT_EQ(true, bar);
 
 	std::cerr.rdbuf(sbuf);
 }
