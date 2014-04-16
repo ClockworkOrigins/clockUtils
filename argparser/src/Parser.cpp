@@ -22,7 +22,12 @@ namespace argparser {
 					if (name.find(bv->getName()) == 0) {
 						found = true;
 						if (bv->isBool()) {
-							bv->setValue("1");
+							if (bv->getName().length() == name.length()) {
+								bv->setValue("1");
+							} else {
+								found = false;
+								continue;
+							}
 						} else {
 							if (name.length() > bv->getName().length()) {
 								size_t startIndex = bv->getName().length();
