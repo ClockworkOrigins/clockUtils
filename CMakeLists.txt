@@ -11,6 +11,7 @@ cmake_minimum_required (VERSION 2.8)
 #########################################################################
 
 option(WITH_TESTING "build clockUtils with tests" OFF)
+option(WITH_LIBRARY_INIPARSER "builds iniParser library" ON)
 option(WITH_LIBRARY_SOCKETS "builds sockets library" ON)
 
 IF(WITH_TESTING AND NOT WIN32)
@@ -120,6 +121,15 @@ ENDIF(WITH_TESTING)
 include_directories(${CMAKE_SOURCE_DIR}/include/)
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include DESTINATION ${CMAKE_INSTALL_PREFIX})
+
+#####################################################################################
+# iniParser
+#####################################################################################
+
+IF(WITH_LIBRARY_INIPARSER)
+	add_subdirectory(iniParser)
+	set(SOCKETS_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/iniParser/include)
+ENDIF(WITH_LIBRARY_INIPARSER)
 
 #####################################################################################
 # sockets

@@ -1,0 +1,92 @@
+#include "clockUtils/iniParser/iniParser.h"
+
+#include <fstream>
+
+namespace clockUtils {
+namespace iniParser {
+
+	IniParser::IniParser() : _data(), _allLines() {
+	}
+
+	ClockError IniParser::load(const std::string & file) {
+		std::fstream fs;
+		fs.open(file, std::fstream::in);
+
+		if (fs.fail()) {
+			return ClockError::FILENOTFOUND;
+		}
+
+		std::string currentSection = "global";
+		_allLines["global"];
+		_data["global"];
+
+		while (fs.good()) {
+			std::string line = "";
+			getline(fs, line);
+
+			if (line.empty() || line.length() == 1 || line.at(0) == ';') {
+				_allLines[currentSection].push_back(line);
+				continue; // no entry found
+			}
+
+			if (line.at(0) == '[') { // section or error
+				if (line.at(line.length() - 1) != ']') {
+					// "Couldn't parse ini file! Section not closed!"
+					return ClockError::WRONG_SYNTAX;
+				}
+
+				currentSection = line.substr(1, line.length() - 2);
+			} else { // found field
+				if (currentSection.empty() || currentSection == "global") {
+					// "Couldn't parse ini file! Found field without section"
+					return ClockError::WRONG_SYNTAX;
+				}
+
+				size_t n = line.find("=");
+
+				if (n == std::string::npos) {
+					// "Couldn't parse ini file! Found field without ="
+					return ClockError::WRONG_SYNTAX;
+				}
+
+				_data[currentSection].push_back(std::make_tuple(currentSection, line.substr(0, n), _allLines[currentSection].size(), line.substr(n + 1, line.length() - n - 1)));
+			}
+			_allLines[currentSection].push_back(line);
+		}
+
+		fs.close();
+		return ClockError::SUCCESS;
+	}
+
+	ClockError IniParser::save(const std::string & file) {
+		std::fstream fs;
+		fs.open(file, std::fstream::out);
+
+		if (fs.bad()) {
+			return ClockError::FILENOTFOUND;
+		}
+
+		for (std::pair<std::string, std::vector<std::string>> p : _allLines) {
+			uint32_t nextEntry = 0;
+			for (size_t i = 0; i < p.second.size(); i++) {
+				if (nextEntry < _data[p.first].size() && i == std::get<INDEX>(_data[p.first][nextEntry])) {
+					fs << std::get<FIELD>(_data[p.first][nextEntry]) << "=" << std::get<VALUE>(_data[p.first][nextEntry]) << "\n";
+					nextEntry++;
+				} else {
+					fs << p.second[i];
+
+					if (i < p.second.size() - 1) {
+						fs << "\n";
+					}
+				}
+			}
+		}
+
+		fs.flush();
+		fs.close();
+
+		return ClockError::SUCCESS;
+	}
+
+} /* namespace iniParser */
+} /* namespace clockUtils */
