@@ -10,7 +10,7 @@
 
 #include "clockUtils/errors.h"
 #include "clockUtils/iniParser/iniParserParameters.h"
-
+#include <iostream>
 namespace clockUtils {
 namespace iniParser {
 
@@ -62,7 +62,11 @@ namespace iniParser {
 				}
 			}
 			// value not found. Insert at end
-			_data[section].push_back(make_tuple(section, field, _allLines[section].size(), ss.str()));
+			if (_allLines[section].back() == "" && std::get<INDEX>(_data[section].back()) != _allLines[section].size() - 1) {
+				_data[section].push_back(make_tuple(section, field, _allLines[section].size() - 1, ss.str()));
+			} else {
+				_data[section].push_back(make_tuple(section, field, _allLines[section].size(), ss.str()));
+			}
 			_allLines[section].push_back(""); // empty line. will be overritten anyways
 		}
 
