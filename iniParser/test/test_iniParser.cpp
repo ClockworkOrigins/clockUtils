@@ -64,3 +64,70 @@ TEST(IniParser, loadSave) {
 
 	EXPECT_EQ(fs1.good(), fs2.good());
 }
+
+TEST(IniParser, setNewValue) {
+	IniParser i1;
+	EXPECT_EQ(ClockError::SUCCESS, i1.load("resources/example1.ini"));
+
+	int s1e1;
+	EXPECT_EQ(ClockError::VALUE_NOTFOUND, i1.getValue<int>("SECTION1", "entry4", s1e1));
+	s1e1 = 11;
+	i1.setValue<int>("SECTION1", "entry4", s1e1);
+	s1e1 = 0;
+	EXPECT_EQ(ClockError::SUCCESS, i1.getValue<int>("SECTION1", "entry4", s1e1));
+	EXPECT_EQ(11, s1e1);
+
+	EXPECT_EQ(ClockError::SUCCESS, i1.save("resources/example1saved2.ini"));
+
+	std::fstream fs1;
+	fs1.open("resources/example1result.ini", std::fstream::in);
+	std::fstream fs2;
+	fs2.open("resources/example1saved2.ini", std::fstream::in);
+
+	while (fs1.good() && fs2.good()) {
+		std::string line1 = "";
+		getline(fs1, line1);
+		std::string line2 = "";
+		getline(fs2, line2);
+		EXPECT_EQ(line1, line2);
+	}
+
+	EXPECT_EQ(fs1.good(), fs2.good());
+}
+
+TEST(IniParser, setNewSection) {
+	IniParser i1;
+	EXPECT_EQ(ClockError::SUCCESS, i1.load("resources/example1.ini"));
+
+	int s3e1;
+	EXPECT_EQ(ClockError::VALUE_NOTFOUND, i1.getValue<int>("SECTION3", "entry1", s3e1));
+	s3e1 = 123;
+	i1.setValue<int>("SECTION3", "entry1", s3e1);
+	s3e1 = 0;
+	EXPECT_EQ(ClockError::SUCCESS, i1.getValue<int>("SECTION3", "entry1", s3e1));
+	EXPECT_EQ(123, s3e1);
+	std::string s3e2;
+	EXPECT_EQ(ClockError::VALUE_NOTFOUND, i1.getValue<std::string>("SECTION3", "entry2", s3e2));
+	s3e2 = "blafoo";
+	i1.setValue<std::string>("SECTION3", "entry2", s3e2);
+	s3e2 = "";
+	EXPECT_EQ(ClockError::SUCCESS, i1.getValue<std::string>("SECTION3", "entry2", s3e2));
+	EXPECT_EQ("blafoo", s3e2);
+
+	EXPECT_EQ(ClockError::SUCCESS, i1.save("resources/example1saved3.ini"));
+
+	std::fstream fs1;
+	fs1.open("resources/example1result2.ini", std::fstream::in);
+	std::fstream fs2;
+	fs2.open("resources/example1saved3.ini", std::fstream::in);
+
+	while (fs1.good() && fs2.good()) {
+		std::string line1 = "";
+		getline(fs1, line1);
+		std::string line2 = "";
+		getline(fs2, line2);
+		EXPECT_EQ(line1, line2);
+	}
+
+	EXPECT_EQ(fs1.good(), fs2.good());
+}
