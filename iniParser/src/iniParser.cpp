@@ -66,21 +66,21 @@ namespace iniParser {
 			return ClockError::FILENOTFOUND;
 		}
 
+		std::stringstream ss;
+
 		for (std::pair<std::string, std::vector<std::string>> p : _allLines) {
 			uint32_t nextEntry = 0;
 			for (size_t i = 0; i < p.second.size(); i++) {
 				if (nextEntry < _data[p.first].size() && i == std::get<INDEX>(_data[p.first][nextEntry])) {
-					fs << std::get<FIELD>(_data[p.first][nextEntry]) << "=" << std::get<VALUE>(_data[p.first][nextEntry]) << "\n";
+					ss << std::get<FIELD>(_data[p.first][nextEntry]) << "=" << std::get<VALUE>(_data[p.first][nextEntry]) << "\n";
 					nextEntry++;
 				} else {
-					fs << p.second[i];
-
-					if (i < p.second.size() - 1) {
-						fs << "\n";
-					}
+					ss << p.second[i] << '\n';
 				}
 			}
 		}
+
+		fs << ss.str().substr(0, ss.str().length() - 1);
 
 		fs.flush();
 		fs.close();
