@@ -10,17 +10,36 @@
 
 #include "clockUtils/errors.h"
 #include "clockUtils/iniParser/iniParserParameters.h"
-#include <iostream>
+
 namespace clockUtils {
 namespace iniParser {
 
 	class CLOCK_INIPARSER_API IniParser {
 	public:
+		/**
+		 * \brief constructor
+		 */
 		IniParser();
 
+		/**
+		 * \brief loads given ini file
+		 * returns ClockError::SUCCESS if no problems occured, otherwise an error code
+		 */
 		ClockError load(const std::string & file);
+
+		/**
+		 * \brief loads given ini file
+		 * returns ClockError::SUCCESS if no problems occured, otherwise an error code
+		 */
 		ClockError save(const std::string & file);
 
+		/**
+		 * \brief fetches value from parsed ini file
+		 * \param[in] section the section of the variable
+		 * \param[in] field the name of the variable
+		 * \param[out] value the variable the value should be stored in
+		 * returns ClockError::SUCCESS if value found, otherwise an error code and value is set to default value of type T
+		 */
 		template<typename T>
 		ClockError getValue(const std::string & section, const std::string & field, T & value) {
 			if (_data.find(section) == _data.end()) {
@@ -44,6 +63,13 @@ namespace iniParser {
 			return ClockError::VALUE_NOTFOUND;
 		}
 
+		/**
+		 * \brief loads given ini file
+		 * \param[in] section the section of the variable
+		 * \param[in] field the name of the variable
+		 * \param[in] value the value to be stored
+		 * returns ClockError::SUCCESS if no problems occured, otherwise an error code
+		 */
 		template<typename T>
 		void setValue(const std::string & section, const std::string & field, const T & value) {
 			std::stringstream ss;
@@ -71,6 +97,9 @@ namespace iniParser {
 		}
 
 	private:
+		/**
+		 * \brief enum to identify entries in tuple
+		 */
 		enum Fields {
 			SECTION,
 			FIELD,
