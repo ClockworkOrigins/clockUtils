@@ -715,3 +715,36 @@ TEST(TcpSocket, receiveCallback) {
 
 	_socketList.clear();
 }
+
+int called = 0;
+
+TEST(TcpSocket, receiveCallbackRemove) {
+	TcpSocket sock1, sock2;
+
+	sock1.listen(12345, 1, false, [](TcpSocket * sock) {
+		sock->receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * sock, ClockError error) {
+			called++;
+			if (error != ClockError::SUCCESS) {
+				sock->close();
+				delete sock;
+				EXPECT_EQ(2, called);
+			} else {
+				EXPECT_EQ(1, called);
+			}
+		});
+	});
+	sock2.connect("127.0.0.1", 12345, 500);
+
+
+	std::string s = "Some messsage!";
+
+	EXPECT_EQ(ClockError::SUCCESS, sock2.writePacket(s.c_str(), s.length()));
+
+	sock2.close();
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+	EXPECT_EQ(2, called);
+
+	sock1.close();
+}
