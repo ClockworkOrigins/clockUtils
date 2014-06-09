@@ -11,10 +11,6 @@
 using namespace clockUtils;
 using namespace clockUtils::sockets;
 
-bool operator==(const ClockError & a, const ClockError & b) {
-	return static_cast<int>(a) == static_cast<int>(b);
-}
-
 int connectCounter = 0;
 std::vector<std::string> messages = { "Hello", "World!", "This is a super nice message", "111elf!!!" };
 std::vector<TcpSocket *> _socketList;
@@ -699,6 +695,7 @@ TEST(TcpSocket, writeMass2) {
 
 	sock1.listen(12345, 1, false, [&v1, &v2](TcpSocket * sock) {
 		std::vector<uint8_t> v1L = v1, v2L = v2;
+
 		for (int i = 0; i < NUM_RUNS; ++i) {
 			for (size_t j = 0; j < VEC_SIZE; ++j) {
 				v1L[j]++;

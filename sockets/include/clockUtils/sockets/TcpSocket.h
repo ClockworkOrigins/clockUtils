@@ -9,7 +9,26 @@
 #include <mutex>
 
 #include "clockUtils/sockets/socketsParameters.h"
+#include "clockUtils/errors.h"
 
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+	#include <WinSock2.h>
+
+	typedef int32_t socklen_t;
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
+	#include <arpa/inet.h>
+	#include <cstring>
+	#include <fcntl.h>
+	#include <netdb.h>
+	#include <netinet/in.h>
+	#include <sys/socket.h>
+	#include <sys/types.h>
+	#include <unistd.h>
+#endif
+
+namespace std {
+	class thread;
+}
 namespace clockUtils {
 	enum class ClockError;
 
@@ -140,12 +159,41 @@ namespace sockets {
 		/**
 		 * \brief receives data on the socket
 		 */
-		ClockError read(std::vector<uint8_t> & buffer);
+		template<class Container>
+		ClockError read(Container & buffer) {
+			if (_status != SocketStatus::CONNECTED) {
+				return ClockError::NOT_READY;
+			}
 
-		/**
-		 * \brief receives data on the socket
-		 */
-		ClockError read(std::string & buffer);	
+			buffer.resize(260);
+			int rc = -1;
+
+			do {
+	#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
+				rc = recv(_sock, &buffer[0], 256, 0);
+	#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+				rc = recv(_sock, reinterpret_cast<char *>(&buffer[0]), 256, 0);
+	#endif
+
+				if (rc == -1) {
+					ClockError error = getLastError();
+
+					if (error == ClockError::IN_PROGRESS) {
+						continue;
+					}
+
+					return error;
+				} else if (rc == 0) {
+					return ClockError::NOT_CONNECTED;
+				}
+
+				break;
+			} while (true);
+
+			buffer.resize(size_t(rc));
+
+			return ClockError::SUCCESS;
+		}
 
 		/* void operator<<(int a);
 
@@ -185,6 +233,7 @@ namespace sockets {
 
 		std::mutex _todoLock;
 		std::queue<std::vector<uint8_t>> _todo;
+
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 		static int _counter;
 		static std::mutex _lock;
@@ -194,6 +243,10 @@ namespace sockets {
 		 * \brief if a receivePacket gets more data than the packet contains, the rest is buffered in this variable
 		 */
 		std::vector<uint8_t> _buffer;
+
+		bool _terminate;
+
+		std::thread * _worker;
 
 		TcpSocket(const TcpSocket &) = delete;
 		TcpSocket & operator=(const TcpSocket &) = delete;

@@ -17,10 +17,28 @@
 namespace clockUtils {
 namespace sockets {
 
-	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _buffer() {
+	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _todoLock(), _todo(), _buffer(), _terminate(false) {
+		_worker = new std::thread([this]() {
+				while (!_terminate) {
+					_todoLock.lock();
+					while(_todo.size() > 0) {
+						std::vector<uint8_t> tmp = _todo.front();
+						_todo.pop();
+						_todoLock.unlock();
+
+						writePacket(const_cast<const unsigned char *>(&tmp[0]), tmp.size());
+
+						_todoLock.lock();
+					}
+					_todoLock.unlock();
+					std::this_thread::sleep_for(std::chrono::milliseconds(100));
+				}
+			});
 	}
 
 	TcpSocket::~TcpSocket() {
+		_terminate = true;
+		_worker->join();
 		close();
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
