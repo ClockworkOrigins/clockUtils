@@ -1,6 +1,8 @@
 #include "clockUtils/sockets/TcpSocket.h"
 
-#define _GLIBCXX_USE_NANOSLEEP // needed for sleep_for, see http://stackoverflow.com/questions/4438084/stdthis-threadsleep-for-and-gcc
+#ifndef _GLIBCXX_USE_NANOSLEEP
+	#define _GLIBCXX_USE_NANOSLEEP // needed for sleep_for, see http://stackoverflow.com/questions/4438084/stdthis-threadsleep-for-and-gcc, but is fixed in newer version of gcc (>4.8 i think)
+#endif
 
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 	#include <sys/socket.h>
@@ -85,7 +87,7 @@ namespace sockets {
 		} else if (errno == EPIPE) {
 			return ClockError::NOT_CONNECTED;
 		}
-		
+
 		return ClockError::UNKNOWN;
 	}
 
