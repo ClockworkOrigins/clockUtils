@@ -5,12 +5,10 @@
 #include <functional>
 #include <string>
 #include <vector>
+#include <queue>
+#include <mutex>
 
 #include "clockUtils/sockets/socketsParameters.h"
-
-#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
-	#include <mutex>
-#endif
 
 namespace clockUtils {
 	enum class ClockError;
@@ -20,7 +18,7 @@ namespace sockets {
 	class CLOCK_SOCKETS_API TcpSocket {
 	public:
 		typedef std::function<void(TcpSocket *)> acceptCallback;
-		
+
 		typedef std::function<void(std::vector<uint8_t> packet, TcpSocket * socket, ClockError err)> packetCallback;
 
 		/**
@@ -42,7 +40,7 @@ namespace sockets {
 		 * \param[in] acb the callback to be called for every accepted connection
 		 */
 		ClockError listen(uint16_t listenPort, int maxParallelConnections, bool acceptMultiple, const acceptCallback acb);
-	
+
 		/**
 		 * \brief creates a connection to the given pair of IP and port
 		 *
@@ -51,22 +49,22 @@ namespace sockets {
 		 * \param[in] timeout the time in milliseconds a connect request should least in maximum
 		 */
 		ClockError connect(const std::string & remoteIP, uint16_t remotePort, unsigned int timeout);
-	
+
 		/**
 		 * \brief closes a connection if socket is connected
 		 */
 		void close();
-	
+
 		/**
 		 * \brief returns the ip of the socket this socket is connected with
 		 */
 		std::string getRemoteIP() const;
-	
+
 		/**
 		 * \brief returns the port of the socket this socket is connected with
 		 */
 		uint16_t getRemotePort() const;
-	
+
 		/**
 		 * \brief returns all local IP's
 		 */
@@ -86,7 +84,7 @@ namespace sockets {
 		 * \brief returns the port this socket uses for connection
 		 */
 		uint16_t getLocalPort() const;
-	
+
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
 		 *
@@ -100,6 +98,13 @@ namespace sockets {
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
 		ClockError writePacket(const std::vector<uint8_t> & str);
+
+		/**
+		 * \brief sends a packet being able to be completely received in one call of receivePacket
+		 *
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writePacketAsync(const std::vector<uint8_t> & str);
 
 		/**
 		 * \brief receives a packet sent with writePacket, doesn't work with write
@@ -143,7 +148,7 @@ namespace sockets {
 		ClockError read(std::string & buffer);	
 
 		/* void operator<<(int a);
-	
+
 		void operator>>(int & a); */
 
 	private:
@@ -178,6 +183,8 @@ namespace sockets {
 		 */
 		SocketStatus _status;
 
+		std::mutex _todoLock;
+		std::queue<std::vector<uint8_t>> _todo;
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 		static int _counter;
 		static std::mutex _lock;

@@ -29,7 +29,7 @@ namespace sockets {
 		_counter++;
 		_lock.unlock();
 	}
-	
+
 	void TcpSocket::close() {
 		if (_sock != -1) {
 			shutdown(_sock, SD_BOTH);
@@ -99,7 +99,7 @@ namespace sockets {
 		} else if (error == WSAECONNABORTED) {
 			return ClockError::NOT_CONNECTED;
 		}
-		
+
 		return ClockError::UNKNOWN;
 	}
 

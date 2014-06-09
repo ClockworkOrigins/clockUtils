@@ -689,6 +689,51 @@ TEST(TcpSocket, writeMass) {
 	_socketList.clear();
 }
 
+TEST(TcpSocket, writeMass2) {
+	const int NUM_RUNS = 10000;
+	const int VEC_SIZE = 10000;
+	TcpSocket sock1, sock2;
+	std::vector<uint8_t> v1(VEC_SIZE, 'a');
+	std::vector<uint8_t> v2(VEC_SIZE, 'b');
+	std::vector<uint8_t> v1T = v1, v2T = v2;
+
+	sock1.listen(12345, 1, false, [&v1, &v2](TcpSocket * sock) {
+		std::vector<uint8_t> v1L = v1, v2L = v2;
+		for (int i = 0; i < NUM_RUNS; ++i) {
+			for (size_t j = 0; j < VEC_SIZE; ++j) {
+				v1L[j]++;
+				v2L[j]++;
+			}
+			sock->writePacketAsync(v1L);
+			sock->writePacketAsync(v2L);
+		}
+		_socketList.push_back(sock);
+	});
+	sock2.connect("127.0.0.1", 12345, 500);
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+	std::vector<uint8_t> v3, v4;
+	for (int i = 0; i < NUM_RUNS; ++i) {
+		for (size_t j = 0; j < VEC_SIZE; ++j) {
+			v1T[j]++;
+			v2T[j]++;
+		}
+		sock2.receivePacket(v3);
+		EXPECT_EQ(v1T, v3);
+		sock2.receivePacket(v4);
+		EXPECT_EQ(v2T, v4);
+	}
+	sock1.close();
+	sock2.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
+}
+
 TEST(TcpSocket, receiveCallback) {
 	TcpSocket sock1, sock2;
 

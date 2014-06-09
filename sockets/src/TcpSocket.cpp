@@ -26,6 +26,21 @@ namespace sockets {
 	TcpSocket::TcpSocket(int fd) : TcpSocket() {
 		_sock = fd;
 		_status = SocketStatus::CONNECTED;
+		std::thread thrd([this]() {
+				while (1) {
+					_todoLock.lock();
+					while(_todo.size() > 0) {
+						std::vector<uint8_t> tmp = _todo.front();
+						_todo.pop();
+						_todoLock.unlock();
+						writePacket(const_cast<const unsigned char *>(&tmp[0]), tmp.size());
+						_todoLock.lock();
+					}
+					_todoLock.unlock();
+					std::this_thread::sleep_for(std::chrono::milliseconds(100));
+				}
+			});
+		thrd.detach();
 	}
 
 	ClockError TcpSocket::listen(uint16_t listenPort, int maxParallelConnections, bool acceptMultiple, const acceptCallback acb) {
@@ -136,7 +151,7 @@ namespace sockets {
 		arg |= O_NONBLOCK; 
 		fcntl(_sock, F_SETFL, arg);
 #endif
-		
+
 		// connect
 		errno = 0;
 		if (-1 == ::connect(_sock, reinterpret_cast<sockaddr *>(&addr), sizeof(sockaddr))) {
@@ -171,7 +186,7 @@ namespace sockets {
 				return error;
 			}
 		}
-		
+
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 		iMode = 0;
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
@@ -279,6 +294,16 @@ namespace sockets {
 		return writePacket(const_cast<const unsigned char *>(&str[0]), str.size());
 	}
 
+	ClockError TcpSocket::writePacketAsync(const std::vector<uint8_t> & str) {
+		if (_status != SocketStatus::CONNECTED) {
+			return ClockError::NOT_READY;
+		}
+		_todoLock.lock();
+		_todo.push(str);
+		_todoLock.unlock();
+		return ClockError::SUCCESS;
+	}
+
 	ClockError TcpSocket::receivePacket(std::vector<uint8_t> & buffer) {
 		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
@@ -309,7 +334,7 @@ namespace sockets {
 		while (true) {
 			std::vector<uint8_t> s;
 			ClockError error = ClockError::SUCCESS;
-			
+
 			if (!skipFirstRead) {
 				error = read(s);
 			}
@@ -359,7 +384,7 @@ namespace sockets {
 		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
-		
+
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 		int rc = send(_sock, reinterpret_cast<const char *>(str), length, MSG_NOSIGNAL);
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
@@ -387,13 +412,14 @@ namespace sockets {
 			return ClockError::NOT_READY;
 		}
 		unsigned char buf[256];
+		buffer.resize(260);
 		int rc = -1;
 
 		do {
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
-			rc = recv(_sock, buf, 256, 0);
+			rc = recv(_sock, &buffer[0], 256, 0);
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
-			rc = recv(_sock, reinterpret_cast<char *>(buf), 256, 0);
+			rc = recv(_sock, reinterpret_cast<char *>(&buffer[0]), 256, 0);
 #endif
 
 			if (rc == -1) {
@@ -411,9 +437,7 @@ namespace sockets {
 			break;
 		} while (true);
 
-		for (int i = 0; i < rc; i++) {
-			buffer.push_back(buf[i]);
-		}
+		buffer.resize(rc); // +1 for '\0'
 
 		return ClockError::SUCCESS;
 	}
@@ -441,12 +465,12 @@ namespace sockets {
 
 			break;
 		} while (true);
-		
+
 		buffer = std::string(buf);
 
 		return ClockError::SUCCESS;
 	}
-	
+
 	ClockError TcpSocket::receiveCallback(packetCallback pcb) {
 		std::thread thrd([pcb, this]()
 			{
