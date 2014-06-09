@@ -411,7 +411,7 @@ namespace sockets {
 		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
-		unsigned char buf[256];
+
 		buffer.resize(260);
 		int rc = -1;
 
@@ -437,7 +437,7 @@ namespace sockets {
 			break;
 		} while (true);
 
-		buffer.resize(rc); // +1 for '\0'
+		buffer.resize(size_t(rc));
 
 		return ClockError::SUCCESS;
 	}
