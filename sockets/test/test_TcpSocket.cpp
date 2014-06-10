@@ -687,14 +687,14 @@ TEST(TcpSocket, writeMass) {
 
 TEST(TcpSocket, writeMass2) {
 	const int NUM_RUNS = 10000;
-	const int VEC_SIZE = 10000;
+	const size_t VEC_SIZE = 10000;
 
 	TcpSocket sock1, sock2;
 	std::vector<uint8_t> v1(VEC_SIZE, 'a');
 	std::vector<uint8_t> v2(VEC_SIZE, 'b');
 	std::vector<uint8_t> v1T = v1, v2T = v2;
 
-	sock1.listen(12345, 1, false, [&v1, &v2](TcpSocket * sock) {
+	sock1.listen(12345, 1, false, [&v1, &v2, NUM_RUNS, VEC_SIZE](TcpSocket * sock) {
 		std::vector<uint8_t> v1L = v1, v2L = v2;
 
 		for (int i = 0; i < NUM_RUNS; ++i) {
