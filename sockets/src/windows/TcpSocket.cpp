@@ -4,6 +4,9 @@
 
 #include <WinSock2.h>
 
+#include <thread>
+#include <chrono>
+
 namespace clockUtils {
 namespace sockets {
 
@@ -18,6 +21,22 @@ namespace sockets {
 		}
 		_counter++;
 		_lock.unlock();
+
+		_worker = new std::thread([this]() {
+				while (!_terminate) {
+					_todoLock.lock();
+					while(_todo.size() > 0) {
+						_todoLock.unlock();
+
+						writePacket(const_cast<const unsigned char *>(&_todo.front()[0]), _todo.front().size());
+
+						_todoLock.lock();
+						_todo.pop();
+					}
+					_todoLock.unlock();
+					std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				}
+			});
 	}
 
 	TcpSocket::~TcpSocket() {

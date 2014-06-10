@@ -688,6 +688,7 @@ TEST(TcpSocket, writeMass) {
 TEST(TcpSocket, writeMass2) {
 	const int NUM_RUNS = 10000;
 	const int VEC_SIZE = 10000;
+
 	TcpSocket sock1, sock2;
 	std::vector<uint8_t> v1(VEC_SIZE, 'a');
 	std::vector<uint8_t> v2(VEC_SIZE, 'b');

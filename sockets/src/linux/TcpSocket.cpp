@@ -22,16 +22,15 @@ namespace sockets {
 				while (!_terminate) {
 					_todoLock.lock();
 					while(_todo.size() > 0) {
-						std::vector<uint8_t> tmp = _todo.front();
-						_todo.pop();
 						_todoLock.unlock();
 
-						writePacket(const_cast<const unsigned char *>(&tmp[0]), tmp.size());
+						writePacket(const_cast<const unsigned char *>(&_todo.front()[0]), _todo.front().size());
 
 						_todoLock.lock();
+						_todo.pop();
 					}
 					_todoLock.unlock();
-					std::this_thread::sleep_for(std::chrono::milliseconds(100));
+					std::this_thread::sleep_for(std::chrono::milliseconds(10));
 				}
 			});
 	}
