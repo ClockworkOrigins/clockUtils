@@ -687,14 +687,14 @@ TEST(TcpSocket, writeMass) {
 
 TEST(TcpSocket, writeMass2) {
 	const int NUM_RUNS = 10000;
-	const int VEC_SIZE = 10000;
+	const size_t VEC_SIZE = 10000;
 
 	TcpSocket sock1, sock2;
 	std::vector<uint8_t> v1(VEC_SIZE, 'a');
 	std::vector<uint8_t> v2(VEC_SIZE, 'b');
 	std::vector<uint8_t> v1T = v1, v2T = v2;
 
-	sock1.listen(12345, 1, false, [&v1, &v2](TcpSocket * sock) {
+	sock1.listen(12345, 1, false, [&v1, &v2, NUM_RUNS, VEC_SIZE](TcpSocket * sock) {
 		std::vector<uint8_t> v1L = v1, v2L = v2;
 
 		for (int i = 0; i < NUM_RUNS; ++i) {
@@ -788,6 +788,69 @@ TEST(TcpSocket, receiveCallbackRemove) {
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 	EXPECT_EQ(2, called);
+
+	sock1.close();
+}
+
+/**
+ * stops a blocking read and tests whether this works or not
+ */
+TEST(TcpSocket, stopRead) {
+	TcpSocket sock1, sock2;
+
+	called = 0;
+
+	sock1.listen(12345, 1, false, [](TcpSocket * sock) {
+		sock->receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
+			if (error != ClockError::SUCCESS) {
+				so->close();
+				delete so;
+			}
+		});
+	});
+	sock2.connect("127.0.0.1", 12345, 500);
+
+	std::thread thrd([&sock2](){
+			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			sock2.close();
+		});
+	thrd.detach();
+	std::string buffer;
+	sock2.receivePacket(buffer);
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+	sock1.close();
+}
+
+/**
+ * stops a blocking read started in own thread and tests whether this works or not
+ */
+TEST(TcpSocket, stopReadAsync) {
+	TcpSocket sock1, sock2;
+
+	called = 0;
+
+	sock1.listen(12345, 1, false, [](TcpSocket * sock) {
+		sock->receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
+			if (error != ClockError::SUCCESS) {
+				so->close();
+				delete so;
+			}
+		});
+	});
+	sock2.connect("127.0.0.1", 12345, 500);
+	sock2.receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
+			if (error != ClockError::SUCCESS) {
+				called = 1;
+			}
+		});
+
+	sock2.close();
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+	EXPECT_EQ(1, called);
 
 	sock1.close();
 }
