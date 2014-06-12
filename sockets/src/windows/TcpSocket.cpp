@@ -40,7 +40,11 @@ namespace sockets {
 	}
 
 	TcpSocket::~TcpSocket() {
+		_terminate = true;
+		_worker->join();
+		delete _worker;
 		close();
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		_lock.lock();
 		if (_counter == 1) {
 			WSACleanup();

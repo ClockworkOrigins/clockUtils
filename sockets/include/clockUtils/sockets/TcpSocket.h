@@ -65,7 +65,7 @@ namespace sockets {
 		 *
 		 * \param[in] remoteIP the ip of the connection listening
 		 * \param[in] remotePort the port of the connection listening
-		 * \param[in] timeout the time in milliseconds a connect request should least in maximum
+		 * \param[in] timeout the time in milliseconds a connect request should last in maximum
 		 */
 		ClockError connect(const std::string & remoteIP, uint16_t remotePort, unsigned int timeout);
 

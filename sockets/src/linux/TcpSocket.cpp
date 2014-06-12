@@ -38,6 +38,7 @@ namespace sockets {
 	TcpSocket::~TcpSocket() {
 		_terminate = true;
 		_worker->join();
+		delete _worker;
 		close();
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
