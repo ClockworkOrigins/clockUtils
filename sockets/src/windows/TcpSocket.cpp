@@ -1,11 +1,12 @@
 #include "clockUtils/sockets/TcpSocket.h"
 
+#include <chrono>
+#include <thread>
+
 #include "clockUtils/errors.h"
 
 #include <WinSock2.h>
 
-#include <thread>
-#include <chrono>
 
 namespace clockUtils {
 namespace sockets {
@@ -13,7 +14,7 @@ namespace sockets {
 	int TcpSocket::_counter = 0;
 	std::mutex TcpSocket::_lock;
 
-	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _buffer() {
+	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _todoLock(), _todo(), _buffer(), _terminate(false), _worker(nullptr) {
 		_lock.lock();
 		if (_counter == 0) {
 			WSADATA wsa;
