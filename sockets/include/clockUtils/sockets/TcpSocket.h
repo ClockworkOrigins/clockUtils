@@ -3,10 +3,10 @@
 
 #include <cstdint>
 #include <functional>
+#include <mutex>
+#include <queue>
 #include <string>
 #include <vector>
-#include <queue>
-#include <mutex>
 
 #include "clockUtils/sockets/socketsParameters.h"
 #include "clockUtils/errors.h"

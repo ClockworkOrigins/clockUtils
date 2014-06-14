@@ -5,9 +5,6 @@
 
 #include "clockUtils/errors.h"
 
-#include <WinSock2.h>
-
-
 namespace clockUtils {
 namespace sockets {
 
