@@ -41,12 +41,13 @@ namespace iniParser {
 		 * returns ClockError::SUCCESS if value found, otherwise an error code and value is set to default value of type T
 		 */
 		template<typename T>
-		ClockError getValue(const std::string & section, const std::string & field, T & value) {
-			if (_data.find(section) == _data.end()) {
+		ClockError getValue(const std::string & section, const std::string & field, T & value) const {
+			auto it = _data.find(section);
+			if (it == _data.end()) {
 				value = T();
 				return ClockError::VALUE_NOTFOUND;
 			}
-			for (std::tuple<std::string, std::string, uint32_t, std::string> & t : _data[section]) {
+			for (const std::tuple<std::string, std::string, uint32_t, std::string> & t : it->second) {
 				if (std::get<SECTION>(t) == section && std::get<FIELD>(t) == field) {
 					std::stringstream ss(std::get<VALUE>(t));
 					T result;
