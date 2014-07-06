@@ -234,11 +234,6 @@ namespace sockets {
 		std::mutex _todoLock;
 		std::queue<std::vector<uint8_t>> _todo;
 
-#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
-		static int _counter;
-		static std::mutex _lock;
-#endif
-
 		/**
 		 * \brief if a receivePacket gets more data than the packet contains, the rest is buffered in this variable
 		 */

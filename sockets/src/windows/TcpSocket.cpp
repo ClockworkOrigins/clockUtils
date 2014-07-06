@@ -8,18 +8,20 @@
 namespace clockUtils {
 namespace sockets {
 
-	int TcpSocket::_counter = 0;
-	std::mutex TcpSocket::_lock;
-
-	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _todoLock(), _todo(), _buffer(), _terminate(false), _worker(nullptr) {
-		_lock.lock();
-		if (_counter == 0) {
+	class WSAHelper {
+	public:
+		WSAHelper() {
 			WSADATA wsa;
 			WSAStartup(MAKEWORD(2, 0), &wsa);
 		}
-		_counter++;
-		_lock.unlock();
 
+		~WSAHelper() {
+			WSACleanup();
+		}
+	};
+
+	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _todoLock(), _todo(), _buffer(), _terminate(false), _worker(nullptr) {
+		static WSAHelper wsa;
 		_worker = new std::thread([this]() {
 				while (!_terminate) {
 					_todoLock.lock();
@@ -43,12 +45,6 @@ namespace sockets {
 		delete _worker;
 		close();
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-		_lock.lock();
-		if (_counter == 1) {
-			WSACleanup();
-		}
-		_counter++;
-		_lock.unlock();
 	}
 
 	void TcpSocket::close() {
