@@ -872,7 +872,7 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 				}
 			});
 		});
-		sock2.connect("127.0.0.1", 12345, 500);
+		EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
 		sock2.receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
 				if (error != ClockError::SUCCESS) {
 					called = 1;
@@ -900,7 +900,7 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 				}
 			});
 		});
-		sock2.connect("127.0.0.1", 12345, 500);
+		EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
 		sock2.receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
 				if (error != ClockError::SUCCESS) {
 					called = 1;
