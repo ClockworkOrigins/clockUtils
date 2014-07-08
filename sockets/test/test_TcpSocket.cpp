@@ -854,3 +854,65 @@ TEST(TcpSocket, stopReadAsync) {
 
 	sock1.close();
 }
+
+/**
+ * test whether a second socket creation after deletion of all sockets works
+ */
+TEST(TcpSocket, createSocketAfterDeletion) {
+	{
+		TcpSocket sock1, sock2;
+
+		called = 0;
+
+		sock1.listen(12345, 1, false, [](TcpSocket * sock) {
+			sock->receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
+				if (error != ClockError::SUCCESS) {
+					so->close();
+					delete so;
+				}
+			});
+		});
+		sock2.connect("127.0.0.1", 12345, 500);
+		sock2.receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
+				if (error != ClockError::SUCCESS) {
+					called = 1;
+				}
+			});
+
+		sock2.close();
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+		EXPECT_EQ(1, called);
+
+		sock1.close();
+	}
+	{
+		TcpSocket sock1, sock2;
+
+		called = 0;
+
+		sock1.listen(12345, 1, false, [](TcpSocket * sock) {
+			sock->receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
+				if (error != ClockError::SUCCESS) {
+					so->close();
+					delete so;
+				}
+			});
+		});
+		sock2.connect("127.0.0.1", 12345, 500);
+		sock2.receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
+				if (error != ClockError::SUCCESS) {
+					called = 1;
+				}
+			});
+
+		sock2.close();
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+		EXPECT_EQ(1, called);
+
+		sock1.close();
+	}
+}
