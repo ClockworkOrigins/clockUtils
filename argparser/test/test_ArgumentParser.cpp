@@ -192,15 +192,42 @@ TEST(ArgumentParser, parseMultiple) {
 
 TEST(ArgumentParser, testForTrailingArgs) {
 	REGISTER_VARIABLE(int32_t, i, -1, "A test integer");
+	{
+		REGISTER_VARIABLE_ARGUMENTS(args);
 
-	const char * buffer1[] = { "-i", "1234", "a1", "a2" };
-	int length1 = sizeof(buffer1) / sizeof(char *);
+		const char * buffer1[] = { "-i", "1234", "a1", "a2" };
+		int length1 = sizeof(buffer1) / sizeof(char *);
+		EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer1, length1));
+		EXPECT_EQ(2, args.size());	// only two arguments remaining
+		EXPECT_EQ("a1", args[0]);
+		EXPECT_EQ("a2", args[1]);
+	}
 
-	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer1, length1));
+	{
+		REGISTER_VARIABLE_ARGUMENTS(args);
+		const char * buffer2[] = { "-i", "1234" };
+		int length2 = sizeof(buffer2) / sizeof(char *);
+		EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer2, length2)); // no args trailing
+		EXPECT_EQ(0, args.size());
+	}
 
-	EXPECT_EQ(argc, 2);		// only two arguments remaining
-	EXPECT_STREQ("a1", argv[0]);
-	EXPECT_STREQ("a2", argv[1]);
+	{
+		const char * buffer3[] = {"-i", "1234", "-j"};
+		int length3 = sizeof(buffer3) / sizeof(char *);
+		REGISTER_VARIABLE_ARGUMENTS(args);
+		clockUtils::argparser::Parser::setErrorOnFlag(false);
+		EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer3, length3)); // no args trailing
+		EXPECT_EQ(1, args.size());
+		EXPECT_EQ("-j", args[0]);
+	}
+
+	{
+		const char * buffer4[] = {"-i", "1234", "-j"};
+		int length4 = sizeof(buffer4) / sizeof(char *);
+		REGISTER_VARIABLE_ARGUMENTS(args);
+		clockUtils::argparser::Parser::setErrorOnFlag(true);
+		EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer4, length4)); // no args trailing
+	}
 }
 
 TEST(ArgumentParser, invalidCommands) {

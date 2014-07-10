@@ -35,6 +35,6 @@
  */
 #define REGISTER_VARIABLE_ARGUMENTS(name)\
 	std::vector<std::string> name;\
-	clockUtils::argParser::Parser::registerArgumentsVector(&name)
+	clockUtils::argparser::Parser::registerArgumentsVector(&name)
 
 #endif /* __CLOCKUTILS_ARGPARSER_ARGUMENTPARSER_H__ */

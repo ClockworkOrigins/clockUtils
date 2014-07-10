@@ -11,6 +11,7 @@ namespace argparser {
 
 	std::vector<BasicVariable *> Parser::variableList = std::vector<BasicVariable *>();
 	std::string Parser::error = std::string();
+	bool Parser::errorOnFlag = true;
 	std::vector<std::string> * Parser::arguments = nullptr;
 
 	ClockError Parser::parseArguments(const char ** argv, int argc) {
@@ -30,6 +31,7 @@ namespace argparser {
 							if (bv->getName().length() == name.length()) {
 								bv->setValue("1");
 								if (parsed.find(bv->getName()) != parsed.end()) {
+									arguments = nullptr;
 									return ClockError::INVALID_USAGE;
 								}
 								parsed[bv->getName()] = true;
@@ -45,20 +47,26 @@ namespace argparser {
 								}
 								if (!bv->setValue(name.substr(startIndex, name.length()))) {
 									error = std::string(argv[1]) + std::string(" is not a valid value for variable ") + name;
+									arguments = nullptr;
 									return ClockError::INVALID_USAGE;
 								}
 							} else if (argc == 1) {
 								error = name + std::string(" requires a value: -") + name + std::string(" <value> or -") + name + std::string("<value> or -") + name + std::string("=<value>");
+								arguments = nullptr;
 								return ClockError::INVALID_USAGE;
 							} else {
 								if (!bv->setValue(argv[1])) {
 									error = std::string(argv[1]) + std::string(" is not a valid value for variable ") + name;
+									arguments = nullptr;
 									return ClockError::INVALID_USAGE;
 								}
 								if (parsed.find(bv->getName()) != parsed.end()) {
+									arguments = nullptr;
 									return ClockError::INVALID_USAGE;
 								}
 								parsed[bv->getName()] = true;
+								argc--;
+								argv++;
 							}
 						}
 						break;
@@ -66,11 +74,22 @@ namespace argparser {
 				}
 
 				if (!found) {
-					error = std::string("argument -") + name + std::string(" not registered!");
-					return ClockError::INVALID_USAGE;
+					if (errorOnFlag) {
+						error = std::string("argument -") + name + std::string(" not registered!");
+						arguments = nullptr;
+						return ClockError::INVALID_USAGE;
+					} else {
+						if (arguments == nullptr) {
+							arguments = nullptr;
+							return ClockError::INVALID_USAGE;
+						} else {
+							arguments->push_back(argv[0]);
+						}
+					}
 				}
 			} else {
 				if (arguments == nullptr) {
+					arguments = nullptr;
 					return ClockError::INVALID_USAGE;
 				} else {
 					arguments->push_back(argv[0]);
@@ -81,6 +100,7 @@ namespace argparser {
 			argc--;
 		}
 
+		arguments = nullptr;
 		return result;
 	}
 

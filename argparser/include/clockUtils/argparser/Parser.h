@@ -39,6 +39,12 @@ namespace argparser {
 			arguments = args;
 		}
 
+		/**
+		 * \brief sets bool determining whether an error shall occure if an extra flag is given that wasn't registered
+		 */
+		static void setErrorOnFlag(bool b) {
+			errorOnFlag = b;
+		}
 	private:
 		/**
 		 * \brief list of all registered and parseable variables
@@ -54,6 +60,11 @@ namespace argparser {
 		 * \brief vector containing all parsed arguments at the end of the input
 		 */
 		static std::vector<std::string> * arguments;
+
+		/**
+		 * \brief bool determining whether an error shall occure if an extra flag is given that wasn't registered
+		 */
+		static bool errorOnFlag;
 	};
 
 } /* namespace argparser */
