@@ -1,0 +1,11 @@
+/**
+ * \mainpage clockUtils Documentation
+ *
+ * \section sec_main_overview Overview
+ *
+ * clockUtils is a collection of libraries helping in different parts of development
+ *
+ * \section sec_main_links Links
+ *
+ * - \ref page_argparser
+ */

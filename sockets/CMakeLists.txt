@@ -35,7 +35,7 @@ IF(WIN32)
 	add_custom_command(TARGET clock_sockets POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>/clock_sockets.dll ${CMAKE_BINARY_DIR}/bin)
 ENDIF(WIN32)
 ########################
-# i6engine-utils tests
+# sockets tests
 ########################
 
 ########## Testing ##########
