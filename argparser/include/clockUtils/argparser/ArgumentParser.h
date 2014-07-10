@@ -19,6 +19,12 @@
 	clockUtils::argparser::Parser::parseArguments(argv, argc)
 
 /**
+ * \brief returns the last error message if some appeared
+ */
+#define GETLASTPARSERERROR()\
+	clockUtils::argparser::Parser::getLastParserError()
+
+/**
  * \brief registers a variable with a type, the variable and argument name, a default value and a description text for --help
  */
 #define REGISTER_VARIABLE(type, name, value, description)\

@@ -3,6 +3,7 @@
 
 #include "clockUtils/argparser/argParserParameters.h"
 
+#include <string>
 #include <vector>
 
 namespace clockUtils {
@@ -26,11 +27,21 @@ namespace argparser {
 		 */
 		static ClockError parseArguments(char ** argv, int argc);
 
+		/**
+		 * \brief returns last error or empty string
+		 */
+		static std::string getLastParserError();
+
 	private:
 		/**
 		 * \brief list of all registered and parseable variables
 		 */
 		static std::vector<BasicVariable *> variableList;
+
+		/**
+		 * \brief contains the last error being detected or an empty string
+		 */
+		static std::string error;
 	};
 
 } /* namespace argparser */
