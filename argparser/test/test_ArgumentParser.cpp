@@ -11,21 +11,21 @@ TEST(ArgumentParser, parseBool) {
 	REGISTER_VARIABLE(bool, foo, false, "A test boolean");
 	REGISTER_VARIABLE(bool, bar, false, "A test boolean");
 
-	char * buffer1[] = { "-c", "-e", "3" };
+	const char * buffer1[] = { "-c", "-e", "3" };
 	int length1 = sizeof(buffer1) / sizeof(char *);
 
-	char * buffer2[] = { "-b" };
+	const char * buffer2[] = { "-b" };
 	int length2 = sizeof(buffer2) / sizeof(char *);
 
-	char * buffer3[] = { "-b", "-d", "-foo", "-bar" };
+	const char * buffer3[] = { "-b", "-d", "-foo", "-bar" };
 	int length3 = sizeof(buffer3) / sizeof(char *);
 
-	EXPECT_EQ(false, b);
+	EXPECT_FALSE(b);
 
 	EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer1, length1));
 
 	EXPECT_EQ("argument -c not registered!", GETLASTPARSERERROR());
-	EXPECT_EQ(false, b);
+	EXPECT_FALSE(b);
 
 	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer2, length2));
 
@@ -48,19 +48,19 @@ TEST(ArgumentParser, parseBool) {
 TEST(ArgumentParser, parseString) {
 	REGISTER_VARIABLE(std::string, s, "test", "A test string");
 
-	char * buffer1[] = { "-c", "-e", "3" };
+	const char * buffer1[] = { "-c", "-e", "3" };
 	int length1 = sizeof(buffer1) / sizeof(char *);
 
-	char * buffer2[] = { "-s" };
+	const char * buffer2[] = { "-s" };
 	int length2 = sizeof(buffer2) / sizeof(char *);
 
-	char * buffer3[] = { "-s", "blafoo" };
+	const char * buffer3[] = { "-s", "blafoo" };
 	int length3 = sizeof(buffer3) / sizeof(char *);
 
-	char * buffer4[] = { "-sblafoo" };
+	const char * buffer4[] = { "-sblafoo" };
 	int length4 = sizeof(buffer4) / sizeof(char *);
 
-	char * buffer5[] = { "-s=blafoo" };
+	const char * buffer5[] = { "-s=blafoo" };
 	int length5 = sizeof(buffer5) / sizeof(char *);
 
 	EXPECT_EQ("test", s);
@@ -107,22 +107,22 @@ TEST(ArgumentParser, parseString) {
 TEST(ArgumentParser, parseInt) {
 	REGISTER_VARIABLE(int32_t, i, -1, "A test integer");
 
-	char * buffer1[] = { "-c", "-e", "3" };
+	const char * buffer1[] = { "-c", "-e", "3" };
 	int length1 = sizeof(buffer1) / sizeof(char *);
 
-	char * buffer2[] = { "-i" };
+	const char * buffer2[] = { "-i" };
 	int length2 = sizeof(buffer2) / sizeof(char *);
 
-	char * buffer3[] = { "-i", "blafoo" };
+	const char * buffer3[] = { "-i", "blafoo" };
 	int length3 = sizeof(buffer3) / sizeof(char *);
 
-	char * buffer4[] = { "-i", "10" };
+	const char * buffer4[] = { "-i", "10" };
 	int length4 = sizeof(buffer4) / sizeof(char *);
 
-	char * buffer5[] = { "-i11" };
+	const char * buffer5[] = { "-i11" };
 	int length5 = sizeof(buffer5) / sizeof(char *);
 
-	char * buffer6[] = { "-i=12" };
+	const char * buffer6[] = { "-i=12" };
 	int length6 = sizeof(buffer6) / sizeof(char *);
 
 	EXPECT_EQ(-1, i);
@@ -177,7 +177,7 @@ TEST(ArgumentParser, parseMultiple) {
 	REGISTER_VARIABLE(bool, b, false, "A test bool");
 	REGISTER_VARIABLE(double, d, 1.23, "A test double");
 
-	char * buffer1[] = { "-i", "1234", "-s", "readString", "-b", "-d=3.14" };
+	const char * buffer1[] = { "-i", "1234", "-s", "readString", "-b", "-d=3.14" };
 	int length1 = sizeof(buffer1) / sizeof(char *);
 
 	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer1, length1));
@@ -188,4 +188,30 @@ TEST(ArgumentParser, parseMultiple) {
 	EXPECT_EQ("readString", s);
 	EXPECT_EQ(true, b);
 	EXPECT_DOUBLE_EQ(3.14, d);
+}
+
+TEST(ArgumentParser, testForTrailingArgs) {
+	REGISTER_VARIABLE(int32_t, i, -1, "A test integer");
+
+	const char * buffer1[] = { "-i", "1234", "a1", "a2" };
+	int length1 = sizeof(buffer1) / sizeof(char *);
+
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer1, length1));
+
+	EXPECT_EQ(argc, 2);		// only two arguments remaining
+	EXPECT_STREQ("a1", argv[0]);
+	EXPECT_STREQ("a2", argv[1]);
+}
+
+TEST(ArgumentParser, invalidCommands) {
+	REGISTER_VARIABLE(int32_t, i, -1, "A test integer");
+	REGISTER_VARIABLE(int32_t, j, -1, "A test integer");
+
+	const char * buffer1[] = { "-i", "-j", "1234", "4567" };
+	int length1 = sizeof(buffer1) / sizeof(char *);
+	const char * buffer2[] = { "1234", "-i", "1234", "-j", "4567" };
+	int length2 = sizeof(buffer2) / sizeof(char *);
+
+	EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer1, length1)); // one variable as arg for other
+	EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer2, length2)); // additional leading value
 }

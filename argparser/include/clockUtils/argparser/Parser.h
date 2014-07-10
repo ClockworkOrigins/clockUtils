@@ -25,7 +25,7 @@ namespace argparser {
 		 * \param[in] argv list of all strings in the argument line
 		 * \param[in] argc amount of entries in the list
 		 */
-		static ClockError parseArguments(char ** argv, int argc);
+		static ClockError parseArguments(const char ** argv, int argc);
 
 		/**
 		 * \brief returns last error or empty string

@@ -12,7 +12,7 @@ namespace argparser {
 	std::vector<BasicVariable *> Parser::variableList = std::vector<BasicVariable *>();
 	std::string Parser::error = std::string();
 
-	ClockError Parser::parseArguments(char ** argv, int argc) {
+	ClockError Parser::parseArguments(const char ** argv, int argc) {
 		error = "";
 		ClockError result = ClockError::SUCCESS;
 		std::map<std::string, bool> parsed;
