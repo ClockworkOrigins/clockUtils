@@ -30,4 +30,11 @@
 #define REGISTER_VARIABLE(type, name, value, description)\
 	clockUtils::argparser::Variable<type> name(#name, description, value)
 
+/**
+ * \brief registers a variable where the arguments at the end are parsed into
+ */
+#define REGISTER_VARIABLE_ARGUMENTS(name)\
+	std::vector<std::string> name;\
+	clockUtils::argParser::Parser::registerArgumentsVector(&name)
+
 #endif /* __CLOCKUTILS_ARGPARSER_ARGUMENTPARSER_H__ */

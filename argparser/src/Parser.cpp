@@ -11,6 +11,7 @@ namespace argparser {
 
 	std::vector<BasicVariable *> Parser::variableList = std::vector<BasicVariable *>();
 	std::string Parser::error = std::string();
+	std::vector<std::string> * Parser::arguments = nullptr;
 
 	ClockError Parser::parseArguments(const char ** argv, int argc) {
 		error = "";
@@ -69,7 +70,11 @@ namespace argparser {
 					return ClockError::INVALID_USAGE;
 				}
 			} else {
-				// TODO: (Daniel) found a single value, but no argument before
+				if (arguments == nullptr) {
+					return ClockError::INVALID_USAGE;
+				} else {
+					arguments->push_back(argv[0]);
+				}
 			}
 
 			argv++;

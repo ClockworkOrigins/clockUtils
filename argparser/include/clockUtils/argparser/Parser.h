@@ -32,6 +32,13 @@ namespace argparser {
 		 */
 		static std::string getLastParserError();
 
+		/**
+		 * \brief registers a vector for arguments at end of input
+		 */
+		static void registerArgumentsVector(std::vector<std::string> * args) {
+			arguments = args;
+		}
+
 	private:
 		/**
 		 * \brief list of all registered and parseable variables
@@ -42,6 +49,11 @@ namespace argparser {
 		 * \brief contains the last error being detected or an empty string
 		 */
 		static std::string error;
+
+		/**
+		 * \brief vector containing all parsed arguments at the end of the input
+		 */
+		static std::vector<std::string> * arguments;
 	};
 
 } /* namespace argparser */
