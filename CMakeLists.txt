@@ -88,7 +88,7 @@ ENDIF(APPLE)
 # Pthreads
 #----------------------------------------------------
 IF(NOT WIN32)
-	find_package(Pthreads REQUIRED)
+	find_package(Threads REQUIRED)
 	include_directories(SYSTEM ${PTHREADS_INCLUDE_DIR})
 ENDIF(NOT WIN32)
 

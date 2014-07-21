@@ -28,7 +28,10 @@ ENDIF(CLOCKUTILS_BUILD_SHARED)
 IF(WIN32)
 	target_link_libraries(clock_sockets ws2_32)
 ELSEIF(UNIX)
-	target_link_libraries(clock_sockets pthread)
+	# linking against pthreads or threads
+	# I don't know, why we need this strange varaible, but it works
+	# source: http://stackoverflow.com/questions/1620918/cmake-and-libpthread
+	target_link_libraries(clock_sockets ${CMAKE_THREAD_LIBS_INIT})
 ENDIF()
 
 IF(WIN32)
