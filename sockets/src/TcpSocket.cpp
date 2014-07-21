@@ -115,8 +115,8 @@ namespace sockets {
 		u_long iMode = 1;
 		ioctlsocket(_sock, FIONBIO, &iMode);
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
-		long arg = fcntl(_sock, F_GETFL, NULL); 
-		arg |= O_NONBLOCK; 
+		long arg = fcntl(_sock, F_GETFL, NULL);
+		arg |= O_NONBLOCK;
 		fcntl(_sock, F_SETFL, arg);
 #endif
 
@@ -128,16 +128,16 @@ namespace sockets {
 				// connect still in progress. wait for completion with timeout
 				struct timeval tv;
 				fd_set myset;
-				tv.tv_sec = timeout / 1000;
-				tv.tv_usec = (timeout % 1000) * 1000;
-				FD_ZERO(&myset); 
+				tv.tv_sec = time_t(timeout / 1000);
+				tv.tv_usec = suseconds_t((timeout % 1000) * 1000);
+				FD_ZERO(&myset);
 				FD_SET(_sock, &myset);
-				if (select(_sock + 1, NULL, &myset, NULL, &tv) > 0) { 
+				if (select(_sock + 1, NULL, &myset, NULL, &tv) > 0) {
 					socklen_t lon = sizeof(int);
 					int valopt;
 
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
-					getsockopt(_sock, SOL_SOCKET, SO_ERROR, reinterpret_cast<char *>(&valopt), &lon); 
+					getsockopt(_sock, SOL_SOCKET, SO_ERROR, reinterpret_cast<char *>(&valopt), &lon);
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 					getsockopt(_sock, SOL_SOCKET, SO_ERROR, static_cast<void *>(&valopt), &lon);
 #endif
@@ -145,10 +145,10 @@ namespace sockets {
 						close();
 						return ClockError::CONNECTION_FAILED;
 					}
-				} else { 
+				} else {
 					close();
 					return ClockError::TIMEOUT;
-				} 
+				}
 			} else {
 				close();
 				return error;
@@ -333,10 +333,10 @@ namespace sockets {
 			}
 
 			if (result.size() >= length + 6) {
-				buffer = std::string(result.begin() + 5, result.begin() + 5 + length);
+				buffer = std::string(result.begin() + 5, result.begin() + 5 + int(length));
 
 				if (result.size() > length + 6) {
-					_buffer = std::vector<uint8_t>(result.begin() + length + 6, result.end());
+					_buffer = std::vector<uint8_t>(result.begin() + int(length) + 6, result.end());
 				} else {
 					_buffer.clear();
 				}
