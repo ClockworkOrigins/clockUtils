@@ -129,7 +129,7 @@ namespace sockets {
 				struct timeval tv;
 				fd_set myset;
 				tv.tv_sec = time_t(timeout / 1000);
-				tv.tv_usec = suseconds_t((timeout % 1000) * 1000);
+				tv.tv_usec = (timeout % 1000) * 1000;
 				FD_ZERO(&myset);
 				FD_SET(_sock, &myset);
 				if (select(_sock + 1, NULL, &myset, NULL, &tv) > 0) {

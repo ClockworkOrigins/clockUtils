@@ -37,7 +37,7 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 
 # Sets appropriate Compilerflags
 
-set (CXX_FLAGS "-pedantic -Wall -Wextra -Woverloaded-virtual -Wnon-virtual-dtor -Wformat=2 -Winit-self -Wswitch-default -Wfloat-equal -Wshadow -Wredundant-decls -Wctor-dtor-privacy -Wsign-conversion -Wno-unused-parameter -Wno-long-long -Wno-missing-braces -std=c++11")
+set (CXX_FLAGS "-pedantic -Wall -Wextra -Woverloaded-virtual -Wnon-virtual-dtor -Wformat=2 -Winit-self -Wswitch-default -Wfloat-equal -Wshadow -Wredundant-decls -Wctor-dtor-privacy -Wno-unused-parameter -Wno-long-long -Wno-missing-braces -std=c++11")
 IF(WITH_TESTING)
 	set(CXX_FLAGS "${CXX_FLAGS} -fPIC")
 ENDIF(WITH_TESTING)
