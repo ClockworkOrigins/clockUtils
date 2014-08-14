@@ -131,3 +131,12 @@ TEST(IniParser, setNewSection) {
 
 	EXPECT_EQ(fs1.good(), fs2.good());
 }
+
+TEST(IniParser, getValueWithSpaces) {
+	IniParser i1;
+	EXPECT_EQ(ClockError::SUCCESS, i1.load("resources/example2.ini"));
+
+	std::string s1e1;
+	EXPECT_EQ(ClockError::SUCCESS, i1.getValue("SECTION1", "entry1", s1e1));
+	EXPECT_EQ("5 0 0", s1e1);
+}
