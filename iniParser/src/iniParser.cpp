@@ -37,10 +37,10 @@ namespace iniParser {
 
 				currentSection = line.substr(1, line.length() - 2);
 			} else { // found field
-				if (currentSection.empty() || currentSection == "global") {
+				/*if (currentSection.empty() || currentSection == "global") {
 					// "Couldn't parse ini file! Found field without section"
 					return ClockError::WRONG_SYNTAX;
-				}
+				}*/
 
 				size_t n = line.find("=");
 
