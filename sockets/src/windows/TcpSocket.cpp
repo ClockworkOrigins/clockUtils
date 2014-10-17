@@ -20,12 +20,12 @@ namespace sockets {
 		}
 	};
 
-	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _todoLock(), _todo(), _buffer(), _terminate(false), _worker(nullptr) {
+	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _todoLock(), _todo(), _buffer(), _terminate(false), _worker(nullptr), _objCondExecutable(), _objCondMut(), _objCondUniqLock(_objCondMut) {
 		static WSAHelper wsa;
 		_worker = new std::thread([this]() {
 				while (!_terminate) {
 					_todoLock.lock();
-					while(_todo.size() > 0) {
+					while (_todo.size() > 0) {
 						_todoLock.unlock();
 
 						writePacket(const_cast<const unsigned char *>(&_todo.front()[0]), _todo.front().size());
@@ -34,17 +34,18 @@ namespace sockets {
 						_todo.pop();
 					}
 					_todoLock.unlock();
-					std::this_thread::sleep_for(std::chrono::milliseconds(10));
+					_objCondExecutable.wait(_objCondUniqLock);
 				}
 			});
 	}
 
 	TcpSocket::~TcpSocket() {
 		_terminate = true;
+		_objCondExecutable.notify_all();
 		_worker->join();
 		delete _worker;
 		close();
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		//std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 
 	void TcpSocket::close() {

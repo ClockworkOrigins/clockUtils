@@ -1,6 +1,7 @@
 #ifndef __CLOCKUTILS_SOCKETS_TCPSOCKET_H__
 #define __CLOCKUTILS_SOCKETS_TCPSOCKET_H__
 
+#include <condition_variable>
 #include <cstdint>
 #include <functional>
 #include <mutex>
@@ -242,6 +243,10 @@ namespace sockets {
 		bool _terminate;
 
 		std::thread * _worker;
+
+		std::condition_variable _objCondExecutable;
+		std::mutex _objCondMut;
+		std::unique_lock<std::mutex> _objCondUniqLock;
 
 		TcpSocket(const TcpSocket &) = delete;
 		TcpSocket & operator=(const TcpSocket &) = delete;

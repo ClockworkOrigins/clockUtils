@@ -270,6 +270,7 @@ namespace sockets {
 		_todoLock.lock();
 		_todo.push(str);
 		_todoLock.unlock();
+		_objCondExecutable.notify_all();
 		return ClockError::SUCCESS;
 	}
 
