@@ -64,24 +64,6 @@ namespace iniParser {
 			return ClockError::VALUE_NOTFOUND;
 		}
 
-		template<>
-		ClockError getValue<std::string>(const std::string & section, const std::string & field, std::string & value) const {
-			auto it = _data.find(section);
-			if (it == _data.end()) {
-				value = std::string();
-				return ClockError::VALUE_NOTFOUND;
-			}
-			for (const std::tuple<std::string, std::string, uint32_t, std::string> & t : it->second) {
-				if (std::get<SECTION>(t) == section && std::get<FIELD>(t) == field) {
-					value = std::get<VALUE>(t);
-					return ClockError::SUCCESS;
-				}
-			}
-
-			value = std::string();
-			return ClockError::VALUE_NOTFOUND;
-		}
-
 		/**
 		 * \brief loads given ini file
 		 * \param[in] section the section of the variable
@@ -130,6 +112,9 @@ namespace iniParser {
 		std::map<std::string, std::vector<std::tuple<std::string, std::string, uint32_t, std::string>>> _data;
 		std::map<std::string, std::vector<std::string>> _allLines;
 	};
+
+	template<>
+	ClockError CLOCK_INIPARSER_API IniParser::getValue<std::string>(const std::string & section, const std::string & field, std::string & value) const;
 
 } /* namespace iniParser */
 } /* namespace clockUtils */
