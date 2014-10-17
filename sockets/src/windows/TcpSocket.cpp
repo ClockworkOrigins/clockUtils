@@ -26,9 +26,10 @@ namespace sockets {
 				while (!_terminate) {
 					_todoLock.lock();
 					while (_todo.size() > 0) {
+						std::vector<uint8_t> tmp = std::move(_todo.front());
 						_todoLock.unlock();
 
-						writePacket(const_cast<const unsigned char *>(&_todo.front()[0]), _todo.front().size());
+						writePacket(const_cast<const unsigned char *>(&tmp[0]), tmp.size());
 
 						_todoLock.lock();
 						_todo.pop();
@@ -42,10 +43,11 @@ namespace sockets {
 	TcpSocket::~TcpSocket() {
 		_terminate = true;
 		_objCondExecutable.notify_all();
-		_worker->join();
+		if (_worker->joinable()) {
+			_worker->join();
+		}
 		delete _worker;
 		close();
-		//std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 
 	void TcpSocket::close() {

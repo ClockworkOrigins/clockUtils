@@ -22,9 +22,10 @@ namespace sockets {
 				while (!_terminate) {
 					_todoLock.lock();
 					while(_todo.size() > 0) {
+						std::vector<uint8_t> tmp = std::move(_todo.front());
 						_todoLock.unlock();
 
-						writePacket(const_cast<const unsigned char *>(&_todo.front()[0]), _todo.front().size());
+						writePacket(const_cast<const unsigned char *>(&tmp[0]), tmp.size());
 
 						_todoLock.lock();
 						_todo.pop();

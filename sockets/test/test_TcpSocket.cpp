@@ -916,3 +916,42 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 		sock1.close();
 	}
 }
+
+/**
+ * tests multiple sending using asyn writePacket
+ */
+TEST(TcpSocket, writePacketAsyncMultiple) {
+	TcpSocket sock1, sock2;
+
+	called = 0;
+
+	sock1.listen(12345, 1, false, [](TcpSocket * sock) {
+		for (int i = 0; i < 5000; i++) {
+			sock->writePacketAsync({ 0x0, 0x1, 0x2, 0x3, 0x4, 0x5 });
+		}
+		for (int i = 0; i < 5000; i++) {
+			sock->writePacketAsync({ 0x5, 0x4, 0x3, 0x2, 0x1, 0x0 });
+		}
+		delete sock;
+	});
+	EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
+	sock2.receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
+		if (error != ClockError::SUCCESS) {
+		} else {
+			if (called < 5000) {
+				EXPECT_EQ(std::vector<uint8_t>({ 0x0, 0x1, 0x2, 0x3, 0x4, 0x5 }), msg);
+			} else {
+				EXPECT_EQ(std::vector<uint8_t>({ 0x5, 0x4, 0x3, 0x2, 0x1, 0x0 }), msg);
+			}
+			called++;
+		}
+	});
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+	EXPECT_EQ(10000, called);
+
+	sock1.close();
+
+	sock2.close();
+}
