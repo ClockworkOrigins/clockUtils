@@ -11,9 +11,10 @@ cmake_minimum_required (VERSION 2.8)
 #########################################################################
 
 option(WITH_TESTING "build clockUtils with tests" OFF)
+option(WITH_LIBRARY_ARGPARSER "builds argument parser library" ON)
+option(WITH_LIBRARY_COMPRESSION "builds compression library" ON)
 option(WITH_LIBRARY_INIPARSER "builds iniParser library" ON)
 option(WITH_LIBRARY_SOCKETS "builds sockets library" ON)
-option(WITH_LIBRARY_ARGPARSER "builds argument parser library" ON)
 
 IF(WITH_TESTING AND NOT WIN32)
 	# static for gmock
@@ -124,12 +125,30 @@ include_directories(${CMAKE_SOURCE_DIR}/include/)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 #####################################################################################
+# argument parser
+#####################################################################################
+
+IF(WITH_LIBRARY_ARGPARSER)
+	add_subdirectory(argparser)
+	set(ARGPARSER_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/argparser/include)
+ENDIF(WITH_LIBRARY_ARGPARSER)
+
+#####################################################################################
+# compression
+#####################################################################################
+
+IF(WITH_LIBRARY_COMPRESSION)
+	add_subdirectory(compression)
+	set(COMPRESSION_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/compression/include)
+ENDIF(WITH_LIBRARY_COMPRESSION)
+
+#####################################################################################
 # iniParser
 #####################################################################################
 
 IF(WITH_LIBRARY_INIPARSER)
 	add_subdirectory(iniParser)
-	set(SOCKETS_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/iniParser/include)
+	set(INIPARSER_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/iniParser/include)
 ENDIF(WITH_LIBRARY_INIPARSER)
 
 #####################################################################################
@@ -140,15 +159,6 @@ IF(WITH_LIBRARY_SOCKETS)
 	add_subdirectory(sockets)
 	set(SOCKETS_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/sockets/include)
 ENDIF(WITH_LIBRARY_SOCKETS)
-
-#####################################################################################
-# argument parser
-#####################################################################################
-
-IF(WITH_LIBRARY_ARGPARSER)
-	add_subdirectory(argparser)
-	set(SOCKETS_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/argparser/include)
-ENDIF(WITH_LIBRARY_ARGPARSER)
 
 
 ###############################################################################
