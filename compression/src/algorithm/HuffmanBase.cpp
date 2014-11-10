@@ -22,7 +22,7 @@ namespace algorithm {
 
 		std::vector<unsigned char> charHeader(256, 0);
 
-		for (size_t i = 0; i < header.size(); ++i) {
+		for (size_t i = 0; i < 256; ++i) {
 			charHeader[i] = unsigned char(header[i] / double(max) * 255.0);
 			if (header[i] > 0 && charHeader[i] == 0) {
 				charHeader[i] = 1;
@@ -43,7 +43,7 @@ namespace algorithm {
 
 		std::priority_queue<std::shared_ptr<Node>, std::vector<std::shared_ptr<Node>>, compare> queue;
 
-		for (size_t i = 0; i < header.size(); i++) {
+		for (size_t i = 0; i < 256; i++) {
 			if (header[i] == 0) {
 				continue;
 			}
@@ -130,23 +130,26 @@ namespace algorithm {
 		return result;
 	}
 
-	void HuffmanBase::getChar(const std::string & compressed, const std::shared_ptr<HuffmanBase::Tree> & tree, size_t & index, std::string & result) {
+	void HuffmanBase::getChar(const std::string & compressed, const std::shared_ptr<HuffmanBase::Tree> & tree, size_t length, std::string & result) {
 		// start char
-		unsigned char currentChar = compressed[index / 8];
+		size_t index = 0;
+		unsigned char currentChar = compressed[index];
 		// get single bit
-		std::shared_ptr<Node> node = ((currentChar & (1 << (7 - index % 8))) == (1 << (7 - index % 8))) ? tree->left : tree->right;
-		index++;
-		if (index % 8 == 0) {
-			currentChar = compressed[index / 8];
-		}
-		while (node->left != nullptr || node->right != nullptr) {
-			node = ((currentChar & (1 << (7 - index % 8))) == (1 << (7 - index % 8))) ? node->left : node->right;
+		for (size_t i = 0; i < length; i++) {
+			std::shared_ptr<Node> node = ((currentChar & (1 << (7 - index % 8))) == (1 << (7 - index % 8))) ? tree->left : tree->right;
 			index++;
 			if (index % 8 == 0) {
 				currentChar = compressed[index / 8];
 			}
+			while (node->left != nullptr || node->right != nullptr) {
+				node = ((currentChar & (1 << (7 - index % 8))) == (1 << (7 - index % 8))) ? node->left : node->right;
+				index++;
+				if (index % 8 == 0) {
+					currentChar = compressed[index / 8];
+				}
+			}
+			result[i] = node->c;
 		}
-		result += node->c;
 	}
 
 	unsigned char HuffmanBase::convertToChar(const std::string & code) {
@@ -180,23 +183,6 @@ namespace algorithm {
 		}
 
 		result = tmp;
-
-		return result;
-	}
-
-	std::string HuffmanBase::convertToBitString(unsigned char c) {
-		std::string result = "";
-
-		int tmp = c;
-
-		for (int i = 0; i < 8; i++) {
-			if (tmp % 2 > 0) {
-				result = "1" + result;
-			} else {
-				result = "0" + result;
-			}
-			tmp /= 2;
-		}
 
 		return result;
 	}

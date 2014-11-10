@@ -76,14 +76,11 @@ namespace algorithm {
 	std::string HuffmanFixed::decompress(const std::string & text) {
 		std::string realText(text.begin() + 4, text.end());
 
-		int length = int(unsigned char(text[0]) * 256 * 256 * 256 + unsigned char(text[1]) * 256 * 256 + unsigned char(text[2]) * 256 + unsigned char(text[3]));
+		size_t length = size_t(unsigned char(text[0]) * 256 * 256 * 256 + unsigned char(text[1]) * 256 * 256 + unsigned char(text[2]) * 256 + unsigned char(text[3]));
 
-		std::string result;
-		size_t index = 0;
+		std::string result(length, 0x0);
 
-		for (int i = 0; i < length; i++) {
-			getChar(realText, tree, index, result);
-		}
+		getChar(realText, tree, length, result);
 
 		return result;
 	}

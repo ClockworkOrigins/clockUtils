@@ -29,12 +29,10 @@ TEST(Compression, HuffmanFixed) {
 	std::string compressedVeryLong = compressor.compress(beforeVeryLong);
 	std::string compressedAllTheSame = compressor.compress(beforeAllTheSame);
 
-	clockUtils::compression::Compression<clockUtils::compression::algorithm::HuffmanFixed> decompressor;
-
-	std::string after = decompressor.decompress(compressed);
-	std::string afterLong = decompressor.decompress(compressedLong);
-	std::string afterVeryLong = decompressor.decompress(compressedVeryLong);
-	std::string afterAllTheSame = decompressor.decompress(compressedAllTheSame);
+	std::string after = compressor.decompress(compressed);
+	std::string afterLong = compressor.decompress(compressedLong);
+	std::string afterVeryLong = compressor.decompress(compressedVeryLong);
+	std::string afterAllTheSame = compressor.decompress(compressedAllTheSame);
 
 	EXPECT_NE(before, compressed);
 	EXPECT_NE(compressed, after);
@@ -81,12 +79,10 @@ TEST(Compression, HuffmanGeneric) {
 	std::string compressedVeryLong = compressor.compress(beforeVeryLong);
 	std::string compressedAllTheSame = compressor.compress(beforeAllTheSame);
 
-	clockUtils::compression::Compression<clockUtils::compression::algorithm::HuffmanGeneric> decompressor;
-
-	std::string after = decompressor.decompress(compressed);
-	std::string afterLong = decompressor.decompress(compressedLong);
-	std::string afterVeryLong = decompressor.decompress(compressedVeryLong);
-	std::string afterAllTheSame = decompressor.decompress(compressedAllTheSame);
+	std::string after = compressor.decompress(compressed);
+	std::string afterLong = compressor.decompress(compressedLong);
+	std::string afterVeryLong = compressor.decompress(compressedVeryLong);
+	std::string afterAllTheSame = compressor.decompress(compressedAllTheSame);
 
 	EXPECT_NE(before, compressed);
 	EXPECT_NE(compressed, after);
