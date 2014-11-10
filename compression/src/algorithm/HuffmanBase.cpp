@@ -1,5 +1,6 @@
 #include "clockUtils/compression/algorithm/HuffmanBase.h"
 
+#include <iostream>
 #include <queue>
 
 namespace clockUtils {
@@ -129,14 +130,23 @@ namespace algorithm {
 		return result;
 	}
 
-	std::pair<unsigned char, int> HuffmanBase::getChar(const std::string & code, const std::shared_ptr<Tree> & tree) {
-		std::shared_ptr<Node> node = (code[0] == '1') ? tree->left : tree->right;
-		int count = 1;
-		while (node->left != nullptr || node->right != nullptr) {
-			node = (code[count] == '1') ? node->left : node->right;
-			count++;
+	void HuffmanBase::getChar(const std::string & compressed, const std::shared_ptr<HuffmanBase::Tree> & tree, size_t & index, std::string & result) {
+		// start char
+		unsigned char currentChar = compressed[index / 8];
+		// get single bit
+		std::shared_ptr<Node> node = ((currentChar & (1 << (7 - index % 8))) == (1 << (7 - index % 8))) ? tree->left : tree->right;
+		index++;
+		if (index % 8 == 0) {
+			currentChar = compressed[index / 8];
 		}
-		return std::make_pair(node->c, count);
+		while (node->left != nullptr || node->right != nullptr) {
+			node = ((currentChar & (1 << (7 - index % 8))) == (1 << (7 - index % 8))) ? node->left : node->right;
+			index++;
+			if (index % 8 == 0) {
+				currentChar = compressed[index / 8];
+			}
+		}
+		result += node->c;
 	}
 
 	unsigned char HuffmanBase::convertToChar(const std::string & code) {

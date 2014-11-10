@@ -46,17 +46,11 @@ namespace algorithm {
 
 		int length = int(unsigned char(text[256]) * 256 * 256 * 256 + unsigned char(text[257]) * 256 * 256 + unsigned char(text[258]) * 256 + unsigned char(text[259]));
 
-		std::string newText = "";
 		std::string result;
-
-		for (char c : realText) {
-			newText += convertToBitString(c);
-		}
+		size_t index = 0;
 
 		for (int i = 0; i < length; i++) {
-			std::pair<unsigned char, int> p = getChar(newText, tree);
-			result += p.first;
-			newText = newText.substr(p.second, newText.length() - p.second);
+			getChar(realText, tree, index, result);
 		}
 
 		return result;
