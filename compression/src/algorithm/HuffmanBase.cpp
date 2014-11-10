@@ -23,6 +23,9 @@ namespace algorithm {
 
 		for (size_t i = 0; i < header.size(); ++i) {
 			charHeader[i] = unsigned char(header[i] / double(max) * 255.0);
+			if (header[i] > 0 && charHeader[i] == 0) {
+				charHeader[i] = 1;
+			}
 		}
 
 		return charHeader;
@@ -40,6 +43,9 @@ namespace algorithm {
 		std::priority_queue<std::shared_ptr<Node>, std::vector<std::shared_ptr<Node>>, compare> queue;
 
 		for (size_t i = 0; i < header.size(); i++) {
+			if (header[i] == 0) {
+				continue;
+			}
 			std::shared_ptr<Node> node = std::make_shared<Node>();
 			node->value = header[i];
 			node->c = unsigned char(i);
@@ -60,10 +66,14 @@ namespace algorithm {
 			queue.push(node);
 		}
 
-		tree->left = queue.top();
-		queue.pop();
-		tree->right = queue.top();
-		queue.pop();
+		if (queue.size() > 0) {
+			tree->left = queue.top();
+			queue.pop();
+		}
+		if (queue.size() > 0) {
+			tree->right = queue.top();
+			queue.pop();
+		}
 
 		return tree;
 	}
