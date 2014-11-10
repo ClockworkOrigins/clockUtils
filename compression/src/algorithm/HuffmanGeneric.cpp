@@ -1,6 +1,5 @@
 #include "clockUtils/compression/algorithm/HuffmanGeneric.h"
 
-#include <iostream>
 #include <queue>
 
 namespace clockUtils {

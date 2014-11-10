@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+
 #include "clockUtils/compression/algorithm/HuffmanBase.h"
 
 namespace clockUtils {
@@ -17,6 +19,7 @@ namespace algorithm {
 
 	private:
 		static std::shared_ptr<Tree> tree;
+		static std::map<unsigned char, std::string> mappings;
 	};
 
 } /* namespace algorithm */
