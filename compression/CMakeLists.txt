@@ -7,10 +7,13 @@ include_directories("include")
 set(srcdir ./src)
 
 set(compressionSrc
+	${srcdir}/algorithm/HuffmanBase.cpp
+	${srcdir}/algorithm/HuffmanFixed.cpp
 	${srcdir}/algorithm/HuffmanGeneric.cpp
 )
 
 SOURCE_GROUP(compression FILES ${compressionSrc})
+SOURCE_GROUP(algorithm FILES ${compressionSrc}/algorithm)
 
 IF(CLOCKUTILS_BUILD_SHARED)
 	add_library(clock_compression SHARED ${compressionSrc})
