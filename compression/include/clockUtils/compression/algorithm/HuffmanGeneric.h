@@ -11,9 +11,26 @@ namespace algorithm {
 	 */
 	class CLOCK_COMPRESSION_API HuffmanGeneric : public HuffmanBase {
 	public:
+		/**
+		 * \brief compresses the given string and returns result
+		 */
 		static std::string compress(const std::string & text);
 
+		/**
+		 * \brief decompresses the given string and returns result
+		 */
 		static std::string decompress(const std::string & text);
+
+	private:
+		/**
+		 * \brief converts the given text to a bit sequence using a cache internally to improve performance
+		 */
+		static void convert(const std::string & text, const std::shared_ptr<Tree> & tree, size_t index, std::string & result);
+
+		/**
+		 * \brief calculates the probabilities used for the tree and returns it
+		 */
+		static std::vector<unsigned char> getHeader(const std::string & text);
 	};
 
 } /* namespace algorithm */

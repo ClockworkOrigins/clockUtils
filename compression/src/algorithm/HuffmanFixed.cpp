@@ -1,8 +1,5 @@
 #include "clockUtils/compression/algorithm/HuffmanFixed.h"
 
-#include <iostream>
-#include <queue>
-
 namespace clockUtils {
 namespace compression {
 namespace algorithm {
@@ -37,40 +34,18 @@ namespace algorithm {
 	});
 
 	std::shared_ptr<HuffmanBase::Tree> HuffmanFixed::tree = HuffmanFixed::buildTree(vec);
-	std::map<unsigned char, std::string> HuffmanFixed::mappings = std::map<unsigned char, std::string>();
+	std::map<unsigned char, std::pair<size_t, std::vector<unsigned char>>> HuffmanFixed::mappings = std::map<unsigned char, std::pair<size_t, std::vector<unsigned char>>>();
 
 	std::string HuffmanFixed::compress(const std::string & text) {
-		std::string result;
-		result += char((((text.length() / 256) / 256) / 256) % 256);
-		result += char(((text.length() / 256) / 256) % 256);
-		result += char((text.length() / 256) % 256);
-		result += char(text.length() % 256);
+		std::string result(5, 0x0);
+		result[0] = char((((text.length() / 256) / 256) / 256) % 256);
+		result[1] = char(((text.length() / 256) / 256) % 256);
+		result[2] = char((text.length() / 256) % 256);
+		result[3] = char(text.length() % 256);
 
-		std::string buffer = "";
-		std::string newText = "";
+		convert(text, tree, 32, result);
 
-		for (unsigned char c : text) {
-			auto it = mappings.find(c);
-
-			if (it != mappings.end()) {
-				buffer += it->second;
-			} else {
-				std::string tmp = getBits(c, tree);
-				buffer += tmp;
-				mappings.insert(std::make_pair(c, tmp));
-			}
-
-			while (buffer.length() >= 8) {
-				newText += convertToChar(buffer.substr(0, 8));
-				buffer = buffer.substr(8, buffer.length() - 8);
-			}
-		}
-
-		if (!buffer.empty()) {
-			newText += convertToChar(buffer);
-		}
-
-		return result + newText;
+		return result;
 	}
 
 	std::string HuffmanFixed::decompress(const std::string & text) {
@@ -83,6 +58,40 @@ namespace algorithm {
 		getChar(realText, tree, length, result);
 
 		return result;
+	}
+
+	void HuffmanFixed::convert(const std::string & text, const std::shared_ptr<Tree> & tree, size_t index, std::string & result) {
+		for (unsigned char c : text) {
+			auto it = mappings.find(c);
+
+			if (it == mappings.end()) {
+				size_t count = getBitsRec(c, tree, tree->left, 1, index, result);
+
+				if (count == 0) {
+					count = getBitsRec(c, tree, tree->right, 1, index, result);
+				}
+
+				std::vector<unsigned char> vec(count / 8 + 1, 0x0);
+
+				for (size_t i = 0; i < count; i++) {
+					vec[i / 8] += ((result[(index + i) / 8] & (1 << (7 - (index + i) % 8))) == (1 << (7 - (index + i) % 8))) ? (1 << (7 - i % 8)) : 0;
+				}
+
+				mappings.insert(std::make_pair(c, std::make_pair(count, vec)));
+
+				index += count;
+			} else {
+				while ((index + it->second.first) / 8 + 1 > result.size()) {
+					result += char(unsigned char(0x0));
+				}
+
+				for (size_t i = 0; i < it->second.first; i++) {
+					result[(index + i) / 8] += ((it->second.second[i / 8] & (1 << (7 - i % 8))) == (1 << (7 - i % 8))) ? (1 << (7 - (index + i) % 8)) : 0;
+				}
+
+				index += it->second.first;
+			}
+		}
 	}
 
 } /* namespace algorithm */
