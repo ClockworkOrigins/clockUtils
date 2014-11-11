@@ -32,7 +32,7 @@ namespace algorithm {
 		/**
 		 * \brief because the tree in fixed Huffman stays always the same, also the mappings are constant
 		 */
-		static std::map<unsigned char, std::pair<size_t, std::vector<unsigned char>>> mappings; 
+		static std::map<unsigned char, std::pair<size_t, std::vector<uint8_t>>> mappings;
 		
 		/**
 		 * \brief converts the text into a bit sequence using the mappings, if possible and otherwise filling the mappings

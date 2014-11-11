@@ -4,7 +4,7 @@ namespace clockUtils {
 namespace compression {
 namespace algorithm {
 
-	std::vector<unsigned char> vec({
+	std::vector<uint8_t> vec({
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 		7, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -34,7 +34,7 @@ namespace algorithm {
 	});
 
 	std::shared_ptr<HuffmanBase::Tree> HuffmanFixed::tree = HuffmanFixed::buildTree(vec);
-	std::map<unsigned char, std::pair<size_t, std::vector<unsigned char>>> HuffmanFixed::mappings = std::map<unsigned char, std::pair<size_t, std::vector<unsigned char>>>();
+	std::map<uint8_t, std::pair<size_t, std::vector<uint8_t>>> HuffmanFixed::mappings = std::map<uint8_t, std::pair<size_t, std::vector<uint8_t>>>();
 
 	std::string HuffmanFixed::compress(const std::string & text) {
 		std::string result(5, 0x0);
@@ -51,7 +51,7 @@ namespace algorithm {
 	std::string HuffmanFixed::decompress(const std::string & text) {
 		std::string realText(text.begin() + 4, text.end());
 
-		size_t length = size_t(unsigned char(text[0]) * 256 * 256 * 256 + unsigned char(text[1]) * 256 * 256 + unsigned char(text[2]) * 256 + unsigned char(text[3]));
+		size_t length = size_t(uint8_t(text[0]) * 256 * 256 * 256 + uint8_t(text[1]) * 256 * 256 + uint8_t(text[2]) * 256 + uint8_t(text[3]));
 
 		std::string result(length, 0x0);
 
@@ -61,7 +61,7 @@ namespace algorithm {
 	}
 
 	void HuffmanFixed::convert(const std::string & text, const std::shared_ptr<Tree> & tree, size_t index, std::string & result) {
-		for (unsigned char c : text) {
+		for (uint8_t c : text) {
 			auto it = mappings.find(c);
 
 			if (it == mappings.end()) {
@@ -71,7 +71,7 @@ namespace algorithm {
 					count = getBitsRec(c, tree, tree->right, 1, index, result);
 				}
 
-				std::vector<unsigned char> vec(count / 8 + 1, 0x0);
+				std::vector<uint8_t> vec(count / 8 + 1, 0x0);
 
 				for (size_t i = 0; i < count; i++) {
 					vec[i / 8] += ((result[(index + i) / 8] & (1 << (7 - (index + i) % 8))) == (1 << (7 - (index + i) % 8))) ? (1 << (7 - i % 8)) : 0;
@@ -82,7 +82,7 @@ namespace algorithm {
 				index += count;
 			} else {
 				while ((index + it->second.first) / 8 + 1 > result.size()) {
-					result += char(unsigned char(0x0));
+					result += char(uint8_t(0x0));
 				}
 
 				for (size_t i = 0; i < it->second.first; i++) {

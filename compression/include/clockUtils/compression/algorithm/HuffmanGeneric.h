@@ -30,7 +30,7 @@ namespace algorithm {
 		/**
 		 * \brief calculates the probabilities used for the tree and returns it
 		 */
-		static std::vector<unsigned char> getHeader(const std::string & text);
+		static std::vector<uint8_t> getHeader(const std::string & text);
 	};
 
 } /* namespace algorithm */
