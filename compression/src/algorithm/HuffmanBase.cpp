@@ -1,5 +1,8 @@
 #include "clockUtils/compression/algorithm/HuffmanBase.h"
 
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_LINUX
+	#include <cmath>
+#endif
 #include <queue>
 
 namespace clockUtils {

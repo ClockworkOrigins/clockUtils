@@ -4,7 +4,7 @@ namespace clockUtils {
 namespace compression {
 namespace algorithm {
 
-	std::vector<uint8_t> vec({
+	std::vector<uint8_t> preVec({
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 		7, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -33,7 +33,7 @@ namespace algorithm {
 		1, 1, 1, 1, 1, 1
 	});
 
-	std::shared_ptr<HuffmanBase::Tree> HuffmanFixed::tree = HuffmanFixed::buildTree(vec);
+	std::shared_ptr<HuffmanBase::Tree> HuffmanFixed::tree = HuffmanFixed::buildTree(preVec);
 	std::map<uint8_t, std::pair<size_t, std::vector<uint8_t>>> HuffmanFixed::mappings = std::map<uint8_t, std::pair<size_t, std::vector<uint8_t>>>();
 
 	std::string HuffmanFixed::compress(const std::string & text) {
