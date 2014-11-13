@@ -4,6 +4,7 @@
 
 SET(testSrc
 	test_TcpSocket.cpp
+	test_UdpSocket.cpp
 )
 
 add_executable(SocketsTester ${testSrc})
