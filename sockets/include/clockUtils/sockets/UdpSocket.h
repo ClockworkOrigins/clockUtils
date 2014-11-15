@@ -138,10 +138,9 @@ namespace sockets {
 
 			do {
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
-				rc = recv(_sock, &buffer[0], 256, 0);
+				rc = recvfrom(_sock, &buffer[0], MAX_PACKET_SIZE, 0, (struct sockaddr *) &remaddr, &addrlen);
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 				rc = recvfrom(_sock, reinterpret_cast<char *>(&buffer[0]), MAX_PACKET_SIZE, 0, (struct sockaddr *) &remaddr, &addrlen);
-				//rc = recvfrom(_sock, reinterpret_cast<char *>(&buffer[0]), 256, 0);
 #endif
 
 				port = static_cast<uint16_t>(ntohs(remaddr.sin_port));

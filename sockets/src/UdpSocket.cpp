@@ -1,7 +1,6 @@
 #include "clockUtils/sockets/UdpSocket.h"
 
 #include <errno.h>
-#include <iostream>
 #include <thread>
 
 namespace clockUtils {
@@ -128,7 +127,7 @@ namespace sockets {
 		addr.sin_port = htons(port);
 		addr.sin_addr.s_addr = inet_addr(ip.c_str());
 
-		for (int i = 0; i < length / MAX_PACKET_SIZE + 1; i++) {
+		for (uint32_t i = 0; i < length / MAX_PACKET_SIZE + 1; i++) {
 			uint32_t sendLength = (i < length / MAX_PACKET_SIZE) ? MAX_PACKET_SIZE : length - (i * MAX_PACKET_SIZE);
 			if (sendto(_sock, &reinterpret_cast<const char *>(str)[i * MAX_PACKET_SIZE], sendLength, 0, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
 				ClockError error = getLastError();

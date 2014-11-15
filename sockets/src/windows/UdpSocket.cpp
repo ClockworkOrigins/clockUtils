@@ -1,7 +1,6 @@
 #include "clockUtils/sockets/UdpSocket.h"
 
 #include <chrono>
-#include <iostream>
 #include <thread>
 
 #include "clockUtils/errors.h"
@@ -96,8 +95,6 @@ namespace sockets {
 		} else if (error == WSAECONNABORTED) {
 			return ClockError::NOT_CONNECTED;
 		}
-
-		std::cout << "Error: " << error << std::endl;
 
 		return ClockError::UNKNOWN;
 	}
