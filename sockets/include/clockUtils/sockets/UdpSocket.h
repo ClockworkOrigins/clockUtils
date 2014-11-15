@@ -177,21 +177,10 @@ namespace sockets {
 		 */
 		int _sock;
 
-		std::mutex _todoLock;
-		std::queue<std::vector<uint8_t>> _todo;
-
 		/**
 		 * \brief if a receivePacket gets more data than the packet contains, the rest is buffered in this variable
 		 */
 		std::map<std::pair<std::string, uint16_t>, std::vector<uint8_t>> _buffer;
-
-		bool _terminate;
-
-		std::thread * _worker;
-
-		std::condition_variable _objCondExecutable;
-		std::mutex _objCondMut;
-		std::unique_lock<std::mutex> _objCondUniqLock;
 
 		UdpSocket(const UdpSocket &) = delete;
 		UdpSocket & operator=(const UdpSocket &) = delete;
