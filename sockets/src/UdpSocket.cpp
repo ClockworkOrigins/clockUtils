@@ -33,6 +33,10 @@ namespace sockets {
 			close();
 			return error;
 		}
+		int stackSize = 1024 * 1024 * 1024; // 1 GB UDP stack
+		int len = sizeof(int);
+		setsockopt(_sock, SOL_SOCKET, SO_RCVBUF, reinterpret_cast<char *>(&stackSize), len);
+		setsockopt(_sock, SOL_SOCKET, SO_SNDBUF, reinterpret_cast<char *>(&stackSize), len);
 
 		return ClockError::SUCCESS;
 	}
@@ -128,9 +132,12 @@ namespace sockets {
 		addr.sin_port = htons(port);
 		addr.sin_addr.s_addr = inet_addr(ip.c_str());
 
-		if (sendto(_sock, reinterpret_cast<const char *>(str), length, 0, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
-			ClockError error = getLastError();
-			return error;
+		for (int i = 0; i < length / MAX_PACKET_SIZE + 1; i++) {
+			uint32_t sendLength = (i < length / MAX_PACKET_SIZE) ? MAX_PACKET_SIZE : length - (i * MAX_PACKET_SIZE);
+			if (sendto(_sock, &reinterpret_cast<const char *>(str)[i * MAX_PACKET_SIZE], sendLength, 0, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
+				ClockError error = getLastError();
+				return error;
+			}
 		}
 		return ClockError::SUCCESS;
 	}
@@ -158,9 +165,8 @@ namespace sockets {
 
 		// TODO: (Daniel) check all buffers if one has a complete message
 
-		uint32_t length = 0;
-
 		while (true) {
+			uint32_t length = 0;
 			std::vector<uint8_t> s;
 			ClockError error = ClockError::SUCCESS;
 
@@ -202,6 +208,8 @@ namespace sockets {
 				}
 
 				return ClockError::SUCCESS;
+			} else {
+				_buffer[std::make_pair(ip, port)] = std::vector<uint8_t>(result.begin(), result.end());
 			}
 		}
 

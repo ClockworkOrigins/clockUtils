@@ -40,6 +40,8 @@ namespace sockets {
 	public:
 		typedef std::function<void(std::vector<uint8_t> packet, UdpSocket * socket, ClockError err)> packetCallback;
 
+		const int MAX_PACKET_SIZE = 32 * 1024;
+
 		/**
 		 * \brief constructor
 		 */
@@ -129,7 +131,7 @@ namespace sockets {
 				return ClockError::NOT_READY;
 			}
 
-			buffer.resize(260);
+			buffer.resize(MAX_PACKET_SIZE + 4);
 			int rc = -1;
 			struct sockaddr_in remaddr;
 			socklen_t addrlen = sizeof(remaddr);
@@ -138,7 +140,7 @@ namespace sockets {
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 				rc = recv(_sock, &buffer[0], 256, 0);
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
-				rc = recvfrom(_sock, reinterpret_cast<char *>(&buffer[0]), 256, 0, (struct sockaddr *) &remaddr, &addrlen);
+				rc = recvfrom(_sock, reinterpret_cast<char *>(&buffer[0]), MAX_PACKET_SIZE, 0, (struct sockaddr *) &remaddr, &addrlen);
 				//rc = recvfrom(_sock, reinterpret_cast<char *>(&buffer[0]), 256, 0);
 #endif
 

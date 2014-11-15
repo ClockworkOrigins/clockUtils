@@ -106,9 +106,9 @@ TEST(UdpSocket, writeMass) {
 	uint16_t port;
 
 	std::vector<uint8_t> v3, v4;
-	sock2.receivePacket(v3, ip, port);
+	EXPECT_EQ(ClockError::SUCCESS, sock2.receivePacket(v3, ip, port));
 	EXPECT_EQ(v1, v3);
-	sock2.receivePacket(v4, ip, port);
+	EXPECT_EQ(ClockError::SUCCESS, sock2.receivePacket(v4, ip, port));
 	EXPECT_EQ(v2, v4);
 	sock1.close();
 	sock2.close();

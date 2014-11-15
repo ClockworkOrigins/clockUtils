@@ -97,6 +97,8 @@ namespace sockets {
 			return ClockError::NOT_CONNECTED;
 		}
 
+		std::cout << "Error: " << error << std::endl;
+
 		return ClockError::UNKNOWN;
 	}
 
