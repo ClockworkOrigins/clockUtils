@@ -7,10 +7,6 @@
 namespace clockUtils {
 namespace sockets {
 
-	UdpSocket::UdpSocket(int fd) : UdpSocket() {
-		_sock = fd;
-	}
-
 	ClockError UdpSocket::bind(uint16_t port) {
 		if (_sock != -1) {
 			return ClockError::INVALID_USAGE;

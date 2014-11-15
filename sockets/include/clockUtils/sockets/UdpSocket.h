@@ -169,13 +169,6 @@ namespace sockets {
 
 	private:
 		/**
-		 * \brief constructor being called during accept
-		 *
-		 * \param[in] fd
-		 */
-		UdpSocket(int fd);
-
-		/**
 		 * \brief reads platform specific error codes and returns a ClockError
 		 */
 		ClockError getLastError();
