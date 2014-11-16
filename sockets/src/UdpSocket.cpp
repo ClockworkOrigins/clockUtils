@@ -36,61 +36,6 @@ namespace sockets {
 		return ClockError::SUCCESS;
 	}
 
-	std::string UdpSocket::getRemoteIP() const {
-		struct sockaddr_in localAddress;
-		socklen_t addressLength = sizeof(localAddress);
-		getpeername(_sock, reinterpret_cast<struct sockaddr *>(&localAddress), &addressLength);
-		return inet_ntoa(localAddress.sin_addr);
-	}
-
-	uint16_t UdpSocket::getRemotePort() const {
-		struct sockaddr_in localAddress;
-		socklen_t addressLength = sizeof(localAddress);
-		getpeername(_sock, reinterpret_cast<struct sockaddr *>(&localAddress), &addressLength);
-		return static_cast<uint16_t>(ntohs(localAddress.sin_port));
-	}
-
-	std::vector<std::pair<std::string, std::string>> UdpSocket::enumerateLocalIPs() {
-		char buffer[256];
-		gethostname(buffer, 256);
-		hostent * localHost = gethostbyname(buffer);
-
-		std::vector<std::pair<std::string, std::string>> result;
-
-		for (int i = 0; *(localHost->h_addr_list + i) != nullptr; i++) {
-			char * localIP = inet_ntoa(*reinterpret_cast<struct in_addr *>(*(localHost->h_addr_list + i)));
-
-			result.push_back(std::make_pair(std::string(localHost->h_name), std::string(localIP)));
-		}
-
-		return result;
-	}
-
-	std::string UdpSocket::getLocalIP() const {
-		char buffer[256];
-		gethostname(buffer, 256);
-		hostent * localHost = gethostbyname(buffer);
-		char * localIP = inet_ntoa(*reinterpret_cast<struct in_addr *>(*localHost->h_addr_list));
-
-		std::string ip(localIP);
-
-		return ip;
-	}
-
-	std::string UdpSocket::getPublicIP() const {
-		struct sockaddr_in localAddress;
-		socklen_t addressLength = sizeof(localAddress);
-		getsockname(_sock, reinterpret_cast<struct sockaddr *>(&localAddress), &addressLength);
-		return inet_ntoa(localAddress.sin_addr);
-	}
-
-	uint16_t UdpSocket::getLocalPort() const {
-		struct sockaddr_in localAddress;
-		socklen_t addressLength = sizeof(localAddress);
-		getsockname(_sock, reinterpret_cast<struct sockaddr *>(&localAddress), &addressLength);
-		return static_cast<uint16_t>(ntohs(localAddress.sin_port));
-	}
-
 	ClockError UdpSocket::writePacket(const std::string & ip, uint16_t port, const void * str, const uint32_t length) {
 		if (_sock == -1) {
 			return ClockError::NOT_READY;

@@ -108,8 +108,6 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 
 	TcpSocket server2;
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(600));
-
 	e = server2.listen(12345, 10, true, std::bind(connectionAccepted, std::placeholders::_1));
 
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
@@ -125,21 +123,21 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 	TcpSocket client1;
 	e = client1.connect("127.0.0.1", 12345, 500);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(600));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	EXPECT_EQ(ClockError::SUCCESS, e);
 	EXPECT_EQ(1, connectCounter);
 
 	TcpSocket client2;
 	e = client2.connect("127.0.0.1", 12345, 500);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(600));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	EXPECT_EQ(ClockError::SUCCESS, e);
 	EXPECT_EQ(2, connectCounter);
 
 	TcpSocket client3;
 	e = client3.connect("127.0.0.1", 12345, 500);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(600));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	EXPECT_EQ(ClockError::SUCCESS, e);
 	EXPECT_EQ(3, connectCounter);
 
@@ -150,14 +148,14 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 	TcpSocket client4;
 	e = client4.connect("127.0.0.1", 12346, 500);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(600));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	EXPECT_EQ(ClockError::SUCCESS, e);
 	EXPECT_EQ(4, connectCounter);
 
 	TcpSocket client5;
 	e = client5.connect("127.0.0.1", 12346, 500);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(600));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 	EXPECT_EQ(ClockError::CONNECTION_FAILED, e);
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
@@ -172,12 +170,12 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 	client5.close();
 	server1.close();
 	server2.close();
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	TcpSocket client6;
 	e = client6.connect("127.0.0.1", 12345, 500);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(600));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 	EXPECT_EQ(ClockError::CONNECTION_FAILED, e);
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
@@ -361,7 +359,7 @@ TEST(TcpSocket, invalidUse) {
 	std::string str;
 
 	TcpSocket sock1;
-	EXPECT_EQ(ClockError::SUCCESS, sock1.listen(1025, 1, true, [](TcpSocket * sock) {
+	EXPECT_EQ(ClockError::SUCCESS, sock1.listen(10252, 1, true, [](TcpSocket * sock) {
 		_socketList.push_back(sock);
 	}));
 	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.listen(1025, 1, true, [](TcpSocket *){}));
@@ -417,7 +415,7 @@ TEST(TcpSocket, connectOnly) {
 		});
 	sock2.connect("127.0.0.1", 12345, 500);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	EXPECT_EQ(12345, sock2.getRemotePort());
 	EXPECT_EQ(_socketList[0]->getLocalPort(), sock2.getRemotePort());
@@ -431,9 +429,9 @@ TEST(TcpSocket, connectOnly) {
 
 	_socketList.clear();
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-	EXPECT_EQ(ClockError::SUCCESS, sock1.listen(1025, 1, true, [](TcpSocket * sock){}));
+	EXPECT_EQ(ClockError::SUCCESS, sock1.listen(10252, 1, true, [](TcpSocket * sock){}));
 	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.listen(1025, 1, true, [](TcpSocket * sock){}));
 	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.connect("127.0.0.1", 1026, 500));
 	EXPECT_EQ(ClockError::NOT_READY, sock1.writePacket(buffer));
@@ -444,7 +442,7 @@ TEST(TcpSocket, connectOnly) {
 	EXPECT_EQ(ClockError::NOT_READY, sock1.receivePacket(buffer));
 	EXPECT_EQ(ClockError::NOT_READY, sock1.receivePacket(str));
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	sock2.writePacket(buffer);
 	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.read(buffer));
@@ -458,7 +456,7 @@ TEST(TcpSocket, connectOnly) {
 
 	sock2.close();
 
-	EXPECT_EQ(ClockError::SUCCESS, sock2.listen(1026, 1, true, [](TcpSocket * sock) {}));
+	EXPECT_EQ(ClockError::SUCCESS, sock2.listen(10262, 1, true, [](TcpSocket * sock) {}));
 
 	sock1.close();
 	sock2.close();
@@ -480,7 +478,7 @@ TEST(TcpSocket, accept) {
 		});
 	sock2.connect("127.0.0.1", 12345, 500);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	EXPECT_EQ(1, a);
 	sock1.close();
@@ -531,7 +529,7 @@ TEST(TcpSocket, writeMultiple) {
 		});
 	sock2.connect("127.0.0.1", 12345, 500);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	std::vector<uint8_t> v3;
 	sock2.read(v3);
@@ -578,8 +576,6 @@ TEST(TcpSocket, writePacket) {
 		});
 	sock2.connect("127.0.0.1", 12345, 500);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
 	std::string v2;
 	sock2.receivePacket(v2);
 	EXPECT_EQ(v, v2);
@@ -605,8 +601,6 @@ TEST(TcpSocket, writePacketMultiple) {
 			_socketList.push_back(sock);
 		});
 	sock2.connect("127.0.0.1", 12345, 500);
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 	std::vector<uint8_t> v3, v4;
 	sock2.receivePacket(v3);
@@ -644,7 +638,7 @@ TEST(TcpSocket, writePacketMultipleSwapped) {
 	sock2.writePacket(v1);
 	sock2.writePacket(v2);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
 	sock1.close();
 	sock2.close();
@@ -667,8 +661,6 @@ TEST(TcpSocket, writeMass) {
 		_socketList.push_back(sock);
 	});
 	sock2.connect("127.0.0.1", 12345, 500);
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 	std::vector<uint8_t> v3, v4;
 	sock2.receivePacket(v3);
@@ -709,8 +701,6 @@ TEST(TcpSocket, writeMass2) {
 	});
 	sock2.connect("127.0.0.1", 12345, 500);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
 	std::vector<uint8_t> v3, v4;
 	for (int i = 0; i < NUM_RUNS; ++i) {
 		for (size_t j = 0; j < VEC_SIZE; ++j) {
@@ -741,13 +731,11 @@ TEST(TcpSocket, receiveCallback) {
 	});
 	sock2.connect("127.0.0.1", 12345, 500);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
 	for (std::string s : messages) {
 		EXPECT_EQ(ClockError::SUCCESS, sock2.writePacket(s.c_str(), s.length()));
 	}
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
 	sock1.close();
 	sock2.close();
@@ -785,7 +773,7 @@ TEST(TcpSocket, receiveCallbackRemove) {
 
 	sock2.close();
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	EXPECT_EQ(2, called);
 
@@ -810,15 +798,15 @@ TEST(TcpSocket, stopRead) {
 	});
 	sock2.connect("127.0.0.1", 12345, 500);
 
-	std::thread thrd([&sock2](){
-			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::thread thrd([&sock2]() {
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			sock2.close();
 		});
 	thrd.detach();
 	std::string buffer;
 	sock2.receivePacket(buffer);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
 	sock1.close();
 }
@@ -848,7 +836,7 @@ TEST(TcpSocket, stopReadAsync) {
 
 	sock2.close();
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
 	EXPECT_EQ(1, called);
 
@@ -881,7 +869,7 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 
 		sock2.close();
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+		std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
 		EXPECT_EQ(1, called);
 
@@ -909,7 +897,7 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 
 		sock2.close();
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+		std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
 		EXPECT_EQ(1, called);
 
@@ -947,7 +935,7 @@ TEST(TcpSocket, writePacketAsyncMultiple) {
 		}
 	});
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
 	EXPECT_EQ(10000, called);
 

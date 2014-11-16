@@ -63,36 +63,6 @@ namespace sockets {
 		void close();
 
 		/**
-		 * \brief returns the ip of the socket this socket is connected with
-		 */
-		std::string getRemoteIP() const;
-
-		/**
-		 * \brief returns the port of the socket this socket is connected with
-		 */
-		uint16_t getRemotePort() const;
-
-		/**
-		 * \brief returns all local IP's
-		 */
-		static std::vector<std::pair<std::string, std::string>> enumerateLocalIPs();
-
-		/**
-		 * \brief returns the local IP of this socket
-		 */
-		std::string getLocalIP() const;
-
-		/**
-		 * \brief returns the public IP of this socket shown in network
-		 */
-		std::string getPublicIP() const;
-
-		/**
-		 * \brief returns the port this socket uses for connection
-		 */
-		uint16_t getLocalPort() const;
-
-		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
 		 *
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
