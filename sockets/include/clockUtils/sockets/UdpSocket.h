@@ -28,9 +28,6 @@
 	#include <unistd.h>
 #endif
 
-namespace std {
-	class thread;
-}
 namespace clockUtils {
 	enum class ClockError;
 
@@ -38,7 +35,7 @@ namespace sockets {
 
 	class CLOCK_SOCKETS_API UdpSocket {
 	public:
-		typedef std::function<void(std::vector<uint8_t> packet, UdpSocket * socket, ClockError err)> packetCallback;
+		typedef std::function<void(std::vector<uint8_t> packet, UdpSocket * socket, std::string ip, uint16_t port, ClockError err)> packetCallback;
 
 		const int MAX_PACKET_SIZE = 32 * 1024;
 
@@ -91,6 +88,12 @@ namespace sockets {
 		 * \brief receives a packet sent with writePacket, doesn't work with write
 		 */
 		ClockError receivePacket(std::string & buffer, std::string & ip, uint16_t & port);
+
+		/**
+		 * \brief calls the callback for every packet that is received on this socket
+		 * This function will return immediately
+		 */
+		ClockError receiveCallback(packetCallback pcb);
 
 		/**
 		 * \brief receives data on the socket

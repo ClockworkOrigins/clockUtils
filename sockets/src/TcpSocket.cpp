@@ -379,7 +379,7 @@ namespace sockets {
 	ClockError TcpSocket::receiveCallback(packetCallback pcb) {
 		std::thread thrd([pcb, this]()
 			{
-				while (1) {
+				while (true) {
 					std::vector<uint8_t> buffer;
 					ClockError err = receivePacket(buffer);
 					pcb(buffer, this, err);

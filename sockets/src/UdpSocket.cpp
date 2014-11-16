@@ -156,5 +156,22 @@ namespace sockets {
 		return ClockError::SUCCESS;
 	}
 
+	ClockError UdpSocket::receiveCallback(packetCallback pcb) {
+		std::thread thrd([pcb, this]() {
+			while (true) {
+				std::vector<uint8_t> buffer;
+				std::string ip;
+				uint16_t port;
+				ClockError err = receivePacket(buffer, ip, port);
+				pcb(buffer, this, ip, port, err);
+				if (err != ClockError::SUCCESS) {
+					break;
+				}
+			}
+		});
+		thrd.detach();
+		return ClockError::SUCCESS;
+	}
+
 } /* namespace sockets */
 } /* namespace clockUtils */

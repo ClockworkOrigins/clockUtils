@@ -723,6 +723,7 @@ TEST(TcpSocket, writeMass2) {
 }
 
 TEST(TcpSocket, receiveCallback) {
+	receivedCounter = 0;
 	TcpSocket sock1, sock2;
 
 	sock1.listen(12345, 1, false, [](TcpSocket * sock) {
@@ -750,6 +751,7 @@ TEST(TcpSocket, receiveCallback) {
 int called = 0;
 
 TEST(TcpSocket, receiveCallbackRemove) {
+	called = 0;
 	TcpSocket sock1, sock2;
 
 	sock1.listen(12345, 1, false, [](TcpSocket * sock) {
