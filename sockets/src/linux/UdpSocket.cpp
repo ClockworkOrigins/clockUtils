@@ -22,9 +22,11 @@ namespace sockets {
 	}
 
 	void UdpSocket::close() {
-		::close(_sock); // FIXME: only do this if connected?, check for errorcode than
-		if (-1 == ::close(_sock)) perror("close");
-		_sock = -1;
+		if (_sock != -1) {
+			::close(_sock); // FIXME: only do this if connected?, check for errorcode than
+			if (-1 == ::close(_sock)) perror("close");
+			_sock = -1;
+		}
 	}
 
 	ClockError UdpSocket::getLastError() {
