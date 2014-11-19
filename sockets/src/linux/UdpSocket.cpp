@@ -14,7 +14,7 @@
 namespace clockUtils {
 namespace sockets {
 
-	UdpSocket::UdpSocket() : _sock(-1), _buffer(), _terminate(false) {
+	UdpSocket::UdpSocket() : _sock(-1), _buffer() {
 	}
 
 	UdpSocket::~UdpSocket() {
