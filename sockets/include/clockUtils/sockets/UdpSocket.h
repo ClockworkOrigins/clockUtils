@@ -35,7 +35,7 @@ namespace sockets {
 
 	class CLOCK_SOCKETS_API UdpSocket {
 	public:
-		typedef std::function<void(std::vector<uint8_t> packet, UdpSocket * socket, std::string ip, uint16_t port, ClockError err)> packetCallback;
+		typedef std::function<void(std::vector<uint8_t> packet, std::string ip, uint16_t port, ClockError err)> packetCallback;
 
 		const int MAX_PACKET_SIZE = 32 * 1024;
 

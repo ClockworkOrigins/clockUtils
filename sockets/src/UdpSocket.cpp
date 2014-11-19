@@ -163,7 +163,7 @@ namespace sockets {
 				std::string ip;
 				uint16_t port;
 				ClockError err = receivePacket(buffer, ip, port);
-				pcb(buffer, this, ip, port, err);
+				pcb(buffer, ip, port, err);
 				if (err != ClockError::SUCCESS) {
 					break;
 				}

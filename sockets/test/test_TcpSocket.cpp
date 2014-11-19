@@ -694,8 +694,8 @@ TEST(TcpSocket, writeMass2) {
 				v1L[j]++;
 				v2L[j]++;
 			}
-			sock->writePacketAsync(v1L);
-			sock->writePacketAsync(v2L);
+			EXPECT_EQ(ClockError::SUCCESS, sock->writePacketAsync(v1L));
+			EXPECT_EQ(ClockError::SUCCESS, sock->writePacketAsync(v2L));
 		}
 		_socketList.push_back(sock);
 	});
@@ -707,9 +707,9 @@ TEST(TcpSocket, writeMass2) {
 			v1T[j]++;
 			v2T[j]++;
 		}
-		sock2.receivePacket(v3);
+		EXPECT_EQ(ClockError::SUCCESS, sock2.receivePacket(v3));
 		EXPECT_EQ(v1T, v3);
-		sock2.receivePacket(v4);
+		EXPECT_EQ(ClockError::SUCCESS, sock2.receivePacket(v4));
 		EXPECT_EQ(v2T, v4);
 	}
 	sock1.close();

@@ -121,7 +121,7 @@ TEST(UdpSocket, receiveCallback) {
 	int received = 0;
 
 	sock1.bind(12345);
-	sock1.receiveCallback([&received](std::vector<uint8_t> packet, UdpSocket * socket, std::string ip, uint16_t port, ClockError err) {
+	sock1.receiveCallback([&received](std::vector<uint8_t> packet, std::string ip, uint16_t port, ClockError err) {
 		received++;
 	});
 	sock2.bind(12346);
@@ -143,7 +143,7 @@ TEST(UdpSocket, receiveCallbackRemove) {
 	int called = 0;
 
 	sock1.bind(12345);
-	sock1.receiveCallback([&called](std::vector<uint8_t> packet, UdpSocket * socket, std::string ip, uint16_t port, ClockError err) {
+	sock1.receiveCallback([&called](std::vector<uint8_t> packet, std::string ip, uint16_t port, ClockError err) {
 		called++;
 		if (err != ClockError::SUCCESS) {
 			EXPECT_EQ(2, called);
@@ -157,6 +157,8 @@ TEST(UdpSocket, receiveCallbackRemove) {
 	std::string s = "Some messsage!";
 
 	EXPECT_EQ(ClockError::SUCCESS, sock2.writePacket("127.0.0.1", 12345, s.c_str(), s.length()));
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	sock1.close();
 	sock2.close();

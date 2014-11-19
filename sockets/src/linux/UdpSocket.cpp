@@ -23,8 +23,8 @@ namespace sockets {
 
 	void UdpSocket::close() {
 		if (_sock != -1) {
+			::shutdown(_sock, SHUT_RDWR); // FIXME: only do this if connected?, check for errorcode than
 			::close(_sock); // FIXME: only do this if connected?, check for errorcode than
-			if (-1 == ::close(_sock)) perror("close");
 			_sock = -1;
 		}
 	}
