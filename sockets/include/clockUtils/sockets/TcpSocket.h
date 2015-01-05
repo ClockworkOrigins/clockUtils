@@ -243,6 +243,7 @@ namespace sockets {
 		bool _terminate;
 
 		std::thread * _worker;
+		std::thread * _listenThread;
 
 		std::condition_variable _objCondExecutable;
 		std::mutex _objCondMut;

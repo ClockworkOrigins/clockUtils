@@ -1,6 +1,7 @@
 #include "clockUtils/sockets/TcpSocket.h"
 
 #include <chrono>
+#include <iostream>
 #include <thread>
 
 #include "clockUtils/errors.h"
@@ -20,7 +21,7 @@ namespace sockets {
 		}
 	};
 
-	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _todoLock(), _todo(), _buffer(), _terminate(false), _worker(nullptr), _objCondExecutable(), _objCondMut(), _objCondUniqLock(_objCondMut) {
+	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _todoLock(), _todo(), _buffer(), _terminate(false), _worker(nullptr), _listenThread(nullptr), _objCondExecutable(), _objCondMut(), _objCondUniqLock(_objCondMut) {
 		static WSAHelper wsa;
 		_worker = new std::thread([this]() {
 				while (!_terminate) {
@@ -48,6 +49,12 @@ namespace sockets {
 		}
 		delete _worker;
 		close();
+		if (_listenThread) {
+			if (_listenThread->joinable()) {
+				_listenThread->join();
+			}
+			delete _listenThread;
+		}
 	}
 
 	void TcpSocket::close() {

@@ -1,6 +1,7 @@
 #include "clockUtils/sockets/TcpSocket.h"
 
 #include <errno.h>
+#include <iostream>
 #include <thread>
 
 namespace clockUtils {
@@ -24,6 +25,13 @@ namespace sockets {
 		_sock = socket(PF_INET, SOCK_STREAM, 0);
 		if (-1 == _sock) {
 			return ClockError::CONNECTION_FAILED;
+		}
+		if (_listenThread) {
+			if (_listenThread->joinable()) {
+				_listenThread->join();
+			}
+			delete _listenThread;
+			_listenThread = nullptr;
 		}
 
 		// set reusable
@@ -49,10 +57,10 @@ namespace sockets {
 			return error;
 		}
 
-		std::thread thrd([acceptMultiple, acb, this]()
+		_listenThread = new std::thread([acceptMultiple, acb, this]()
 			{
 				if (acceptMultiple) {
-					while(1) {
+					while (true) {
 						errno = 0;
 						int clientSock = ::accept(_sock, nullptr, nullptr);
 						if (clientSock == -1) {
@@ -71,7 +79,6 @@ namespace sockets {
 					acb(new TcpSocket(clientSock));
 				}
 			});
-		thrd.detach();
 
 		_status = SocketStatus::LISTENING;
 
@@ -329,7 +336,7 @@ namespace sockets {
 
 			if (length == 0) {
 				if (result.size() >= 5) {
-					length = static_cast<uint32_t>(result[1] * 256 * 256 * 256 + result[2] * 256 * 256 + result[3] * 256 + result[4]);
+					length = uint32_t(result[1] * 256 * 256 * 256 + result[2] * 256 * 256 + result[3] * 256 + result[4]);
 				}
 			}
 
