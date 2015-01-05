@@ -34,6 +34,11 @@ namespace algorithm {
 		struct Tree {
 			std::shared_ptr<Node> left = nullptr;
 			std::shared_ptr<Node> right = nullptr;
+
+			~Tree();
+
+		private:
+			void deleteHelper(const std::shared_ptr<Node> & node);
 		};
 
 		/**

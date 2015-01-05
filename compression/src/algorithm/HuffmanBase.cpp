@@ -9,6 +9,25 @@ namespace clockUtils {
 namespace compression {
 namespace algorithm {
 
+	HuffmanBase::Tree::~Tree() {
+		deleteHelper(left);
+		deleteHelper(right);
+
+		left = nullptr;
+		right = nullptr;
+	}
+
+	void HuffmanBase::Tree::deleteHelper(const std::shared_ptr<HuffmanBase::Node> & node) {
+		if (node == nullptr) {
+			return;
+		}
+		deleteHelper(node->left);
+		deleteHelper(node->right);
+		node->left = nullptr;
+		node->right = nullptr;
+		node->parent = nullptr;
+	}
+
 	std::shared_ptr<HuffmanBase::Tree> HuffmanBase::buildTree(const std::vector<uint8_t> & header) {
 		std::shared_ptr<Tree> tree = std::make_shared<Tree>();
 
