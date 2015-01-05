@@ -88,6 +88,8 @@ TEST(TcpSocket, connect) { // tests connect with all possible errors
 	EXPECT_EQ(ClockError::SUCCESS, e);
 	server.close();
 
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
 	for (TcpSocket * sock : _socketList) {
 		delete sock;
 	}
@@ -262,6 +264,8 @@ TEST(TcpSocket, getIP) { // tests IP before and after connection
 
 	ts.close();
 	server.close();
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 	for (TcpSocket * sock : _socketList) {
 		delete sock;
@@ -507,6 +511,8 @@ TEST(TcpSocket, write) {
 	sock1.close();
 	sock2.close();
 
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
 	for (TcpSocket * sock : _socketList) {
 		delete sock;
 	}
@@ -550,6 +556,9 @@ TEST(TcpSocket, connectDouble) {
 		_socketList.push_back(sock);
 	}));
 	EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 	EXPECT_EQ(ClockError::CONNECTION_FAILED, sock3.connect("127.0.0.1", 12345, 500));
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
@@ -558,6 +567,8 @@ TEST(TcpSocket, connectDouble) {
 	sock1.close();
 	sock2.close();
 	sock3.close();
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 	for (TcpSocket * sock : _socketList) {
 		delete sock;
@@ -581,6 +592,8 @@ TEST(TcpSocket, writePacket) {
 	EXPECT_EQ(v, v2);
 	sock1.close();
 	sock2.close();
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 	for (TcpSocket * sock : _socketList) {
 		delete sock;
@@ -610,6 +623,8 @@ TEST(TcpSocket, writePacketMultiple) {
 	sock1.close();
 	sock2.close();
 
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
 	for (TcpSocket * sock : _socketList) {
 		delete sock;
 	}
@@ -638,7 +653,7 @@ TEST(TcpSocket, writePacketMultipleSwapped) {
 	sock2.writePacket(v1);
 	sock2.writePacket(v2);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(20));
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 	sock1.close();
 	sock2.close();
@@ -669,6 +684,8 @@ TEST(TcpSocket, writeMass) {
 	EXPECT_EQ(v2, v4);
 	sock1.close();
 	sock2.close();
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 	for (TcpSocket * sock : _socketList) {
 		delete sock;
@@ -714,6 +731,8 @@ TEST(TcpSocket, writeMass2) {
 	}
 	sock1.close();
 	sock2.close();
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 	for (TcpSocket * sock : _socketList) {
 		delete sock;
