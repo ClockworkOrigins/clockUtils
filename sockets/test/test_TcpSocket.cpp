@@ -924,7 +924,8 @@ TEST(TcpSocket, writePacketAsyncMultiple) {
 		for (int i = 0; i < 5000; i++) {
 			sock->writePacketAsync({ 0x5, 0x4, 0x3, 0x2, 0x1, 0x0 });
 		}
-		condVar.wait(std::unique_lock<std::mutex>(lock));
+		std::unique_lock<std::mutex> l(lock);
+		condVar.wait(l);
 		delete sock;
 	});
 	EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
@@ -943,7 +944,8 @@ TEST(TcpSocket, writePacketAsyncMultiple) {
 			}
 		}
 	});
-	condVar.wait(std::unique_lock<std::mutex>(lock));
+	std::unique_lock<std::mutex> l(lock);
+	condVar.wait(l);
 
 	EXPECT_EQ(10000, called);
 
