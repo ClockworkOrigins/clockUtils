@@ -194,6 +194,6 @@ SET(CPACK_PACKAGE_VERSION_MINOR "3")
 SET(CPACK_PACKAGE_VERSION_PATCH "0")
 SET(CPACK_DEB_COMPONENT_INSTALL 1)
 SET(CPACK_COMPONENTS_ALL devel libs)
-SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++ (>= 6.0.0), linux-vdso (>= 1.0.0), libgcc_s (>= 1.0.0), libc (>= 6.0.0), libm (6.0.0)")
+SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++6 (>= 4.8.2), libgcc1 (>= 1:4.1.1), libc6 (>= 2.19)")
 
 INCLUDE(CPack)
