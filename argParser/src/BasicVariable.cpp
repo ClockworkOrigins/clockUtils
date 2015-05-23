@@ -1,12 +1,12 @@
-#include "clockUtils/argparser/BasicVariable.h"
+#include "clockUtils/argParser/BasicVariable.h"
 
-#include "clockUtils/argparser/Parser.h"
+#include "clockUtils/argParser/Parser.h"
 
 namespace clockUtils {
-namespace argparser {
+namespace argParser {
 
 	BasicVariable::BasicVariable(const std::string & name, const std::string & description) : _name(name), _description(description) {
-		clockUtils::argparser::Parser::variableList.push_back(this);
+		clockUtils::argParser::Parser::variableList.push_back(this);
 	}
 
 	BasicVariable::~BasicVariable() {
@@ -23,5 +23,5 @@ namespace argparser {
 		return true;
 	}
 
-} /* namespace argparser */
+} /* namespace argParser */
 } /* namespace clockUtils */

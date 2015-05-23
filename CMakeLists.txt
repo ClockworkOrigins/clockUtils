@@ -96,13 +96,13 @@ ENDIF(NOT WIN32)
 #----------------------------------------------------
 # Google Test
 #----------------------------------------------------
-	IF(WITH_TESTING)
-		SET(LIBNAME "GTEST")
-		SET(LIBHEADER "gtest/gtest.h")
-		SET(GTEST_ROOT ${CMAKE_SOURCE_DIR}/dependencies/gmock)
-		find_package(EasyFind REQUIRED COMPONENTS gmock_main gmock gtest)
-		include_directories(SYSTEM ${GTEST_INCLUDE_DIR})
-	ENDIF(WITH_TESTING)
+IF(WITH_TESTING)
+	SET(LIBNAME "GTEST")
+	SET(LIBHEADER "gtest/gtest.h")
+	SET(GTEST_ROOT ${CMAKE_SOURCE_DIR}/dependencies/gmock)
+	find_package(EasyFind REQUIRED COMPONENTS gmock_main gmock gtest)
+	include_directories(SYSTEM ${GTEST_INCLUDE_DIR})
+ENDIF(WITH_TESTING)
 
 ####################################################################################
 # Install paths
@@ -131,8 +131,8 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/include
 #####################################################################################
 
 IF(WITH_LIBRARY_ARGPARSER)
-	add_subdirectory(argparser)
-	set(ARGPARSER_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/argparser/include)
+	add_subdirectory(argParser)
+	set(ARGPARSER_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/argParser/include)
 ENDIF(WITH_LIBRARY_ARGPARSER)
 
 #####################################################################################
@@ -161,7 +161,6 @@ IF(WITH_LIBRARY_SOCKETS)
 	add_subdirectory(sockets)
 	set(SOCKETS_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/sockets/include)
 ENDIF(WITH_LIBRARY_SOCKETS)
-
 
 ###############################################################################
 # Docs

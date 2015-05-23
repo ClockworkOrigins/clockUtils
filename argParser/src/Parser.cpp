@@ -1,13 +1,13 @@
-#include "clockUtils/argparser/Parser.h"
+#include "clockUtils/argParser/Parser.h"
 
 #include <iostream>
 #include <map>
 
 #include "clockUtils/errors.h"
-#include "clockUtils/argparser/BasicVariable.h"
+#include "clockUtils/argParser/BasicVariable.h"
 
 namespace clockUtils {
-namespace argparser {
+namespace argParser {
 
 	std::vector<BasicVariable *> Parser::variableList = std::vector<BasicVariable *>();
 	std::string Parser::error = std::string();
@@ -108,5 +108,5 @@ namespace argparser {
 		return error;
 	}
 
-} /* namespace argparser */
+} /* namespace argParser */
 } /* namespace clockUtils */

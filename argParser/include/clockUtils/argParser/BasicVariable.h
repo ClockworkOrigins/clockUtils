@@ -1,13 +1,13 @@
 #ifndef __CLOCKUTILS_ARGPARSER_BASICVARIABLE_H__
 #define __CLOCKUTILS_ARGPARSER_BASICVARIABLE_H__
 
-#include "clockUtils/argparser/argParserParameters.h"
+#include "clockUtils/argParser/argParserParameters.h"
 
 #include <sstream>
 #include <string>
 
 namespace clockUtils {
-namespace argparser {
+namespace argParser {
 
 	/**
 	 * \brief base class for Variable handling
@@ -87,6 +87,18 @@ namespace argparser {
 			return first == second._value;
 		}
 
+		friend bool operator==(const Variable<T> & first, const T & second) {
+			return first._value == second;
+		}
+
+		friend bool operator!=(const T & first, const Variable<T> & second) {
+			return first != second._value;
+		}
+
+		friend bool operator!=(const Variable<T> & first, const T & second) {
+			return first._value != second;
+		}
+
 		/**
 		 * \brief assignment operator taking type T
 		 */
@@ -115,7 +127,7 @@ namespace argparser {
 	template<>
 	bool CLOCK_ARGPARSER_API Variable<bool>::isBool() const;
 
-} /* namespace argparser */
+} /* namespace argParser */
 } /* namespace clockUtils */
 
 #endif /* __CLOCKUTILS_ARGPARSER_BASICVARIABLE_H__ */

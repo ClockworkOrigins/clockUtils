@@ -12,7 +12,7 @@
 #ifndef CLOCK_ARGPARSER_API
 	#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 		#ifdef CLOCKUTILS_BUILD_SHARED
-			#ifdef clock_argparser_EXPORTS
+			#ifdef clock_argParser_EXPORTS
 				#define CLOCK_ARGPARSER_API __declspec(dllexport)
 			#else
 				#define CLOCK_ARGPARSER_API __declspec(dllimport)

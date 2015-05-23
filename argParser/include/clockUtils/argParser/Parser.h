@@ -1,14 +1,14 @@
 #ifndef __CLOCKUTILS_ARGPARSER_PARSER_H__
 #define __CLOCKUTILS_ARGPARSER_PARSER_H__
 
-#include "clockUtils/argparser/argParserParameters.h"
+#include "clockUtils/argParser/argParserParameters.h"
 
 #include <string>
 #include <vector>
 
 namespace clockUtils {
 	enum class ClockError;
-namespace argparser {
+namespace argParser {
 
 	class BasicVariable;
 
@@ -67,7 +67,7 @@ namespace argparser {
 		static bool errorOnFlag;
 	};
 
-} /* namespace argparser */
+} /* namespace argParser */
 } /* namespace clockUtils */
 
 #endif /* __CLOCKUTILS_ARGPARSER_PARSER_H__ */
