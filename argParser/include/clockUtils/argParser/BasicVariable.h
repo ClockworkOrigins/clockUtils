@@ -1,13 +1,13 @@
 #ifndef __CLOCKUTILS_ARGPARSER_BASICVARIABLE_H__
 #define __CLOCKUTILS_ARGPARSER_BASICVARIABLE_H__
 
-#include "clockUtils/argparser/argParserParameters.h"
+#include "clockUtils/argParser/argParserParameters.h"
 
 #include <sstream>
 #include <string>
 
 namespace clockUtils {
-namespace argparser {
+namespace argParser {
 
 	/**
 	 * \brief base class for Variable handling
@@ -115,7 +115,7 @@ namespace argparser {
 	template<>
 	bool CLOCK_ARGPARSER_API Variable<bool>::isBool() const;
 
-} /* namespace argparser */
+} /* namespace argParser */
 } /* namespace clockUtils */
 
 #endif /* __CLOCKUTILS_ARGPARSER_BASICVARIABLE_H__ */

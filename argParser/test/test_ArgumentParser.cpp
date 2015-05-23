@@ -1,7 +1,7 @@
 #include <cstdint>
 
 #include "clockUtils/errors.h"
-#include "clockUtils/argparser/ArgumentParser.h"
+#include "clockUtils/argParser/ArgumentParser.h"
 
 #include "gtest/gtest.h"
 
@@ -215,7 +215,7 @@ TEST(ArgumentParser, testForTrailingArgs) {
 		const char * buffer3[] = {"-i", "1234", "-j"};
 		int length3 = sizeof(buffer3) / sizeof(char *);
 		REGISTER_VARIABLE_ARGUMENTS(args);
-		clockUtils::argparser::Parser::setErrorOnFlag(false);
+		clockUtils::argParser::Parser::setErrorOnFlag(false);
 		EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer3, length3)); // no args trailing
 		EXPECT_EQ(1, args.size());
 		EXPECT_EQ("-j", args[0]);
@@ -225,7 +225,7 @@ TEST(ArgumentParser, testForTrailingArgs) {
 		const char * buffer4[] = {"-i", "1234", "-j"};
 		int length4 = sizeof(buffer4) / sizeof(char *);
 		REGISTER_VARIABLE_ARGUMENTS(args);
-		clockUtils::argparser::Parser::setErrorOnFlag(true);
+		clockUtils::argParser::Parser::setErrorOnFlag(true);
 		EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer4, length4)); // no args trailing
 	}
 }

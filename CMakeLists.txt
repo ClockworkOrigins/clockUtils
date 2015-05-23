@@ -146,8 +146,8 @@ ENDIF(WITH_LIBRARY_SOCKETS)
 #####################################################################################
 
 IF(WITH_LIBRARY_ARGPARSER)
-	add_subdirectory(argparser)
-	set(SOCKETS_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/argparser/include)
+	add_subdirectory(argParser)
+	set(SOCKETS_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/argParser/include)
 ENDIF(WITH_LIBRARY_ARGPARSER)
 
 

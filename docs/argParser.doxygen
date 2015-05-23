@@ -1,27 +1,37 @@
 /**
- * \addtogroup argparser
+ * \addtogroup argParser
  * The Argument Parser can be used to easily parse lists of strings for commands and values
  * @{
  */
  
 /**
- * \page page_argparser How to use
+ * \page page_argParser How to use
+ *
+ * You need to include this header
+ * \code{.cpp}
+ * #include "clockUtils/argParser/ArgumentParser.h"
+ * \endcode
  *
  * The usage is really simple and contains just two steps:\n\n
  *
- * First you have to register all variables that should be parseable, that means every argument. For this reason there is the macro REGISTER_VARIABLE(type, value, value, description). The four arguments it expects are the type of variable, the name of the variable (to use is in the code and also the string being looked for in the list), a default value and a description for the --help functionality explaining what the variable is good for and what it expects.\n\n
+ * First you have to register all variables that should be parseable, that means every argument. For this reason there is the macro REGISTER_VARIABLE(type, value, value, description). The four arguments it expects are the type of variable, the name of the variable (to use is in the code and also the string being looked for in the list), a default value and a description for the --help functionality explaining what the variable is good for and what it expects.\n
+ * If the variable type contains a ',' (Template class with several parameters) create a simple typedef (C++ Preprocessor requirement)\n\n
  * Example:\n
- * REGISTER_VARIABLE(bool, b, false, "a bool value");\n
+ * \code{.cpp}
+ * REGISTER_VARIABLE(bool, b, false, "a bool value");
+ * \endcode
  * This line will give you a bool variable being initialized with false. If the argument -b is found in the argument list, the variable will be set to true. The bool is a special case because it doesn't expect any value!\n\n
- * REGISTER_VARIABLE(std::string, s, "english", "a string containing the used language");\n
+ * \code{.cpp}
+ * REGISTER_VARIABLE(std::string, s, "english", "a string containing the used language");
+ * \endcode
  * This line will give you a std::string variable being initialized with "english". To change the string, there are three possibilities to pass the argument:\n
  * -s german\n
  * -sgerman\n
  * -s=german\n\n
  * The next step is to parse your list. Therefor exist two macros:\n
- * PARSE_COMMANDLINE() parses the arguments of the main method (argv and argc)\n
- * PARSE_ARGUMENTS(buffer, length) parses an own list
- *
+ * PARSE_COMMANDLINE() parses the arguments of the main method (argc and argv)\n
+ * PARSE_ARGUMENTS(buffer, length) parses an own list\n
+ * If you use the first one, make sure argc and argv are defined. furthermore, argv needs to be const
  *
  */
  
