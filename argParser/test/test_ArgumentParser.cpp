@@ -242,3 +242,26 @@ TEST(ArgumentParser, invalidCommands) {
 	EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer1, length1)); // one variable as arg for other
 	EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer2, length2)); // additional leading value
 }
+
+TEST(ArgumentParser, noArgs) {
+	REGISTER_VARIABLE_ARGUMENTS(liste);
+	const char * buffer[] = { "test" };
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer, 1));
+	EXPECT_EQ(0, liste.size());
+}
+
+TEST(ArgumentParser, undefinedParam) {
+	REGISTER_VARIABLE_ARGUMENTS(liste);
+	const char * buffer[] = { "test" , "-x", "foo", "bar"};
+	EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer, 4));
+}
+
+TEST(ArgumentParser, macroTransparency) {
+	REGISTER_VARIABLE(std::string, s, "", "Sample");
+	const char * buffer[] = { "test", "-s", "foo" };
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer, 3));
+	EXPECT_EQ("foo", s);
+	// EXPECT_EQ(s, "foo"); // TODO: (Michael) I want this as well
+	EXPECT_TRUE("foo" == s);
+	// EXPECT_FALSE("foo" != s); // TODO: (Michael) I want this as well
+}
