@@ -43,6 +43,24 @@ TEST(IniParser, getValue) {
 	EXPECT_EQ(ClockError::WRONG_TYPE, i1.getValue<double>("SECTION2", "entry1", s1e2));
 }
 
+struct Vec3 {
+	double x, y, z;
+	Vec3 & operator= (const Vec3 &) = delete;
+	friend std::istream& operator>>(std::istream & in, Vec3 & vec) {
+		in >> vec.x >> vec.y >> vec.z;
+		return in;
+	}
+};
+TEST(IniParser, getUserDefined) {
+	IniParser i1;
+	EXPECT_EQ(ClockError::SUCCESS, i1.load("resources/exampleVector.ini"));
+	Vec3 v;
+	EXPECT_EQ(ClockError::SUCCESS, i1.getValue<Vec3>("SECTION1", "point", v));
+	EXPECT_DOUBLE_EQ(1.5, v.x);
+	EXPECT_DOUBLE_EQ(2.3, v.y);
+	EXPECT_DOUBLE_EQ(0.7, v.z);
+}
+
 TEST(IniParser, loadSave) {
 	IniParser i1;
 	EXPECT_EQ(ClockError::SUCCESS, i1.load("resources/example1.ini"));

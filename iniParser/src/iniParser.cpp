@@ -20,8 +20,8 @@ namespace iniParser {
 		_allLines["global"];
 		_data["global"];
 
+		std::string line = "";
 		while (fs.good()) {
-			std::string line = "";
 			getline(fs, line);
 
 			if (line.empty() || line.length() == 1 || line.at(0) == ';') {

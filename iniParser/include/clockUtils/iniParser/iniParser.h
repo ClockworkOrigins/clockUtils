@@ -23,13 +23,13 @@ namespace iniParser {
 
 		/**
 		 * \brief loads given ini file
-		 * returns ClockError::SUCCESS if no problems occured, otherwise an error code
+		 * \returns ClockError::SUCCESS if no problems occured, otherwise an error code
 		 */
 		ClockError load(const std::string & file);
 
 		/**
 		 * \brief loads given ini file
-		 * returns ClockError::SUCCESS if no problems occured, otherwise an error code
+		 * \returns ClockError::SUCCESS if no problems occured, otherwise an error code
 		 */
 		ClockError save(const std::string & file);
 
@@ -38,29 +38,25 @@ namespace iniParser {
 		 * \param[in] section the section of the variable
 		 * \param[in] field the name of the variable
 		 * \param[out] value the variable the value should be stored in
-		 * returns ClockError::SUCCESS if value found, otherwise an error code and value is set to default value of type T
+		 * \returns ClockError::SUCCESS if value found, otherwise an error code.
+		 * If the section or field was not found, value stays unchanged. Otherwise the streamoperator will be called
 		 */
 		template<typename T>
 		ClockError getValue(const std::string & section, const std::string & field, T & value) const {
 			auto it = _data.find(section);
 			if (it == _data.end()) {
-				value = T();
 				return ClockError::VALUE_NOTFOUND;
 			}
 			for (const std::tuple<std::string, std::string, uint32_t, std::string> & t : it->second) {
 				if (std::get<SECTION>(t) == section && std::get<FIELD>(t) == field) {
 					std::stringstream ss(std::get<VALUE>(t));
-					T result;
-					if ((ss >> result).fail()) {
-						value = T();
+					if ((ss >> value).fail()) {
 						return ClockError::WRONG_TYPE;
 					}
-					value = result;
 					return ClockError::SUCCESS;
 				}
 			}
 
-			value = T();
 			return ClockError::VALUE_NOTFOUND;
 		}
 
@@ -69,7 +65,7 @@ namespace iniParser {
 		 * \param[in] section the section of the variable
 		 * \param[in] field the name of the variable
 		 * \param[in] value the value to be stored
-		 * returns ClockError::SUCCESS if no problems occured, otherwise an error code
+		 * \returns ClockError::SUCCESS if no problems occured, otherwise an error code
 		 */
 		template<typename T>
 		void setValue(const std::string & section, const std::string & field, const T & value) {
