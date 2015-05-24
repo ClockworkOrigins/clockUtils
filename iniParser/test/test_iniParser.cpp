@@ -55,10 +55,11 @@ TEST(IniParser, getUserDefined) {
 	IniParser i1;
 	EXPECT_EQ(ClockError::SUCCESS, i1.load("resources/exampleVector.ini"));
 	Vec3 v;
-	EXPECT_EQ(ClockError::SUCCESS, i1.getValue<Vec3>("SECTION1", "point", v));
+	EXPECT_EQ(ClockError::SUCCESS, i1.getValue<Vec3>("SECTION1", "pointA", v));
 	EXPECT_DOUBLE_EQ(1.5, v.x);
 	EXPECT_DOUBLE_EQ(2.3, v.y);
 	EXPECT_DOUBLE_EQ(0.7, v.z);
+	EXPECT_EQ(ClockError::WRONG_TYPE, i1.getValue<Vec3>("SECTION1", "pointB", v));
 }
 
 TEST(IniParser, loadSave) {
