@@ -1,6 +1,7 @@
 #include "clockUtils/iniParser/iniParser.h"
 
 #include <fstream>
+#include <algorithm>
 
 namespace clockUtils {
 namespace iniParser {
@@ -17,6 +18,9 @@ namespace iniParser {
 		}
 
 		std::string currentSection = "global";
+		// reset values
+		_allLines.clear();
+		_data.clear();
 		_allLines["global"];
 		_data["global"];
 
@@ -34,8 +38,11 @@ namespace iniParser {
 					// "Couldn't parse ini file! Section not closed!"
 					return ClockError::WRONG_SYNTAX;
 				}
-
 				currentSection = line.substr(1, line.length() - 2);
+				if (_allLines.find(currentSection) != _allLines.end()) {
+					// section already exists
+					return ClockError::WRONG_SYNTAX;
+				}
 			} else { // found field
 				/*if (currentSection.empty() || currentSection == "global") {
 					// "Couldn't parse ini file! Found field without section"
@@ -48,8 +55,14 @@ namespace iniParser {
 					// "Couldn't parse ini file! Found field without ="
 					return ClockError::WRONG_SYNTAX;
 				}
+				std::string key = line.substr(0, n);
+				for (auto & t : _data[currentSection]) {
+					if (std::get<FIELD>(t) == key) {
+						return ClockError::WRONG_SYNTAX;
+					}
+				}
 
-				_data[currentSection].push_back(std::make_tuple(currentSection, line.substr(0, n), _allLines[currentSection].size(), line.substr(n + 1, line.length() - n - 1)));
+				_data[currentSection].push_back(std::make_tuple(currentSection, key, _allLines[currentSection].size(), line.substr(n + 1, line.length() - n - 1)));
 			}
 			_allLines[currentSection].push_back(line);
 		}

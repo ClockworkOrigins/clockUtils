@@ -13,6 +13,17 @@ TEST(IniParser, loadInvalidFile) {
 	EXPECT_EQ(ClockError::FILENOTFOUND, i1.load("NotExistentFile.ini"));
 	EXPECT_EQ(ClockError::WRONG_SYNTAX, i1.load("resources/DefectSection.ini"));
 	EXPECT_EQ(ClockError::WRONG_SYNTAX, i1.load("resources/DefectField.ini"));
+	EXPECT_EQ(ClockError::WRONG_SYNTAX, i1.load("resources/DefectA.ini"));
+	EXPECT_EQ(ClockError::WRONG_SYNTAX, i1.load("resources/DefectB.ini"));
+	EXPECT_EQ(ClockError::WRONG_SYNTAX, i1.load("resources/DefectC.ini"));
+}
+
+TEST(IniParser, loadTwoFiles) {
+	IniParser i1;
+	EXPECT_EQ(ClockError::SUCCESS, i1.load("resources/example1.ini"));
+	EXPECT_EQ(ClockError::SUCCESS, i1.load("resources/example2.ini"));
+	double s1e2;
+	EXPECT_EQ(ClockError::VALUE_NOTFOUND, i1.getValue<double>("SECTION1", "entry2", s1e2));
 }
 
 TEST(IniParser, getValue) {
