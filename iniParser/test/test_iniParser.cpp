@@ -33,6 +33,7 @@ TEST(IniParser, getValue) {
 	EXPECT_EQ(ClockError::WRONG_TYPE, i1.getValue<double>("SECTION1", "entry3", s1e2));
 
 	EXPECT_EQ(ClockError::SUCCESS, i1.getValue<int>("SECTION2", "entry3", s1e1));
+
 	EXPECT_EQ(-100, s1e1);
 	EXPECT_EQ(ClockError::SUCCESS, i1.getValue<double>("SECTION2", "entry2", s1e2));
 	EXPECT_DOUBLE_EQ(3.141592, s1e2);
@@ -60,6 +61,7 @@ TEST(IniParser, getUserDefined) {
 	EXPECT_DOUBLE_EQ(2.3, v.y);
 	EXPECT_DOUBLE_EQ(0.7, v.z);
 	EXPECT_EQ(ClockError::WRONG_TYPE, i1.getValue<Vec3>("SECTION1", "pointB", v));
+	EXPECT_EQ(ClockError::WRONG_TYPE, i1.getValue<Vec3>("SECTION1", "pointC", v));
 }
 
 TEST(IniParser, loadSave) {
@@ -157,4 +159,8 @@ TEST(IniParser, getValueWithSpaces) {
 	std::string s1e1;
 	EXPECT_EQ(ClockError::SUCCESS, i1.getValue("SECTION1", "entry1", s1e1));
 	EXPECT_EQ("5 0 0", s1e1);
+
+	std::string str;
+	EXPECT_EQ(ClockError::SUCCESS, i1.getValue<std::string>("SECTION1", "string", str));
+	EXPECT_EQ("hello world;", str);
 }

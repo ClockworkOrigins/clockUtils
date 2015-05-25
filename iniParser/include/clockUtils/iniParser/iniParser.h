@@ -50,7 +50,7 @@ namespace iniParser {
 			for (const std::tuple<std::string, std::string, uint32_t, std::string> & t : it->second) {
 				if (std::get<SECTION>(t) == section && std::get<FIELD>(t) == field) {
 					std::stringstream ss(std::get<VALUE>(t));
-					if ((ss >> value).fail()) {
+					if ((ss >> value).fail() || !ss.eof()) {
 						return ClockError::WRONG_TYPE;
 					}
 					return ClockError::SUCCESS;
