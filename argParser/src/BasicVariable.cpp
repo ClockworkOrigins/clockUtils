@@ -23,5 +23,20 @@ namespace argParser {
 		return true;
 	}
 
+	template<>
+	bool Variable<std::string>::setValue(const std::string & value) {
+		_value = value;
+		return true;
+	}
+
+	template<>
+	bool Variable<char>::setValue(const std::string & value) {
+		bool ret = !value.empty();
+		if (ret) {
+			_value = value.at(0);
+		}
+		return ret;
+	}
+
 } /* namespace argParser */
 } /* namespace clockUtils */

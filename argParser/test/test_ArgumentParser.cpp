@@ -258,3 +258,17 @@ TEST(ArgumentParser, macroTransparency) {
 	EXPECT_TRUE("foo" == s);
 	EXPECT_FALSE("foo" != s);
 }
+
+TEST(ArgumentParser, stringWithSpace) {
+	REGISTER_VARIABLE_ARGUMENTS(liste);
+	REGISTER_VARIABLE(std::string, s, "", "Sample");
+	REGISTER_VARIABLE(std::string, f, "", "Sample");
+	REGISTER_VARIABLE(char, c, ' ', "Sample");
+	const char * buffer[] = { "-s", "foo bar", "-f", " a b c ", "-c", " ", " a b c " };
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer, 7));
+	EXPECT_EQ("foo bar", s);
+	EXPECT_EQ(" a b c ", f);
+	EXPECT_EQ(' ', c);
+	ASSERT_EQ(1, liste.size());
+	EXPECT_EQ(" a b c ", liste[0]);
+}

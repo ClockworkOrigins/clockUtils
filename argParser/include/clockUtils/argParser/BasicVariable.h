@@ -77,7 +77,7 @@ namespace argParser {
 		 */
 		bool setValue(const std::string & value) {
 			std::stringstream ss(value);
-			return !(ss >> (_value)).fail();
+			return !(ss >> (_value)).fail() && ss.eof();
 		}
 
 		/**
@@ -122,10 +122,22 @@ namespace argParser {
 	};
 
 	/**
-	* \brief specialization of isBool method for type bool, returns always true
-	*/
+	 * \brief specialization of isBool method for type bool, returns always true
+	 */
 	template<>
 	bool CLOCK_ARGPARSER_API Variable<bool>::isBool() const;
+
+	/**
+	 * \brief specialization of setValue for std::string so it can work with strings containing spaces
+	 */
+	template<>
+	bool CLOCK_ARGPARSER_API Variable<std::string>::setValue(const std::string & value);
+
+	/**
+	 * \brief specialization of setValue for std::string so it can work with strings containing spaces
+	 */
+	template<>
+	bool CLOCK_ARGPARSER_API Variable<char>::setValue(const std::string & value);
 
 } /* namespace argParser */
 } /* namespace clockUtils */
