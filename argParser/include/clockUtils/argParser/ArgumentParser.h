@@ -15,11 +15,11 @@
 
 /**
  * \brief parses command line
+ * Use this to parse the normal command line in the main function.
+ * It is identical to PARSE_ARGUMENTS(++argv, --argc)
  */
 #define PARSE_COMMANDLINE()\
-	argv++;\
-	argc--;\
-	clockUtils::argParser::Parser::parseArguments(argv, argc)
+	clockUtils::argParser::Parser::parseArguments(++argv, --argc)
 
 /**
  * \brief returns the last error message if some appeared
