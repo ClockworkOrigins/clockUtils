@@ -272,3 +272,38 @@ TEST(ArgumentParser, stringWithSpace) {
 	ASSERT_EQ(1, liste.size());
 	EXPECT_EQ(" a b c ", liste[0]);
 }
+
+TEST(ArgumentParser, parseChar) {
+	REGISTER_VARIABLE(char, c, ' ', "Sample");
+	REGISTER_VARIABLE(char, d, ' ', "Sample");
+	const char * buffer1[] = { "-c", "x" };
+	const char * buffer2[] = { "-d", "xy" };
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer1, 2));
+	EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer2, 2));
+	EXPECT_EQ('x', c);
+}
+
+struct Vec3 {
+	double _x, _y, _z;
+	Vec3() : _x(), _y(), _z() {
+	}
+	Vec3(double x, double y, double z) : _x(x), _y(y), _z(z) {
+	}
+	Vec3 & operator=(const Vec3 &) = delete;
+	bool operator==(const Vec3 & other) const {
+		return std::abs(_x - other._x) < DBL_EPSILON && std::abs(_y - other._y) < DBL_EPSILON && std::abs(_z - other._z) < DBL_EPSILON;
+	}
+	friend std::istream & operator>>(std::istream & in, Vec3 & vec) {
+		in >> vec._x >> vec._y >> vec._z;
+		return in;
+	}
+};
+
+TEST(ArgumentParser, parseUserDefined) {
+	REGISTER_VARIABLE(Vec3, v, Vec3(), "Sample");
+	const char * buffer1[] = { "-v", "1.0 2.0 3.0" };
+	const char * buffer2[] = { "-v", "1.0 2.0 3.0 4.0" };
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer1, 2));
+	EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer2, 2));
+	EXPECT_EQ(Vec3(1.0, 2.0, 3.0), v);
+}

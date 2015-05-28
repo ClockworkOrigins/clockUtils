@@ -31,7 +31,7 @@ namespace argParser {
 
 	template<>
 	bool Variable<char>::setValue(const std::string & value) {
-		bool ret = !value.empty();
+		bool ret = value.size() == 1;
 		if (ret) {
 			_value = value.at(0);
 		}

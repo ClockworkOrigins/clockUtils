@@ -57,12 +57,13 @@ TEST(IniParser, getValue) {
 
 struct Vec3 {
 	double x, y, z;
-	Vec3 & operator= (const Vec3 &) = delete;
-	friend std::istream& operator>>(std::istream & in, Vec3 & vec) {
+	Vec3 & operator=(const Vec3 &) = delete;
+	friend std::istream & operator>>(std::istream & in, Vec3 & vec) {
 		in >> vec.x >> vec.y >> vec.z;
 		return in;
 	}
 };
+
 TEST(IniParser, getUserDefined) {
 	IniParser i1;
 	EXPECT_EQ(ClockError::SUCCESS, i1.load("resources/exampleVector.ini"));
