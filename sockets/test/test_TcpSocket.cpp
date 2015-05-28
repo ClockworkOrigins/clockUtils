@@ -777,8 +777,7 @@ TEST(TcpSocket, receiveCallbackRemove) {
 		sock->receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
 			called++;
 			if (error != ClockError::SUCCESS) {
-				so->close();
-				delete so;
+				_socketList.push_back(so);
 				EXPECT_EQ(2, called);
 			} else {
 				EXPECT_EQ(1, called);
@@ -799,6 +798,12 @@ TEST(TcpSocket, receiveCallbackRemove) {
 	EXPECT_EQ(2, called);
 
 	sock1.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 /**
@@ -812,8 +817,7 @@ TEST(TcpSocket, stopRead) {
 	sock1.listen(12345, 1, false, [](TcpSocket * sock) {
 		sock->receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
 			if (error != ClockError::SUCCESS) {
-				so->close();
-				delete so;
+				_socketList.push_back(so);
 			}
 		});
 	});
@@ -830,6 +834,12 @@ TEST(TcpSocket, stopRead) {
 	std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
 	sock1.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 /**
@@ -843,8 +853,7 @@ TEST(TcpSocket, stopReadAsync) {
 	sock1.listen(12345, 1, false, [](TcpSocket * sock) {
 		sock->receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
 			if (error != ClockError::SUCCESS) {
-				so->close();
-				delete so;
+				_socketList.push_back(so);
 			}
 		});
 	});
@@ -862,6 +871,12 @@ TEST(TcpSocket, stopReadAsync) {
 	EXPECT_EQ(1, called);
 
 	sock1.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
 }
 
 /**
@@ -876,8 +891,7 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 		sock1.listen(12345, 1, false, [](TcpSocket * sock) {
 			sock->receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
 				if (error != ClockError::SUCCESS) {
-					so->close();
-					delete so;
+					_socketList.push_back(so);
 				}
 			});
 		});
@@ -895,6 +909,12 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 		EXPECT_EQ(1, called);
 
 		sock1.close();
+
+		for (TcpSocket * sock : _socketList) {
+			delete sock;
+		}
+
+		_socketList.clear();
 	}
 	{
 		TcpSocket sock1, sock2;
@@ -904,8 +924,7 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 		sock1.listen(12345, 1, false, [](TcpSocket * sock) {
 			sock->receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
 				if (error != ClockError::SUCCESS) {
-					so->close();
-					delete so;
+					_socketList.push_back(so);
 				}
 			});
 		});
@@ -923,6 +942,12 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 		EXPECT_EQ(1, called);
 
 		sock1.close();
+
+		for (TcpSocket * sock : _socketList) {
+			delete sock;
+		}
+
+		_socketList.clear();
 	}
 }
 

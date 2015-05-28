@@ -20,7 +20,7 @@ namespace sockets {
 		}
 	};
 
-	UdpSocket::UdpSocket() : _sock(-1), _buffer() {
+	UdpSocket::UdpSocket() : _sock(-1), _buffer(), _callbackThread(nullptr) {
 		static WSAHelper wsa;
 	}
 
@@ -32,6 +32,11 @@ namespace sockets {
 		if (_sock != -1) {
 			closesocket(_sock);
 			_sock = -1;
+		}
+		if (_callbackThread != nullptr) {
+			_callbackThread->join();
+			delete _callbackThread;
+			_callbackThread = nullptr;
 		}
 	}
 

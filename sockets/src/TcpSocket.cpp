@@ -384,9 +384,13 @@ namespace sockets {
 	}
 
 	ClockError TcpSocket::receiveCallback(packetCallback pcb) {
-		std::thread thrd([pcb, this]()
+		if (_callbackThread != nullptr) {
+			_callbackThread->join();
+			delete _callbackThread;
+		}
+		_callbackThread = new std::thread([pcb, this]()
 			{
-				while (true) {
+				while (_sock != -1) {
 					std::vector<uint8_t> buffer;
 					ClockError err = receivePacket(buffer);
 					pcb(buffer, this, err);
@@ -395,7 +399,6 @@ namespace sockets {
 					}
 				}
 			});
-		thrd.detach();
 		return ClockError::SUCCESS;
 	}
 

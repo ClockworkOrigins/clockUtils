@@ -28,6 +28,10 @@
 	#include <unistd.h>
 #endif
 
+namespace std {
+	class thread;
+} /* namespace std */
+
 namespace clockUtils {
 	enum class ClockError;
 
@@ -154,6 +158,11 @@ namespace sockets {
 		 * \brief if a receivePacket gets more data than the packet contains, the rest is buffered in this variable
 		 */
 		std::map<std::pair<std::string, uint16_t>, std::vector<uint8_t>> _buffer;
+
+		/**
+		 * \brief thread for polling messages
+		 */
+		std::thread * _callbackThread;
 
 		UdpSocket(const UdpSocket &) = delete;
 		UdpSocket & operator=(const UdpSocket &) = delete;

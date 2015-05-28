@@ -21,7 +21,7 @@ namespace sockets {
 		}
 	};
 
-	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _todoLock(), _todo(), _buffer(), _terminate(false), _worker(nullptr), _listenThread(nullptr), _objCondExecutable(), _objCondMut(), _objCondUniqLock(_objCondMut) {
+	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _todoLock(), _todo(), _buffer(), _terminate(false), _worker(nullptr), _listenThread(nullptr), _objCondExecutable(), _objCondMut(), _objCondUniqLock(_objCondMut), _callbackThread(nullptr) {
 		static WSAHelper wsa;
 		_worker = new std::thread([this]() {
 				while (!_terminate) {
@@ -63,6 +63,17 @@ namespace sockets {
 			closesocket(_sock);
 			_sock = -1;
 			_status = SocketStatus::INACTIVE;
+		}
+		try {
+			if (_callbackThread != nullptr) {
+				if (_callbackThread->joinable()) {
+					_callbackThread->join();
+				}
+				delete _callbackThread;
+				_callbackThread = nullptr;
+			}
+		} catch (std::system_error &) {
+			// this can only be a deadlock, so do nothing here and delete thread in destructor
 		}
 	}
 

@@ -157,8 +157,12 @@ namespace sockets {
 	}
 
 	ClockError UdpSocket::receiveCallback(packetCallback pcb) {
-		std::thread thrd([pcb, this]() {
-			while (true) {
+		if (_callbackThread != nullptr) {
+			_callbackThread->join();
+			delete _callbackThread;
+		}
+		_callbackThread = new std::thread([pcb, this]() {
+			while (_sock != -1) {
 				std::vector<uint8_t> buffer;
 				std::string ip;
 				uint16_t port;
@@ -169,7 +173,6 @@ namespace sockets {
 				}
 			}
 		});
-		thrd.detach();
 		return ClockError::SUCCESS;
 	}
 

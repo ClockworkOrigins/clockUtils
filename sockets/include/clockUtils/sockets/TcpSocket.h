@@ -249,6 +249,8 @@ namespace sockets {
 		std::mutex _objCondMut;
 		std::unique_lock<std::mutex> _objCondUniqLock;
 
+		std::thread * _callbackThread;
+
 		TcpSocket(const TcpSocket &) = delete;
 		TcpSocket & operator=(const TcpSocket &) = delete;
 	};
