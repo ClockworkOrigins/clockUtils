@@ -83,7 +83,7 @@ TEST(TcpSocket, connect) { // tests connect with all possible errors
 	EXPECT_EQ(ClockError::INVALID_USAGE, e);
 	ts.close();
 
-	e = ts.connect("127.0.0.1", 12345, 500);
+	e = ts.connect("127.0.0.1", 12345, 1000);
 
 	EXPECT_EQ(ClockError::SUCCESS, e);
 	server.close();
