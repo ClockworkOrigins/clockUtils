@@ -58,6 +58,17 @@ namespace sockets {
 			_sock = -1;
 			_status = SocketStatus::INACTIVE;
 		}
+		try {
+			if (_callbackThread != nullptr) {
+				if (_callbackThread->joinable()) {
+					_callbackThread->join();
+				}
+				delete _callbackThread;
+				_callbackThread = nullptr;
+			}
+		} catch (std::system_error &) {
+			// this can only be a deadlock, so do nothing here and delete thread in destructor
+		}
 	}
 
 	ClockError TcpSocket::getLastError() {
