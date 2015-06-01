@@ -1,3 +1,4 @@
+#include <cmath>
 #include <cstdint>
 
 #include "clockUtils/errors.h"
@@ -291,7 +292,7 @@ struct Vec3 {
 	}
 	Vec3 & operator=(const Vec3 &) = delete;
 	bool operator==(const Vec3 & other) const {
-		return std::abs(_x - other._x) < DBL_EPSILON && std::abs(_y - other._y) < DBL_EPSILON && std::abs(_z - other._z) < DBL_EPSILON;
+		return std::fabs(_x - other._x) < DBL_EPSILON && std::fabs(_y - other._y) < DBL_EPSILON && std::abs(_z - other._z) < DBL_EPSILON;
 	}
 	friend std::istream & operator>>(std::istream & in, Vec3 & vec) {
 		in >> vec._x >> vec._y >> vec._z;
