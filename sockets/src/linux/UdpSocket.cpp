@@ -14,7 +14,7 @@
 namespace clockUtils {
 namespace sockets {
 
-	UdpSocket::UdpSocket() : _sock(-1), _buffer() {
+	UdpSocket::UdpSocket() : _sock(-1), _buffer(), _callbackThread(nullptr) {
 	}
 
 	UdpSocket::~UdpSocket() {
@@ -26,6 +26,11 @@ namespace sockets {
 			::shutdown(_sock, SHUT_RDWR); // FIXME: only do this if connected?, check for errorcode than
 			::close(_sock); // FIXME: only do this if connected?, check for errorcode than
 			_sock = -1;
+		}
+		if (_callbackThread != nullptr) {
+			_callbackThread->join();
+			delete _callbackThread;
+			_callbackThread = nullptr;
 		}
 	}
 
