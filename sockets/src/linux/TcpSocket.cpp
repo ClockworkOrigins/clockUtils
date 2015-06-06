@@ -4,10 +4,8 @@
 	#define _GLIBCXX_USE_NANOSLEEP // needed for sleep_for, see http://stackoverflow.com/questions/4438084/stdthis-threadsleep-for-and-gcc, but is fixed in newer version of gcc (>4.8 i think)
 #endif
 
-#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
-	#include <sys/socket.h>
-	#include <unistd.h>
-#endif
+#include <sys/socket.h>
+#include <unistd.h>
 
 #include <chrono>
 #include <thread>
@@ -16,60 +14,6 @@
 
 namespace clockUtils {
 namespace sockets {
-
-	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _todoLock(), _todo(), _buffer(), _terminate(false), _worker(nullptr), _listenThread(nullptr), _objCondExecutable(), _objCondMut(), _objCondUniqLock(_objCondMut), _callbackThread(nullptr) {
-		_worker = new std::thread([this]() {
-				while (!_terminate) {
-					_todoLock.lock();
-					while(_todo.size() > 0) {
-						std::vector<uint8_t> tmp = std::move(_todo.front());
-						_todoLock.unlock();
-
-						writePacket(const_cast<const unsigned char *>(&tmp[0]), tmp.size());
-
-						_todoLock.lock();
-						_todo.pop();
-					}
-					_todoLock.unlock();
-					_objCondExecutable.wait(_objCondUniqLock);
-				}
-			});
-	}
-
-	TcpSocket::~TcpSocket() {
-		_terminate = true;
-		_objCondExecutable.notify_all();
-		_worker->join();
-		delete _worker;
-		close();
-		if (_listenThread) {
-			if (_listenThread->joinable()) {
-				_listenThread->join();
-			}
-			delete _listenThread;
-		}
-	}
-
-	void TcpSocket::close() {
-		if (_status != SocketStatus::INACTIVE) {
-			// needed to stop pending accept operations
-			::shutdown(_sock, SHUT_RDWR); // FIXME: only do this if connected?, check for errorcode than
-			if (-1 == ::close(_sock)) perror("close");
-			_sock = -1;
-			_status = SocketStatus::INACTIVE;
-		}
-		try {
-			if (_callbackThread != nullptr) {
-				if (_callbackThread->joinable()) {
-					_callbackThread->join();
-				}
-				delete _callbackThread;
-				_callbackThread = nullptr;
-			}
-		} catch (std::system_error &) {
-			// this can only be a deadlock, so do nothing here and delete thread in destructor
-		}
-	}
 
 	ClockError TcpSocket::getLastError() {
 		if (errno == EADDRINUSE) {

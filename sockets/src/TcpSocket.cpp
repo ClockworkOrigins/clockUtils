@@ -7,9 +7,61 @@
 namespace clockUtils {
 namespace sockets {
 
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+	class WSAHelper {
+	public:
+		WSAHelper() {
+			WSADATA wsa;
+			WSAStartup(MAKEWORD(2, 2), &wsa);
+		}
+
+		~WSAHelper() {
+			WSACleanup();
+		}
+	};
+#endif
+
+	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _todoLock(), _todo(), _buffer(), _terminate(false), _worker(nullptr), _listenThread(nullptr), _objCondExecutable(), _objCondMut(), _objCondUniqLock(_objCondMut), _callbackThread(nullptr) {
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+		static WSAHelper wsa;
+#endif
+		_worker = new std::thread([this]() {
+				while (!_terminate) {
+					_todoLock.lock();
+					while (_todo.size() > 0) {
+						std::vector<uint8_t> tmp = std::move(_todo.front());
+						_todoLock.unlock();
+
+						writePacket(const_cast<const unsigned char *>(&tmp[0]), tmp.size());
+
+						_todoLock.lock();
+						_todo.pop();
+					}
+					_todoLock.unlock();
+					_objCondExecutable.wait(_objCondUniqLock);
+				}
+			});
+	}
+
 	TcpSocket::TcpSocket(int fd) : TcpSocket() {
 		_sock = fd;
 		_status = SocketStatus::CONNECTED;
+	}
+
+	TcpSocket::~TcpSocket() {
+		_terminate = true;
+		_objCondExecutable.notify_all();
+		if (_worker->joinable()) {
+			_worker->join();
+		}
+		delete _worker;
+		close();
+		if (_listenThread) {
+			if (_listenThread->joinable()) {
+				_listenThread->join();
+			}
+			delete _listenThread;
+		}
 	}
 
 	ClockError TcpSocket::listen(uint16_t listenPort, int maxParallelConnections, bool acceptMultiple, const acceptCallback acb) {
@@ -400,6 +452,27 @@ namespace sockets {
 				}
 			});
 		return ClockError::SUCCESS;
+	}
+
+	void TcpSocket::close() {
+		if (_status != SocketStatus::INACTIVE) {
+			// needed to stop pending accept operations
+			::shutdown(_sock, SHUT_RDWR); // can fail, but dowsn't matter. Was e.g. not connected befor
+			::close(_sock); // can fail, but dowsn't matter. Was e.g. not connected befor
+			_sock = -1;
+			_status = SocketStatus::INACTIVE;
+		}
+		try {
+			if (_callbackThread != nullptr) {
+				if (_callbackThread->joinable()) {
+					_callbackThread->join();
+				}
+				delete _callbackThread;
+				_callbackThread = nullptr;
+			}
+		} catch (std::system_error &) {
+			// this can only be a deadlock, so do nothing here and delete thread in destructor
+		}
 	}
 
 } /* namespace sockets */
