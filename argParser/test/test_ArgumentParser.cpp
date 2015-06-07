@@ -308,3 +308,14 @@ TEST(ArgumentParser, parseUserDefined) {
 	EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer2, 2));
 	EXPECT_EQ(Vec3(1.0, 2.0, 3.0), v);
 }
+
+TEST(ArgumentParser, variableSet) {
+	REGISTER_VARIABLE(std::string, s, "", "Sample");
+	REGISTER_VARIABLE(int, i, 15, "Sample");
+	const char * buffer[] = { "-s", "foo" };
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer, 2));
+	EXPECT_EQ("foo", s);
+	EXPECT_EQ(15, i);
+	EXPECT_TRUE(s.isSet());
+	EXPECT_FALSE(i.isSet());
+}

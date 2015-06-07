@@ -34,6 +34,7 @@ namespace argParser {
 									arguments = nullptr;
 									return ClockError::INVALID_USAGE;
 								}
+								bv->_set = true;
 								parsed[bv->getName()] = true;
 							} else {
 								found = false;
@@ -64,6 +65,7 @@ namespace argParser {
 									arguments = nullptr;
 									return ClockError::INVALID_USAGE;
 								}
+								bv->_set = true;
 								parsed[bv->getName()] = true;
 								argc--;
 								argv++;

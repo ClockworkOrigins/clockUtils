@@ -5,7 +5,7 @@
 namespace clockUtils {
 namespace argParser {
 
-	BasicVariable::BasicVariable(const std::string & name, const std::string & description) : _name(name), _description(description) {
+	BasicVariable::BasicVariable(const std::string & name, const std::string & description) : _name(name), _description(description), _set(false) {
 		clockUtils::argParser::Parser::variableList.push_back(this);
 	}
 

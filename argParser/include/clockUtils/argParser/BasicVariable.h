@@ -9,10 +9,14 @@
 namespace clockUtils {
 namespace argParser {
 
+	class Parser;
+
 	/**
 	 * \brief base class for Variable handling
 	 */
 	class CLOCK_ARGPARSER_API BasicVariable {
+		friend class Parser;
+
 	public:
 		/**
 		 * \brief constructor taking the name (= argument in argument list) and a description text for --help, inserts variable into the variableList of the Parser
@@ -41,6 +45,13 @@ namespace argParser {
 		 */
 		virtual bool setValue(const std::string & value) = 0;
 
+		/**
+		 * \brief returns true, if this variable was set via command line
+		 */
+		bool isSet() const {
+			return _set;
+		}
+
 	private:
 		/**
 		 * \brief argument the argument list is scanned for
@@ -51,6 +62,11 @@ namespace argParser {
 		 * \brief description being shown using --help
 		 */
 		std::string _description;
+
+		/**
+		 * \brief tells whether the variable was set via command line or not
+		 */
+		bool _set;
 	};
 
 	/**
@@ -112,6 +128,14 @@ namespace argParser {
 		 */
 		operator T() const {
 			return _value;
+		}
+
+		/**
+		 * \brief stream operator
+		 */
+		friend std::ostream & operator<<(std::ostream & out, Variable & v) {
+			out << v._value;
+			return out;
 		}
 
 	private:
