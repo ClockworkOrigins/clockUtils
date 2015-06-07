@@ -457,8 +457,13 @@ namespace sockets {
 	void TcpSocket::close() {
 		if (_status != SocketStatus::INACTIVE) {
 			// needed to stop pending accept operations
-			::shutdown(_sock, SHUT_RDWR); // can fail, but dowsn't matter. Was e.g. not connected befor
-			::close(_sock); // can fail, but dowsn't matter. Was e.g. not connected befor
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
+			::shutdown(_sock, SHUT_RDWR); // can fail, but doesn't matter. Was e.g. not connected befor
+			::close(_sock); // can fail, but doesn't matter. Was e.g. not connected before
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+			shutdown(_sock, SD_BOTH);
+			closesocket(_sock);
+#endif
 			_sock = -1;
 			_status = SocketStatus::INACTIVE;
 		}
