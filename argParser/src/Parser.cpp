@@ -17,6 +17,7 @@ namespace argParser {
 
 	ClockError Parser::parseArguments(const char ** argv, int argc) {
 		error = "";
+		help = false;
 		ClockError result = ClockError::SUCCESS;
 		std::map<std::string, bool> parsed;
 		while (argc > 0) {

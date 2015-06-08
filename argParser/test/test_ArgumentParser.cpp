@@ -334,3 +334,15 @@ TEST(ArgumentParser, help) {
 	std::string helpText = "\t-i\t[Default: 15]\t\tAn integer variable\n\t-s\t[Default: ]\t\tA string variable";
 	EXPECT_EQ(helpText, GETHELPTEXT());
 }
+
+TEST(ArgumentParser, parseCommandLine) {
+	REGISTER_VARIABLE(std::string, s, "", "A string variable");
+	REGISTER_VARIABLE(int, i, 15, "An integer variable");
+	const char * buffer[] = { "-/program", "-s", "foobar", "-i", "42" };
+	const char ** argv = buffer;
+	int argc = 5;
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_COMMANDLINE());
+	EXPECT_FALSE(HELPSET());
+	EXPECT_EQ("foobar", s);
+	EXPECT_EQ(42, i);
+}
