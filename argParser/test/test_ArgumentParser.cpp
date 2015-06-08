@@ -298,6 +298,10 @@ struct Vec3 {
 		in >> vec._x >> vec._y >> vec._z;
 		return in;
 	}
+	friend std::ostream & operator<<(std::ostream & out, Vec3 & vec) {
+		out << vec._x << " " << vec._y << " " << vec._z;
+		return out;
+	}
 };
 
 TEST(ArgumentParser, parseUserDefined) {
@@ -318,4 +322,15 @@ TEST(ArgumentParser, variableSet) {
 	EXPECT_EQ(15, i);
 	EXPECT_TRUE(s.isSet());
 	EXPECT_FALSE(i.isSet());
+}
+
+TEST(ArgumentParser, help) {
+	REGISTER_VARIABLE(std::string, s, "", "A string variable");
+	REGISTER_VARIABLE(int, i, 15, "An integer variable");
+	const char * buffer[] = { "--help" };
+	EXPECT_FALSE(HELPSET());
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer, 1));
+	EXPECT_TRUE(HELPSET());
+	std::string helpText = "\t-i\t[Default: 15]\t\tAn integer variable\n\t-s\t[Default: ]\t\tA string variable";
+	EXPECT_EQ(helpText, GETHELPTEXT());
 }

@@ -12,6 +12,7 @@ namespace argParser {
 	std::vector<BasicVariable *> Parser::variableList = std::vector<BasicVariable *>();
 	std::string Parser::error = std::string();
 	bool Parser::errorOnFlag = true;
+	bool Parser::help = false;
 	std::vector<std::string> * Parser::arguments = nullptr;
 
 	ClockError Parser::parseArguments(const char ** argv, int argc) {
@@ -24,7 +25,7 @@ namespace argParser {
 
 				bool found = false;
 
-				for (BasicVariable * bv : Parser::variableList) {
+				for (BasicVariable * bv : variableList) {
 					if (name.find(bv->getName()) == 0) {
 						found = true;
 						if (bv->isBool()) {
@@ -76,7 +77,9 @@ namespace argParser {
 				}
 
 				if (!found) {
-					if (errorOnFlag) {
+					if (name == "-help") {
+						help = true;
+					} else if (errorOnFlag) {
 						error = std::string("argument -") + name + std::string(" not registered!");
 						arguments = nullptr;
 						return ClockError::INVALID_USAGE;
@@ -108,6 +111,22 @@ namespace argParser {
 
 	std::string Parser::getLastParserError() {
 		return error;
+	}
+
+	std::string Parser::getHelpText() {
+		std::map<std::string, BasicVariable *> map;
+		for (auto v : variableList) {
+			map.insert(std::make_pair(v->getName(), v));
+		}
+		std::string text;
+		for (auto it = map.begin(); it != map.end();) {
+			text += "\t-" + it->second->getName() + "\t[Default: " + it->second->_defaultValue + "]\t\t" + it->second->_description;
+			it++;
+			if (it != map.end()) {
+				text += "\n";
+			}
+		}
+		return text;
 	}
 
 } /* namespace argParser */

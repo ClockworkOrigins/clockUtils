@@ -40,4 +40,16 @@
 	std::vector<std::string> name;\
 	clockUtils::argParser::Parser::registerArgumentsVector(&name)
 
+/**
+ * \brief returns true if --help was set
+ */
+#define HELPSET()\
+	clockUtils::argParser::Parser::wasHelpSet()
+
+/**
+ * \brief returns the help text
+ */
+#define GETHELPTEXT()\
+	clockUtils::argParser::Parser::getHelpText()
+
 #endif /* __CLOCKUTILS_ARGPARSER_ARGUMENTPARSER_H__ */

@@ -45,6 +45,19 @@ namespace argParser {
 		static void setErrorOnFlag(bool b) {
 			errorOnFlag = b;
 		}
+
+		/**
+		 * \brief returns true if --help was found in argument line
+		 */
+		static bool wasHelpSet() {
+			return help;
+		}
+
+		/**
+		 * \brief returns help text as string
+		 */
+		static std::string getHelpText();
+
 	private:
 		/**
 		 * \brief list of all registered and parseable variables
@@ -65,6 +78,11 @@ namespace argParser {
 		 * \brief bool determining whether an error shall occure if an extra flag is given that wasn't registered
 		 */
 		static bool errorOnFlag;
+
+		/**
+		 * \brief bool true if --help was found in argument line
+		 */
+		static bool help;
 	};
 
 } /* namespace argParser */

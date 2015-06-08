@@ -143,6 +143,8 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 	EXPECT_EQ(ClockError::SUCCESS, e);
 	EXPECT_EQ(3, connectCounter);
 
+	server1.close();
+
 	e = server2.listen(12346, 10, false, std::bind(connectionAccepted, std::placeholders::_1));
 
 	EXPECT_EQ(ClockError::SUCCESS, e);
