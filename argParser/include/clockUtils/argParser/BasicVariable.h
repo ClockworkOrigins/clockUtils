@@ -52,12 +52,6 @@ namespace argParser {
 			return _set;
 		}
 
-	protected:
-		/**
-		 * \brief default value of this variable used for help text
-		 */
-		std::string _defaultValue;
-
 	private:
 		/**
 		 * \brief argument the argument list is scanned for
@@ -85,9 +79,6 @@ namespace argParser {
 		 * \brief initializes a new variable taking the argument name, the description text and a default value, calls constructor of BasicVariable
 		 */
 		Variable(const std::string & name, const std::string & description, T value) : BasicVariable(name, description), _value(value) {
-			std::stringstream ss;
-			ss << value;
-			_defaultValue = ss.str();
 		}
 
 		/**
