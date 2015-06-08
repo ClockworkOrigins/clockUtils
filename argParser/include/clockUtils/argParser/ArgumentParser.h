@@ -31,6 +31,9 @@
  * \brief registers a variable with a type, the variable and argument name, a default value and a description text for --help
  */
 #define REGISTER_VARIABLE(type, name, value, description)\
+	{\
+		clockUtils::argParser::Parser::addHelpTextLine(std::make_pair(#name, std::string("\t-") + std::string(#name) + std::string("\t[Default: ") + std::string(#value) + std::string("]\t\t") + std::string(description)));\
+	}\
 	clockUtils::argParser::Variable<type> name(#name, description, value)
 
 /**

@@ -3,6 +3,7 @@
 
 #include "clockUtils/argParser/argParserParameters.h"
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -58,6 +59,13 @@ namespace argParser {
 		 */
 		static std::string getHelpText();
 
+		/**
+		 * \brief add a line for help text
+		 */
+		static void addHelpTextLine(const std::pair<std::string, std::string> & line) {
+			helpTexts.insert(line);
+		}
+
 	private:
 		/**
 		 * \brief list of all registered and parseable variables
@@ -83,6 +91,11 @@ namespace argParser {
 		 * \brief bool true if --help was found in argument line
 		 */
 		static bool help;
+
+		/**
+		 * \brief set containing all lines for help text
+		 */
+		static std::map<std::string, std::string> helpTexts;
 	};
 
 } /* namespace argParser */

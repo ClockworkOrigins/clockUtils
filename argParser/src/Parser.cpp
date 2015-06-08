@@ -13,6 +13,7 @@ namespace argParser {
 	std::string Parser::error = std::string();
 	bool Parser::errorOnFlag = true;
 	bool Parser::help = false;
+	std::map<std::string, std::string> Parser::helpTexts = std::map<std::string, std::string>();
 	std::vector<std::string> * Parser::arguments = nullptr;
 
 	ClockError Parser::parseArguments(const char ** argv, int argc) {
@@ -115,15 +116,11 @@ namespace argParser {
 	}
 
 	std::string Parser::getHelpText() {
-		std::map<std::string, BasicVariable *> map;
-		for (auto v : variableList) {
-			map.insert(std::make_pair(v->getName(), v));
-		}
 		std::string text;
-		for (auto it = map.begin(); it != map.end();) {
-			text += "\t-" + it->second->getName() + "\t[Default: " + it->second->_defaultValue + "]\t\t" + it->second->_description;
+		for (auto it = helpTexts.begin(); it != helpTexts.end();) {
+			text += it->second;
 			it++;
-			if (it != map.end()) {
+			if (it != helpTexts.end()) {
 				text += "\n";
 			}
 		}

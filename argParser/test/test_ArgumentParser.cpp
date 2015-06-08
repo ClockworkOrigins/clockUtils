@@ -331,7 +331,7 @@ TEST(ArgumentParser, help) {
 	EXPECT_FALSE(HELPSET());
 	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer, 1));
 	EXPECT_TRUE(HELPSET());
-	std::string helpText = "\t-i\t[Default: 15]\t\tAn integer variable\n\t-s\t[Default: ]\t\tA string variable";
+	std::string helpText = "\t-i\t[Default: 15]\t\tAn integer variable\n\t-s\t[Default: \"\"]\t\tA string variable";
 	EXPECT_EQ(helpText, GETHELPTEXT());
 }
 

@@ -13,6 +13,7 @@ namespace argParser {
 		for (size_t i = 0; i < Parser::variableList.size(); i++) {
 			if (_name == Parser::variableList[i]->getName()) {
 				Parser::variableList.erase(Parser::variableList.begin() + int(i));
+				Parser::helpTexts.erase(_name);
 				break;
 			}
 		}
