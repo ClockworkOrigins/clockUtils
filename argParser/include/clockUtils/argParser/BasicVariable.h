@@ -158,7 +158,7 @@ namespace argParser {
 	bool CLOCK_ARGPARSER_API Variable<std::string>::setValue(const std::string & value);
 
 	/**
-	 * \brief specialization of setValue for std::string so it can work with strings containing spaces
+	 * \brief specialization of setValue for char because chars contain only one single character
 	 */
 	template<>
 	bool CLOCK_ARGPARSER_API Variable<char>::setValue(const std::string & value);

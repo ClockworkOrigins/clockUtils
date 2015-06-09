@@ -11,7 +11,7 @@ namespace clockUtils {
 		INVALID_ARGUMENT,	// !< parameters are invalid
 		INVALID_USAGE,		// !< library is used in wrong way
 		IN_PROGRESS,
-		WRONG_TYPE,		// !< value couldn't be cast in expected type
+		WRONG_TYPE,			// !< value couldn't be cast in expected type
 		WRONG_SYNTAX,		// !< syntax of parsed file is not as expected
 		FILENOTFOUND,		// !< file does not exist
 		// sockets

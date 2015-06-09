@@ -14,7 +14,7 @@ namespace argParser {
 	class BasicVariable;
 
 	/**
-	 * \brief class handling all knows variables being able to be parsed and offering parse functionality
+	 * \brief class handling all known variables being able to be parsed and offering parse functionality
 	 */
 	class CLOCK_ARGPARSER_API Parser {
 		friend class BasicVariable;
@@ -22,7 +22,6 @@ namespace argParser {
 	public:
 		/**
 		 * \brief parses argument line
-		 *
 		 * \param[in] argv list of all strings in the argument line
 		 * \param[in] argc amount of entries in the list
 		 */
@@ -93,7 +92,7 @@ namespace argParser {
 		static bool help;
 
 		/**
-		 * \brief set containing all lines for help text
+		 * \brief map containing all lines for help text
 		 */
 		static std::map<std::string, std::string> helpTexts;
 	};

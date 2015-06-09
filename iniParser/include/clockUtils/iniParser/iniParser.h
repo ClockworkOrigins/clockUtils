@@ -2,9 +2,9 @@
 #define __CLOCKUTILS_INIPARSER_INIPARSER_H__
 
 #include <cstdint>
+#include <map>
 #include <sstream>
 #include <string>
-#include <map>
 #include <tuple>
 #include <vector>
 
@@ -28,7 +28,7 @@ namespace iniParser {
 		ClockError load(const std::string & file);
 
 		/**
-		 * \brief loads given ini file
+		 * \brief saves to given ini file
 		 * \returns ClockError::SUCCESS if no problems occured, otherwise an error code
 		 */
 		ClockError save(const std::string & file);
@@ -61,11 +61,10 @@ namespace iniParser {
 		}
 
 		/**
-		 * \brief loads given ini file
+		 * \brief sets value for a variable
 		 * \param[in] section the section of the variable
 		 * \param[in] field the name of the variable
 		 * \param[in] value the value to be stored
-		 * \returns ClockError::SUCCESS if no problems occured, otherwise an error code
 		 */
 		template<typename T>
 		void setValue(const std::string & section, const std::string & field, const T & value) {
@@ -109,6 +108,9 @@ namespace iniParser {
 		std::map<std::string, std::vector<std::string>> _allLines;
 	};
 
+	/**
+	 * \brief override for std::string so a full line containing spaces will be returned
+	 */
 	template<>
 	ClockError CLOCK_INIPARSER_API IniParser::getValue<std::string>(const std::string & section, const std::string & field, std::string & value) const;
 

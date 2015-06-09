@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __CLOCKUTILS_COMPRESSION_ALGORITHM_HUFFMANFIXED_H__
+#define __CLOCKUTILS_COMPRESSION_ALGORITHM_HUFFMANFIXED_H__
 
 #include <map>
 
@@ -43,3 +44,5 @@ namespace algorithm {
 } /* namespace algorithm */
 } /* namespace compression */
 } /* namespace clockUtils */
+
+#endif /* __CLOCKUTILS_COMPRESSION_ALGORITHM_HUFFMANFIXED_H__ */

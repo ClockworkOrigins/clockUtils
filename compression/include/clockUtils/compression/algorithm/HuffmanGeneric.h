@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __CLOCKUTILS_COMPRESSION_ALGORITHM_HUFFMANGENERIC_H__
+#define __CLOCKUTILS_COMPRESSION_ALGORITHM_HUFFMANGENERIC_H__
 
 #include "clockUtils/compression/algorithm/HuffmanBase.h"
 
@@ -36,3 +37,5 @@ namespace algorithm {
 } /* namespace algorithm */
 } /* namespace compression */
 } /* namespace clockUtils */
+
+#endif /* __CLOCKUTILS_COMPRESSION_ALGORITHM_HUFFMANGENERIC_H__ */

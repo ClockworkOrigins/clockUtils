@@ -34,7 +34,6 @@ namespace std {
 
 namespace clockUtils {
 	enum class ClockError;
-
 namespace sockets {
 
 	class CLOCK_SOCKETS_API UdpSocket {
@@ -65,20 +64,19 @@ namespace sockets {
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
-		 *
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
 		ClockError writePacket(const std::string & ip, uint16_t port, const void * str, const uint32_t length);
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
-		 *
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
 		ClockError writePacket(const std::string & ip, uint16_t port, const std::vector<uint8_t> & str);
 
 		/**
-		 * \brief TODO
+		 * \brief sends a packet, doesn't work with receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
 		ClockError write(const std::string & ip, uint16_t port, const void * str, uint32_t length);
 
@@ -150,7 +148,7 @@ namespace sockets {
 		ClockError getLastError();
 
 		/**
-		 * \brief stores the lokal socket descriptor or -1 if not active
+		 * \brief stores the local socket descriptor or -1 if not active
 		 */
 		int _sock;
 

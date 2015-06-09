@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __CLOCKUTILS_COMPRESSION_COMPRESSION_H__
+#define __CLOCKUTILS_COMPRESSION_COMPRESSION_H__
 
 #include <string>
 
@@ -28,3 +29,5 @@ namespace compression {
 
 } /* namespace compression */
 } /* namespace clockUtils */
+
+#endif /* __CLOCKUTILS_COMPRESSION_COMPRESSION_H__ */

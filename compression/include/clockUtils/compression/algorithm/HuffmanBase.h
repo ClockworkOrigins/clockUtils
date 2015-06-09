@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __CLOCKUTILS_COMPRESSION_ALGORITHM_HUFFMANBASE_H__
+#define __CLOCKUTILS_COMPRESSION_ALGORITHM_HUFFMANBASE_H__
 
 #include <memory>
 #include <string>
@@ -28,6 +29,7 @@ namespace algorithm {
 			std::shared_ptr<Node> left = nullptr;
 			std::shared_ptr<Node> right = nullptr;
 		};
+
 		/**
 		 * \brief represents the tree and is used a the root
 		 */
@@ -73,3 +75,5 @@ namespace algorithm {
 } /* namespace algorithm */
 } /* namespace compression */
 } /* namespace clockUtils */
+
+#endif /* __CLOCKUTILS_COMPRESSION_ALGORITHM_HUFFMANBASE_H__ */

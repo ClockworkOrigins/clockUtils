@@ -29,10 +29,9 @@
 
 namespace std {
 	class thread;
-}
+} /* namespace std */
 namespace clockUtils {
 	enum class ClockError;
-
 namespace sockets {
 
 	class CLOCK_SOCKETS_API TcpSocket {
@@ -53,7 +52,6 @@ namespace sockets {
 
 		/**
 		 * \brief creates listen socket listening on the given port and calling callback for every accepted connection
-		 *
 		 * \param[in] listenPort the port the socket is listening on
 		 * \param[in] maxParallelConnections the amount of connections being able to be handle at once
 		 * \param[in] acceptMultiple if set to false, only one connection is accepted, otherwise infinite
@@ -63,7 +61,6 @@ namespace sockets {
 
 		/**
 		 * \brief creates a connection to the given pair of IP and port
-		 *
 		 * \param[in] remoteIP the ip of the connection listening
 		 * \param[in] remotePort the port of the connection listening
 		 * \param[in] timeout the time in milliseconds a connect request should last in maximum
@@ -107,21 +104,18 @@ namespace sockets {
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
-		 *
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
 		ClockError writePacket(const void * str, const uint32_t length);
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
-		 *
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
 		ClockError writePacket(const std::vector<uint8_t> & str);
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
-		 *
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
 		ClockError writePacketAsync(const std::vector<uint8_t> & str);
@@ -145,14 +139,12 @@ namespace sockets {
 
 		/**
 		 * \brief sends a message, doesn't work with receivePacket
-		 *
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
 		ClockError write(const void * str, uint32_t length);
 
 		/**
 		 * \brief sends a message, doesn't work with receivePacket
-		 *
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
 		ClockError write(const std::vector<uint8_t> & str);
@@ -187,7 +179,6 @@ namespace sockets {
 				} else if (rc == 0) {
 					return ClockError::NOT_CONNECTED;
 				}
-
 				break;
 			} while (true);
 
@@ -212,8 +203,7 @@ namespace sockets {
 
 		/**
 		 * \brief constructor being called during accept
-		 *
-		 * \param[in] fd
+		 * \param[in] fd file descriptor for the new socket
 		 */
 		TcpSocket(int fd);
 
@@ -223,7 +213,7 @@ namespace sockets {
 		ClockError getLastError();
 
 		/**
-		 * \brief stores the lokal socket descriptor or -1 if not active
+		 * \brief stores the local socket descriptor or -1 if not active
 		 */
 		int _sock;
 
@@ -232,7 +222,14 @@ namespace sockets {
 		 */
 		SocketStatus _status;
 
+		/**
+		 * \brief mutex guarding the queue for async packets
+		 */
 		std::mutex _todoLock;
+
+		/**
+		 * \brief queue containing all packets to be sent in an extra worker thread
+		 */
 		std::queue<std::vector<uint8_t>> _todo;
 
 		/**

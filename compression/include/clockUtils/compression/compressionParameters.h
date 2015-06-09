@@ -3,7 +3,8 @@
  * @{
  */
 
-#pragma once
+#ifndef __CLOCKUTILS_COMPRESSION_COMPRESSIONPARAMETERS_H__
+#define __CLOCKUTILS_COMPRESSION_COMPRESSIONPARAMETERS_H__
 
 #include "clockUtils/SystemParameters.h"
 
@@ -25,6 +26,8 @@
 		#define CLOCK_COMPRESSION_API
 	#endif
 #endif
+
+#endif /* __CLOCKUTILS_COMPRESSION_COMPRESSIONPARAMETERS_H__ */
 
 /**
  * @}
