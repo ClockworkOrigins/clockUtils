@@ -43,7 +43,7 @@ namespace algorithm {
 		result[2] = char((text.length() / 256) % 256);
 		result[3] = char(text.length() % 256);
 
-		convert(text, tree, 32, result);
+		convert(text, 32, result);
 
 		return result;
 	}
@@ -60,7 +60,7 @@ namespace algorithm {
 		return result;
 	}
 
-	void HuffmanFixed::convert(const std::string & text, const std::shared_ptr<Tree> & tree, size_t index, std::string & result) {
+	void HuffmanFixed::convert(const std::string & text, size_t index, std::string & result) {
 		for (uint8_t c : text) {
 			auto it = mappings.find(c);
 

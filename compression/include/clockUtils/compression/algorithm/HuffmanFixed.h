@@ -38,7 +38,7 @@ namespace algorithm {
 		/**
 		 * \brief converts the text into a bit sequence using the mappings, if possible and otherwise filling the mappings
 		 */
-		static void convert(const std::string & text, const std::shared_ptr<Tree> & tree, size_t index, std::string & result);
+		static void convert(const std::string & text, size_t index, std::string & result);
 	};
 
 } /* namespace algorithm */
