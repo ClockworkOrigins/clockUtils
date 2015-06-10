@@ -264,10 +264,10 @@ TEST(TcpSocket, getIP) { // tests IP before and after connection
 	EXPECT_NE(0, s2.length());
 	EXPECT_NE(0, s3.length());
 
+	std::this_thread::sleep_for(std::chrono::milliseconds(5));
+
 	ts.close();
 	server.close();
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 	for (TcpSocket * sock : _socketList) {
 		delete sock;
@@ -303,6 +303,8 @@ TEST(TcpSocket, getPort) { // tests port before and after connection
 	EXPECT_NE(0, s);
 	EXPECT_EQ(12345, s2);
 
+	std::this_thread::sleep_for(std::chrono::milliseconds(5));
+
 	ts.close();
 	server.close();
 
@@ -331,6 +333,8 @@ TEST(TcpSocket, useUnready) {
 	}
 
 	_socketList.clear();
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(5));
 }
 
 TEST(TcpSocket, invalidParameters) {
@@ -858,6 +862,7 @@ TEST(TcpSocket, stopReadAsync) {
 				_socketList.push_back(so);
 			}
 		});
+		sock->close();
 	});
 	sock2.connect("127.0.0.1", 12345, 500);
 	sock2.receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
@@ -865,6 +870,8 @@ TEST(TcpSocket, stopReadAsync) {
 				called = 1;
 			}
 		});
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	sock2.close();
 
@@ -896,6 +903,7 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 					_socketList.push_back(so);
 				}
 			});
+			sock->close();
 		});
 		EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
 		sock2.receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
@@ -903,6 +911,8 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 					called = 1;
 				}
 			});
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 		sock2.close();
 
@@ -929,6 +939,7 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 					_socketList.push_back(so);
 				}
 			});
+			sock->close();
 		});
 		EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
 		sock2.receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
@@ -936,6 +947,8 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 					called = 1;
 				}
 			});
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 		sock2.close();
 

@@ -436,6 +436,9 @@ namespace sockets {
 	}
 
 	ClockError TcpSocket::receiveCallback(packetCallback pcb) {
+		if (_status != SocketStatus::CONNECTED) {
+			return ClockError::NOT_READY;
+		}
 		if (_callbackThread != nullptr) {
 			_callbackThread->join();
 			delete _callbackThread;
