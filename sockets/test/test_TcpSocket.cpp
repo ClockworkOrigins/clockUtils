@@ -88,7 +88,7 @@ TEST(TcpSocket, connect) { // tests connect with all possible errors
 	EXPECT_EQ(ClockError::SUCCESS, e);
 	server.close();
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	for (TcpSocket * sock : _socketList) {
 		delete sock;
@@ -517,7 +517,7 @@ TEST(TcpSocket, write) {
 	sock1.close();
 	sock2.close();
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	for (TcpSocket * sock : _socketList) {
 		delete sock;
@@ -574,7 +574,7 @@ TEST(TcpSocket, connectDouble) {
 	sock2.close();
 	sock3.close();
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	for (TcpSocket * sock : _socketList) {
 		delete sock;
@@ -599,7 +599,7 @@ TEST(TcpSocket, writePacket) {
 	sock1.close();
 	sock2.close();
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	for (TcpSocket * sock : _socketList) {
 		delete sock;
@@ -629,7 +629,7 @@ TEST(TcpSocket, writePacketMultiple) {
 	sock1.close();
 	sock2.close();
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	for (TcpSocket * sock : _socketList) {
 		delete sock;
@@ -659,7 +659,7 @@ TEST(TcpSocket, writePacketMultipleSwapped) {
 	sock2.writePacket(v1);
 	sock2.writePacket(v2);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
 	sock1.close();
 	sock2.close();
@@ -691,7 +691,7 @@ TEST(TcpSocket, writeMass) {
 	sock1.close();
 	sock2.close();
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	for (TcpSocket * sock : _socketList) {
 		delete sock;
@@ -738,7 +738,7 @@ TEST(TcpSocket, writeMass2) {
 	sock1.close();
 	sock2.close();
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	for (TcpSocket * sock : _socketList) {
 		delete sock;
