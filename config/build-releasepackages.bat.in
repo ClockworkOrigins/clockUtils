@@ -1,4 +1,4 @@
-Set version=0.3.0
+Set version=@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@
 
 Set sourcePackage=clockUtils-%version%-src
 Set prebuiltPackage=clockUtils-%version%-msvc13
@@ -11,14 +11,16 @@ xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/argParser" "@CMAKE_BINARY_DIR@/%sourcePackage
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/compression" "@CMAKE_BINARY_DIR@/%sourcePackage%/compression"
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/iniParser" "@CMAKE_BINARY_DIR@/%sourcePackage%/iniParser"
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/sockets" "@CMAKE_BINARY_DIR@/%sourcePackage%/sockets"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/include" "@CMAKE_BINARY_DIR@/%sourcePackage%/include"
 
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/cmake_modules" "@CMAKE_BINARY_DIR@/%sourcePackage%/cmake_modules"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/config" "@CMAKE_BINARY_DIR@/%sourcePackage%/config"
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/docs" "@CMAKE_BINARY_DIR@/%sourcePackage%/docs"
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/include" "@CMAKE_BINARY_DIR@/%sourcePackage%/include"
 xcopy /F "@CMAKE_SOURCE_DIR@/CMakeLists.txt" "@CMAKE_BINARY_DIR@/%sourcePackage%/CMakeLists.txt*"
 xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE" "@CMAKE_BINARY_DIR@/%sourcePackage%/LICENSE*"
 xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE.lesser" "@CMAKE_BINARY_DIR@/%sourcePackage%/LICENSE.lesser*"
 
+xcopy /S /Y /I "@CMAKE_BINARY_DIR@/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/include"
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/include"
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/argParser/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/include"
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/compression/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/include"

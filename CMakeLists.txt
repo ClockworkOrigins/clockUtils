@@ -87,6 +87,11 @@ ELSE()
 	message (SEND_INFO "Unknown C++ compiler \"${CMAKE_CXX_COMPILER_ID}\". Only GNU and Clang are completely supported.")
 ENDIF()
 
+# Setting current version
+SET(VERSION_MAJOR 0)
+SET(VERSION_MINOR 3)
+SET(VERSION_PATCH 0)
+
 #########################################################################
 #Global Directory Definitions
 #########################################################################
@@ -150,6 +155,14 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/include
 	DESTINATION ${CMAKE_INSTALL_PREFIX}
 	COMPONENT devel)
 
+configure_file(${CMAKE_SOURCE_DIR}/config/clockUtilsConfig.h.in ${CMAKE_BINARY_DIR}/include/clockUtils/Config.h @ONLY)
+
+include_directories(${CMAKE_BINARY_DIR}/include/)
+
+install(DIRECTORY ${CMAKE_BINARY_DIR}/include
+	DESTINATION ${CMAKE_INSTALL_PREFIX}
+	COMPONENT devel)
+
 #####################################################################################
 # argument parser
 #####################################################################################
@@ -209,15 +222,15 @@ ENDIF(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 configure_file(${CMAKE_SOURCE_DIR}/config/build-releasepackages.bat.in ${CMAKE_BINARY_DIR}/build-releasepackages.bat @ONLY)
 
 #SET(CPACK_GENERATOR "DEB")
-SET(CPACK_PACKAGE_VERSION "0.3.0")
-SET(CPACK_PACKAGE_VERSION_MAJOR "0")
-SET(CPACK_PACKAGE_VERSION_MINOR "3")
-SET(CPACK_PACKAGE_VERSION_PATCH "0")
+SET(CPACK_PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+SET(CPACK_PACKAGE_VERSION_MAJOR "${VERSION_MAJOR}")
+SET(CPACK_PACKAGE_VERSION_MINOR "${VERSION_MINOR}")
+SET(CPACK_PACKAGE_VERSION_PATCH "${VERSION_PATCH}")
 SET(CPACK_COMPONENTS_ALL devel libs)
 SET(CPACK_DEBIAN_PACKAGE_NAME "clockUtils")
 SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Daniel Bonrath")
 SET(CPACK_DEBIAN_PACKAGE_CONTACT "bonne@clockwork-origins.de")
-SET(CPACK_DEBIAN_PACKAGE_VERSION "0.3.0")
+SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++6 (>= 4.8.2), libgcc1 (>= 1:4.1.1), libc6 (>= 2.19)")
 SET(CPACK_DEB_COMPONENT_INSTALL 1)
 IF(32BIT)
@@ -228,7 +241,7 @@ ENDIF(32BIT)
 SET(CPACK_RPM_PACKAGE_NAME "clockUtils")
 SET(CPACK_RPM_PACKAGE_MAINTAINER "Daniel Bonrath")
 SET(CPACK_RPM_PACKAGE_CONTACT "bonne@clockwork-origins.de")
-SET(CPACK_RPM_PACKAGE_VERSION "0.3.0")
+SET(CPACK_RPM_PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 SET(CPACK_RPM_PACKAGE_DEPENDS "libstdc++6 (>= 4.7.2), libgcc1 (>= 1:4.1.1), libc6 (>= 2.19)")
 IF(32BIT)
 	SET(CPACK_RPM_PACKAGE_ARCHITECTURE "i386")
