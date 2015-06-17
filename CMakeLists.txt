@@ -15,6 +15,7 @@ option(WITH_LIBRARY_ARGPARSER "builds argument parser library" ON)
 option(WITH_LIBRARY_COMPRESSION "builds compression library" ON)
 option(WITH_LIBRARY_INIPARSER "builds iniParser library" ON)
 option(WITH_LIBRARY_SOCKETS "builds sockets library" ON)
+option(32BIT "builds as 32Bit library" OFF)
 
 IF(WITH_TESTING AND NOT WIN32)
 	# static for gmock
@@ -39,6 +40,11 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 # Sets appropriate Compilerflags
 
 set (CXX_FLAGS "-pedantic -Wall -Wextra -Woverloaded-virtual -Wnon-virtual-dtor -Wformat=2 -Winit-self -Wswitch-default -Wfloat-equal -Wshadow -Wredundant-decls -Wctor-dtor-privacy -Wno-unused-parameter -Wno-long-long -Wno-missing-braces -std=c++11")
+
+IF(32BIT)
+	set(CXX_FLAGS "${CXX_FLAGS} -m32")
+ENDIF(32BIT)
+
 IF(WITH_TESTING)
 	set(CXX_FLAGS "${CXX_FLAGS} -fPIC")
 ENDIF(WITH_TESTING)
@@ -194,6 +200,11 @@ SET(CPACK_DEBIAN_PACKAGE_CONTACT "bonne@clockwork-origins.de")
 SET(CPACK_DEBIAN_PACKAGE_VERSION "0.3.0")
 SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++6 (>= 4.8.2), libgcc1 (>= 1:4.1.1), libc6 (>= 2.19)")
 SET(CPACK_DEB_COMPONENT_INSTALL 1)
+IF(32BIT)
+	SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "i386")
+ELSE(32BIT)
+	SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+ENDIF(32BIT)
 SET(CPACK_RPM_PACKAGE_NAME "clockUtils")
 SET(CPACK_RPM_PACKAGE_MAINTAINER "Daniel Bonrath")
 SET(CPACK_RPM_PACKAGE_CONTACT "bonne@clockwork-origins.de")
