@@ -1,3 +1,21 @@
+#
+# clockUtils
+# Copyright (2015) Michael Baer, Daniel Bonrath, All rights reserved.
+#
+# This file is part of clockUtils; clockUtils is free software; you can
+# redistribute it and/or modify it under the terms of the GNU Lesser
+# General Public License as published by the Free Software Foundation; either
+# version 3.0 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library.
+#
+
 # CMake main configfile clockUtils project
 #
 
@@ -187,6 +205,8 @@ IF(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 		execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/dependencies ${CMAKE_BINARY_DIR}/dependencies)
 	ENDIF()
 ENDIF(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+
+configure_file(${CMAKE_SOURCE_DIR}/config/build-releasepackages.bat.in ${CMAKE_BINARY_DIR}/build-releasepackages.bat @ONLY)
 
 #SET(CPACK_GENERATOR "DEB")
 SET(CPACK_PACKAGE_VERSION "0.3.0")

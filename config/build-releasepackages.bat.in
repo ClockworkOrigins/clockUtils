@@ -1,0 +1,31 @@
+Set version=0.3.0
+
+Set sourcePackage=clockUtils-%version%-src
+Set prebuiltPackage=clockUtils-%version%-msvc13
+
+mkdir "%sourcePackage%"
+mkdir "%prebuiltPackage%"
+mkdir "%prebuiltPackage%/bin"
+
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/argParser" "@CMAKE_BINARY_DIR@/%sourcePackage%/argParser"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/compression" "@CMAKE_BINARY_DIR@/%sourcePackage%/compression"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/iniParser" "@CMAKE_BINARY_DIR@/%sourcePackage%/iniParser"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/sockets" "@CMAKE_BINARY_DIR@/%sourcePackage%/sockets"
+
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/cmake_modules" "@CMAKE_BINARY_DIR@/%sourcePackage%/cmake_modules"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/docs" "@CMAKE_BINARY_DIR@/%sourcePackage%/docs"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/include" "@CMAKE_BINARY_DIR@/%sourcePackage%/include"
+xcopy /F "@CMAKE_SOURCE_DIR@/CMakeLists.txt" "@CMAKE_BINARY_DIR@/%sourcePackage%/CMakeLists.txt*"
+xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE" "@CMAKE_BINARY_DIR@/%sourcePackage%/LICENSE*"
+
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/include"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/argParser/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/include"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/compression/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/include"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/iniParser/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/include"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/sockets/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/include"
+
+xcopy /F "@CMAKE_BINARY_DIR@/bin/Release/clock_*.dll" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/bin/"
+xcopy /F "@CMAKE_BINARY_DIR@/bin/Release/clock_*.lib" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/lib/"
+
+winrar a -afzip -df %sourcePackage%.zip %sourcePackage%
+winrar a -afzip -df %prebuiltPackage%.zip %prebuiltPackage%
