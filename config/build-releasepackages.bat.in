@@ -17,6 +17,7 @@ xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/docs" "@CMAKE_BINARY_DIR@/%sourcePackage%/doc
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/include" "@CMAKE_BINARY_DIR@/%sourcePackage%/include"
 xcopy /F "@CMAKE_SOURCE_DIR@/CMakeLists.txt" "@CMAKE_BINARY_DIR@/%sourcePackage%/CMakeLists.txt*"
 xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE" "@CMAKE_BINARY_DIR@/%sourcePackage%/LICENSE*"
+xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE.lesser" "@CMAKE_BINARY_DIR@/%sourcePackage%/LICENSE.lesser*"
 
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/include"
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/argParser/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/include"
