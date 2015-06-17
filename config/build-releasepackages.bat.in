@@ -30,5 +30,8 @@ xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/sockets/include" "@CMAKE_BINARY_DIR@/%prebuil
 xcopy /F "@CMAKE_BINARY_DIR@/bin/Release/clock_*.dll" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/bin/"
 xcopy /F "@CMAKE_BINARY_DIR@/bin/Release/clock_*.lib" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/lib/"
 
+xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/LICENSE*"
+xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE.lesser" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/LICENSE.lesser*"
+
 winrar a -afzip -df %sourcePackage%.zip %sourcePackage%
 winrar a -afzip -df %prebuiltPackage%.zip %prebuiltPackage%
