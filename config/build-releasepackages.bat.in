@@ -1,7 +1,7 @@
 Set version=@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@
 
-Set sourcePackage=clockUtils-%version%-src
-Set prebuiltPackage=clockUtils-%version%-msvc13_32bit
+Set sourcePackage=@PACKAGE_NAME@-%version%-src
+Set prebuiltPackage=@PACKAGE_NAME@-%version%-msvc13_32bit
 
 mkdir "%sourcePackage%"
 mkdir "%prebuiltPackage%"
