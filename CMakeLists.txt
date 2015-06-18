@@ -1,11 +1,10 @@
-#
 # clockUtils
 # Copyright (2015) Michael Baer, Daniel Bonrath, All rights reserved.
 #
-# This file is part of clockUtils; clockUtils is free software; you can
-# redistribute it and/or modify it under the terms of the GNU Lesser
-# General Public License as published by the Free Software Foundation; either
-# version 3.0 of the License, or (at your option) any later version.
+# This file is part of clockUtils; clockUtils is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
 #
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,8 +12,8 @@
 # Lesser General Public License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public
-# License along with this library.
-#
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 # CMake main configfile clockUtils project
 #
@@ -154,8 +153,12 @@ include_directories(${CMAKE_SOURCE_DIR}/include/)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include
 	DESTINATION ${CMAKE_INSTALL_PREFIX}
 	COMPONENT devel)
-
+	
 configure_file(${CMAKE_SOURCE_DIR}/config/clockUtilsConfig.h.in ${CMAKE_BINARY_DIR}/include/clockUtils/Config.h @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/config/argParserParameters.h.in ${CMAKE_BINARY_DIR}/include/clockUtils/argParser/argParserParameters.h @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/config/compressionParameters.h.in ${CMAKE_BINARY_DIR}/include/clockUtils/compression/compressionParameters.h @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/config/iniParserParameters.h.in ${CMAKE_BINARY_DIR}/include/clockUtils/iniParser/iniParserParameters.h @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/config/socketsParameters.h.in ${CMAKE_BINARY_DIR}/include/clockUtils/sockets/socketsParameters.h @ONLY)
 
 include_directories(${CMAKE_BINARY_DIR}/include/)
 
@@ -232,7 +235,7 @@ SET(CPACK_PACKAGE_VERSION_MAJOR "${VERSION_MAJOR}")
 SET(CPACK_PACKAGE_VERSION_MINOR "${VERSION_MINOR}")
 SET(CPACK_PACKAGE_VERSION_PATCH "${VERSION_PATCH}")
 SET(CPACK_COMPONENTS_ALL devel libs)
-SET(CPACK_DEBIAN_PACKAGE_NAME "clockUtils")
+SET(CPACK_DEBIAN_PACKAGE_NAME "clockUtils${VERSION_MAJOR}")
 SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Clockwork Origins")
 SET(CPACK_DEBIAN_PACKAGE_CONTACT "contact@clockwork-origins.de")
 SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
@@ -243,11 +246,12 @@ IF(32BIT)
 ELSE(32BIT)
 	SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
 ENDIF(32BIT)
-SET(CPACK_RPM_PACKAGE_NAME "clockUtils")
+SET(CPACK_RPM_PACKAGE_NAME "clockUtils${VERSION_MAJOR}")
 SET(CPACK_RPM_PACKAGE_MAINTAINER "Clockwork Origins")
 SET(CPACK_RPM_PACKAGE_CONTACT "contact@clockwork-origins.de")
 SET(CPACK_RPM_PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 SET(CPACK_RPM_PACKAGE_DEPENDS "libstdc++6 (>= 4.7.2), libgcc1 (>= 1:4.1.1), libc6 (>= 2.19)")
+SET(CPACK_RPM_COMPONENT_INSTALL ON)
 #IF(32BIT)
 #	SET(CPACK_RPM_PACKAGE_ARCHITECTURE "i686")
 #ELSE(32BIT)
