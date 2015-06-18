@@ -18,7 +18,6 @@ xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/config" "@CMAKE_BINARY_DIR@/%sourcePackage%/c
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/docs" "@CMAKE_BINARY_DIR@/%sourcePackage%/docs"
 xcopy /F "@CMAKE_SOURCE_DIR@/CMakeLists.txt" "@CMAKE_BINARY_DIR@/%sourcePackage%/CMakeLists.txt*"
 xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE" "@CMAKE_BINARY_DIR@/%sourcePackage%/LICENSE*"
-xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE.lesser" "@CMAKE_BINARY_DIR@/%sourcePackage%/LICENSE.lesser*"
 
 xcopy /S /Y /I "@CMAKE_BINARY_DIR@/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/include"
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/include"
@@ -31,7 +30,6 @@ xcopy /F "@CMAKE_BINARY_DIR@/bin/Release/clock_*.dll" "@CMAKE_BINARY_DIR@/%prebu
 xcopy /F "@CMAKE_BINARY_DIR@/bin/Release/clock_*.lib" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/lib/"
 
 xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/LICENSE*"
-xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE.lesser" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/LICENSE.lesser*"
 
 winrar a -afzip -df %sourcePackage%.zip %sourcePackage%
 winrar a -afzip -df %prebuiltPackage%.zip %prebuiltPackage%

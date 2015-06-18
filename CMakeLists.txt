@@ -227,9 +227,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 SET(PACKAGE_NAME "clockutils" CACHE STRING "The name for archives and packages")
-MESSAGE(INFO "${PACKAGE_NAME}")
 
-#SET(CPACK_SET_DESTDIR true)
 SET(CPACK_INSTALL_PREFIX "/usr")
 SET(CPACK_PACKAGE_CONTACT "contact@clockwork-origins.de")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A lightweight c++ library for commonly needed tasks. Optimized for simplicity and speed.")
