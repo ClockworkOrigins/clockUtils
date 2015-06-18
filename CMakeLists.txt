@@ -224,6 +224,7 @@ ENDIF(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 
 IF(WIN32)
 	configure_file(${CMAKE_SOURCE_DIR}/config/build-releasepackages.bat.in ${CMAKE_BINARY_DIR}/build-releasepackages.bat @ONLY)
+	add_custom_target(releasePackages COMMAND build-releasepackages.bat WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 ENDIF(WIN32)
 
 SET(PACKAGE_NAME "clockutils" CACHE STRING "The name for archives and packages")
