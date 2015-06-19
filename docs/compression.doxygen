@@ -11,7 +11,11 @@
  * \code{.cpp}
  * #include "clockUtils/compression/Compression.h"
  * \endcode
- * and also at least the one for the algorithm used for compression.\n\n
+ * and also at least the one for the algorithm used for compression.
+ * \code{.cpp}
+ * #include "clockUtils/compression/algorithm/HuffmanFixed.h"
+ * #include "clockUtils/compression/algorithm/HuffmanGeneric.h"
+ * \endcode\n
  *
  * To compress a std::string you just need to call the compress method of the Compression class.\n
  * Currently we offer two similar compression algorithms both implementing Huffman encoding. These two algorithms are:
@@ -25,7 +29,7 @@
  * std::string compressedString = c.compress(uncompressedString);
  * std::string decompressedString = c.decompress(compressedString);
  * \endcode
- * The string ist compressed and decompressed and decompressedString is equal to uncompressedString again.
+ * The string is compressed and decompressed and decompressedString is equal to uncompressedString again.
  *
  */
  
