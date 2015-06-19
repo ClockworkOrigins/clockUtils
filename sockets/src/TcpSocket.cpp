@@ -20,7 +20,6 @@
 #include "clockUtils/sockets/TcpSocket.h"
 
 #include <errno.h>
-#include <iostream>
 #include <thread>
 
 namespace clockUtils {

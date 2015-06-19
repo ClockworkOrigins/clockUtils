@@ -1,0 +1,79 @@
+/**
+ * \addtogroup sockets
+ * The sockets library can be used to easily create socket connections in an efficient way
+ * @{
+ */
+ 
+/**
+ * \page page_sockets How to use the sockets library
+ *
+ * Sockets are used to communicate through networks like a local network or the internet. There are two ways you can do this using this library.
+ *
+ * \section sec_tcp TCP sockets
+ *
+ * You need to include this header
+ * \code{.cpp}
+ * #include "clockUtils/sockets/TcpSocket.h"
+ * \endcode
+ *
+ * To connect two TcpSockets you need two parts. The first part is a host which is waiting for connections, mostly a server. In this example you will see a simple echo server just returning all messages he got sent adding the string " RESPONSE!". A server using TcpSockets can look like this:
+ * \code{.cpp}
+ * clockUtils::sockets::TcpSocket socket;
+ * socket.listen(12345, 10, true, [](clockUtils::sockets::TcpSocket * s) {
+ *		clockUtils::ClockError err;
+ *		do {
+ *			std::string message;
+ *			err = s->receivePacket(message);
+ *			message += " RESPONSE!";
+ *			s->writePacket(message.c_str(), message.length());
+ *		} while (err == clockUtils::ClockError::SUCCESS);
+ *		delete s;
+ * });
+ * \endcode
+ * And the client side of this example looks like this:
+ * \code{.cpp}
+ * clockUtils::sockets::TcpSocket socket;
+ * socket.connect("127.0.0.1", 12345, 2000);
+ * std::string message = "REQUEST?";
+ * socket.writePacket(message.c_str(), message.length());
+ * socket.receivePacket(message);
+ * \endcode
+ *
+ * Every method of TcpSocket will return ClockError::SUCCESS on success or otherwise an error code. The message received in client will now like like "REQUEST? RESPONSE!".
+ *
+ * \section sec_udp UDP sockets
+ *
+ * You need to include this header
+ * \code{.cpp}
+ * #include "clockUtils/sockets/UdpSocket.h"
+ * \endcode
+ *
+ * A UdpSocket works a bit different than the TcpSocket because it doesn't create a connection between to sockets. But the API is mostly the same. Here is the same example as for the TcpSocket:
+ * \code{.cpp}
+ * clockUtils::sockets::UdpSocket socket;
+ * socket.bind(12345);
+ * clockUtils::ClockError err;
+ * do {
+ * 		std::string message;
+ *		std::string ip;
+ *		uint16_t port;
+ * 		err = s->receivePacket(message, ip, port);
+ * 		message += " RESPONSE!";
+ * 		s->writePacket(ip, port, message.c_str(), message.length());
+ * } while (err == clockUtils::ClockError::SUCCESS);
+ * \endcode
+ * And the client side of this example looks like this:
+ * \code{.cpp}
+ * clockUtils::sockets::UdpSocket socket;
+ * std::string message = "REQUEST?";
+ * socket.writePacket("127.0.0.1", 12345, message.c_str(), message.length());
+ * std::string ip;
+ * uint16_t port;
+ * socket.receivePacket(message, ip, port);
+ * \endcode
+ *
+ */
+ 
+/**
+ * @}
+ */

@@ -33,8 +33,9 @@
 #include <string>
 #include <vector>
 
-#include "clockUtils/sockets/socketsParameters.h"
 #include "clockUtils/errors.h"
+
+#include "clockUtils/sockets/socketsParameters.h"
 
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 	#include <WinSock2.h>
@@ -63,8 +64,14 @@ namespace sockets {
 	 */
 	class CLOCK_SOCKETS_API TcpSocket {
 	public:
+		/**
+		 * \brief this function type is used as accept callback, so every accepted socket will reach this function on host
+		 */
 		typedef std::function<void(TcpSocket *)> acceptCallback;
 
+		/**
+		 * \brief this function type is used receiving a packet using receiveCallback and is called for every packet
+		 */
 		typedef std::function<void(std::vector<uint8_t> packet, TcpSocket * socket, ClockError err)> packetCallback;
 
 		/**
@@ -214,6 +221,7 @@ namespace sockets {
 			return ClockError::SUCCESS;
 		}
 
+		// TODO: (Daniel) stream operators for sockets (CU-24)
 		/* void operator<<(int a);
 
 		void operator>>(int & a); */

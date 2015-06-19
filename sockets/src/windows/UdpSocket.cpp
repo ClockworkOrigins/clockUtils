@@ -19,7 +19,6 @@
 
 #include "clockUtils/sockets/UdpSocket.h"
 
-#include <chrono>
 #include <thread>
 
 #include "clockUtils/errors.h"

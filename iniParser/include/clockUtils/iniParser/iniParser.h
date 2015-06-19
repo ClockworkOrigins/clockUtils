@@ -38,6 +38,9 @@
 namespace clockUtils {
 namespace iniParser {
 
+	/**
+	 * \brief this class is used for parsing configuration files
+	 */
 	class CLOCK_INIPARSER_API IniParser {
 	public:
 		/**

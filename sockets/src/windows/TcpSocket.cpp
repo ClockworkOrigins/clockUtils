@@ -19,9 +19,6 @@
 
 #include "clockUtils/sockets/TcpSocket.h"
 
-#include <chrono>
-#include <thread>
-
 #include "clockUtils/errors.h"
 
 namespace clockUtils {

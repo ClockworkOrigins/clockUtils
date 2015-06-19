@@ -1,0 +1,54 @@
+/**
+ * \addtogroup iniParser
+ * The ini parser library can be used to easily load, read, write and save ini files used to configure programs
+ * @{
+ */
+ 
+/**
+ * \page page_iniParser How to use the ini parser library
+ *
+ * You need to include this header
+ * \code{.cpp}
+ * #include "clockUtils/iniParser/iniParser.h"
+ * \endcode
+ *
+ * Many programms use some configuration files like ini files or use at least the same formatting. To be able to use these files in a simple but efficient way you can use our ini parser library.\n\n
+ *
+ * An ini file looks normally likes this:\n
+ * \code{.ini}
+ * [SECTION]
+ * ;comment
+ * variable=value
+ * \endcode
+ *
+ * First create an instance of the IniParser class.\n
+ * \code{.cpp}
+ * clockUtils::iniParser::IniParser iniParser;
+ * \endcode
+ *
+ * To load a file just call load method and add file as parameter:
+ * \code{.cpp}
+ * iniParser.load("foobar.ini");
+ * \endcode
+ *
+ * If loading of the file succeeds, ClockError::SUCCESS is returned, otherwise another error code.\n
+ * To get the value of a variable you use the getValue method.
+ * \code{.cpp}
+ * std::string value;
+ * iniParser.getValue("SECTION", "variable", value);
+ * \endcode
+ * Because of templates the type of value (here std::string) specifies the expected type for the value stored in ini file. If you used a type the type in the file can be converted into the method will return ClockError::SUCCESS, otherwise an error code.\n\n
+ *
+ * The setting of values works analog.
+ * \code{.cpp}
+ * iniParser.setValue("SECTION", "variable", value);
+ * \endcode
+ * This code will set the value of the variable "variable" in section "SECTION" to the last parameter.\n\n
+ *
+ * To save the changes just call save method like load and give an ini file as parameter.
+ *
+ */
+ 
+/**
+ * @}
+ */

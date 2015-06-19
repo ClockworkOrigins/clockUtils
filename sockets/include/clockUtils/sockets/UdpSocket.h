@@ -34,8 +34,9 @@
 #include <string>
 #include <vector>
 
-#include "clockUtils/sockets/socketsParameters.h"
 #include "clockUtils/errors.h"
+
+#include "clockUtils/sockets/socketsParameters.h"
 
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 	#include <WinSock2.h>
@@ -65,8 +66,14 @@ namespace sockets {
 	 */
 	class CLOCK_SOCKETS_API UdpSocket {
 	public:
+		/**
+		 * \brief this function type is used receiving a packet using receiveCallback and is called for every packet
+		 */
 		typedef std::function<void(std::vector<uint8_t> packet, std::string ip, uint16_t port, ClockError err)> packetCallback;
 
+		/**
+		 * \brief maximum size one packet is allowed to have, otherwise it can't be sent
+		 */
 		const int MAX_PACKET_SIZE = 32 * 1024;
 
 		/**
