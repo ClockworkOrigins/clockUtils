@@ -58,6 +58,9 @@ namespace clockUtils {
 	enum class ClockError;
 namespace sockets {
 
+	/**
+	 * \brief class for sockets using tcp
+	 */
 	class CLOCK_SOCKETS_API TcpSocket {
 	public:
 		typedef std::function<void(TcpSocket *)> acceptCallback;

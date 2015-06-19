@@ -18,7 +18,7 @@
  */
 
 /**
- * \addtogroup clockutils
+ * \addtogroup compression
  * @{
  */
 
@@ -32,7 +32,8 @@ namespace compression {
 namespace algorithm {
 
 	/**
-	 * \brief class for Huffman compression using a generic dictionary
+	 * \brief class for Huffman compression using a dictionary generated out of the given string
+	 * has always an overhead of 256 Bytes because of the header
 	 */
 	class CLOCK_COMPRESSION_API HuffmanGeneric : public HuffmanBase {
 	public:

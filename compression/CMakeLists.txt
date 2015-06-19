@@ -33,13 +33,13 @@ SOURCE_GROUP(compression FILES ${compressionSrc})
 SOURCE_GROUP(algorithm FILES ${compressionSrc}/algorithm)
 
 IF(CLOCKUTILS_BUILD_SHARED)
-	add_library(clock_compression${VERSION_MAJOR} SHARED ${compressionSrc})
+	add_library(clock_compression SHARED ${compressionSrc})
 ELSE(CLOCKUTILS_BUILD_SHARED)
-	add_library(clock_compression${VERSION_MAJOR} STATIC ${compressionSrc})
+	add_library(clock_compression STATIC ${compressionSrc})
 ENDIF(CLOCKUTILS_BUILD_SHARED)
 
 IF(WIN32)
-	add_custom_command(TARGET clock_compression${VERSION_MAJOR} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>/clock_compression${VERSION_MAJOR}.dll ${CMAKE_BINARY_DIR}/bin)
+	add_custom_command(TARGET clock_compression POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>/clock_compression.dll ${CMAKE_BINARY_DIR}/bin)
 ENDIF(WIN32)
 
 ########################
@@ -56,7 +56,7 @@ install(DIRECTORY include
 	DESTINATION ${CMAKE_INSTALL_PREFIX}
 	COMPONENT devel)
 
-install(TARGETS clock_compression${VERSION_MAJOR}
+install(TARGETS clock_compression
 	RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin	COMPONENT libs
 	LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib	COMPONENT libs
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib	COMPONENT libs

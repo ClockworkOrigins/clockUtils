@@ -17,11 +17,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/**
- * \addtogroup clockutils
- * @{
- */
-
 #ifndef __CLOCKUTILS_SYSTEMPARAMETERS_H__
 #define __CLOCKUTILS_SYSTEMPARAMETERS_H__
 
@@ -54,7 +49,3 @@
 #endif
 
 #endif /* __CLOCKUTILS_SYSTEMPARAMETERS_H__ */
-
-/**
- * @}
- */

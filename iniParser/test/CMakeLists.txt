@@ -27,7 +27,7 @@ add_executable(iniParserTester ${testSrc})
 
 SET_TARGET_PROPERTIES(iniParserTester PROPERTIES LINKER_LANGUAGE CXX)
 
-target_link_libraries(iniParserTester clock_iniParser${VERSION_MAJOR} ${GTEST_LIBRARIES})
+target_link_libraries(iniParserTester clock_iniParser ${GTEST_LIBRARIES})
 
 IF(UNIX)
 	target_link_libraries(iniParserTester pthread)

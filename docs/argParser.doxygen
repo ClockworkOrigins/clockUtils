@@ -5,7 +5,7 @@
  */
  
 /**
- * \page page_argParser How to use argParser
+ * \page page_argParser How to use the argument parser library
  *
  * You need to include this header
  * \code{.cpp}

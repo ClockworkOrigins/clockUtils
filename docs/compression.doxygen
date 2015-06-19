@@ -1,0 +1,34 @@
+/**
+ * \addtogroup compression
+ * The compression library can be used to easily compress and decompress using different compression algorithms
+ * @{
+ */
+ 
+/**
+ * \page page_compression How to use the compression library
+ *
+ * You need to include this header
+ * \code{.cpp}
+ * #include "clockUtils/compression/Compression.h"
+ * \endcode
+ * and also at least the one for the algorithm used for compression.\n\n
+ *
+ * To compress a std::string you just need to call the compress method of the Compression class.\n
+ * Currently we offer two similar compression algorithms both implementing Huffman encoding. These two algorithms are:
+ * - <b>HuffmanFixed</b> uses a fixed dictionary for the Huffman encoding. This results in a smaller compressed string because of the hardocded header, but can't optimize strings depending on their content. It's better than HuffmanGeneric at least in cases you have short strings <= 512 Bytes.
+ * - <b>HuffmanGeneric</b> generates the dictionary depending on the string being encoded. This means there are always 256 Byte just for the header in every string, but long strings can be reduced in a better way than HuffmanFixed can do.\n
+ * .
+ * If you want to compress a string, just follow these steps:\n
+ * \code{.cpp}
+ * std::string uncompressedString = "blafoo";
+ * clockUtils::compression::Compression<clockUtils::compression::algorithm::HuffmanFixed> c;
+ * std::string compressedString = c.compress(uncompressedString);
+ * std::string decompressedString = c.decompress(compressedString);
+ * \endcode
+ * The string ist compressed and decompressed and decompressedString is equal to uncompressedString again.
+ *
+ */
+ 
+/**
+ * @}
+ */

@@ -39,22 +39,22 @@ set(socketsSrc
 SOURCE_GROUP(sockets FILES ${socketsSrc})
 
 IF(CLOCKUTILS_BUILD_SHARED)
-	add_library(clock_sockets${VERSION_MAJOR} SHARED ${socketsSrc})
+	add_library(clock_sockets SHARED ${socketsSrc})
 ELSE(CLOCKUTILS_BUILD_SHARED)
-	add_library(clock_sockets${VERSION_MAJOR} STATIC ${socketsSrc})
+	add_library(clock_sockets STATIC ${socketsSrc})
 ENDIF(CLOCKUTILS_BUILD_SHARED)
 
 IF(WIN32)
-	target_link_libraries(clock_sockets${VERSION_MAJOR} ws2_32)
+	target_link_libraries(clock_sockets ws2_32)
 ELSEIF(UNIX)
 	# linking against pthreads or threads
 	# I don't know, why we need this strange varaible, but it works
 	# source: http://stackoverflow.com/questions/1620918/cmake-and-libpthread
-	target_link_libraries(clock_sockets${VERSION_MAJOR} ${CMAKE_THREAD_LIBS_INIT})
+	target_link_libraries(clock_sockets ${CMAKE_THREAD_LIBS_INIT})
 ENDIF()
 
 IF(WIN32)
-	add_custom_command(TARGET clock_sockets${VERSION_MAJOR} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>/clock_sockets${VERSION_MAJOR}.dll ${CMAKE_BINARY_DIR}/bin)
+	add_custom_command(TARGET clock_sockets POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>/clock_sockets.dll ${CMAKE_BINARY_DIR}/bin)
 ENDIF(WIN32)
 
 ########################
@@ -71,7 +71,7 @@ install(DIRECTORY include
 	DESTINATION ${CMAKE_INSTALL_PREFIX}
 	COMPONENT devel)
 
-install(TARGETS clock_sockets${VERSION_MAJOR}
+install(TARGETS clock_sockets
 	RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin	COMPONENT libs
 	LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib	COMPONENT libs
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib	COMPONENT libs

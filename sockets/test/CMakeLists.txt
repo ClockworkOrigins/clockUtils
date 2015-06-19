@@ -28,7 +28,7 @@ add_executable(SocketsTester ${testSrc})
 
 SET_TARGET_PROPERTIES(SocketsTester PROPERTIES LINKER_LANGUAGE CXX)
 
-target_link_libraries(SocketsTester clock_sockets${VERSION_MAJOR} ${GTEST_LIBRARIES})
+target_link_libraries(SocketsTester clock_sockets ${GTEST_LIBRARIES})
 
 IF(UNIX)
 	target_link_libraries(SocketsTester pthread)

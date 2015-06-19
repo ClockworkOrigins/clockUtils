@@ -59,7 +59,10 @@ namespace std {
 namespace clockUtils {
 	enum class ClockError;
 namespace sockets {
-
+	
+	/**
+	 * \brief class for sockets using udp
+	 */
 	class CLOCK_SOCKETS_API UdpSocket {
 	public:
 		typedef std::function<void(std::vector<uint8_t> packet, std::string ip, uint16_t port, ClockError err)> packetCallback;

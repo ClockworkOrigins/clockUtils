@@ -27,7 +27,7 @@ add_executable(CompressionTester ${testSrc})
 
 SET_TARGET_PROPERTIES(CompressionTester PROPERTIES LINKER_LANGUAGE CXX)
 
-target_link_libraries(CompressionTester clock_compression${VERSION_MAJOR} ${GTEST_LIBRARIES})
+target_link_libraries(CompressionTester clock_compression ${GTEST_LIBRARIES})
 
 IF(UNIX)
 	TARGET_LINK_LIBRARIES(CompressionTester pthread)

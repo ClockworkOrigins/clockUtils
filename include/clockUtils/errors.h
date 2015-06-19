@@ -18,7 +18,7 @@
  */
 
 /**
- * \addtogroup clockutils
+ * \addtogroup errors
  * @{
  */
 
@@ -28,26 +28,26 @@
 namespace clockUtils {
 
 	enum class ClockError {
-		SUCCESS,
+		SUCCESS,			//!< method call succeeded
 		// general
-		NOT_READY,		// !< not initialized yet
-		TIMEOUT,		// !< waiting time expired
-		INVALID_ARGUMENT,	// !< parameters are invalid
-		INVALID_USAGE,		// !< library is used in wrong way
-		IN_PROGRESS,		// !< current action already in progress
-		WRONG_TYPE,		// !< value couldn't be cast in expected type
-		WRONG_SYNTAX,		// !< syntax of parsed file is not as expected
-		FILENOTFOUND,		// !< file does not exist
+		NOT_READY,			//!< not initialized yet
+		TIMEOUT,			//!< waiting time expired
+		INVALID_ARGUMENT,	//!< parameters are invalid
+		INVALID_USAGE,		//!< library is used in wrong way
+		IN_PROGRESS,		//!< current action already in progress
+		WRONG_TYPE,			//!< value couldn't be cast in expected type
+		WRONG_SYNTAX,		//!< syntax of parsed file is not as expected
+		FILENOTFOUND,		//!< file does not exist
 		// sockets
-		INVALID_IP,		// !< ip address invalid
-		INVALID_PORT,		// !< port invalid
-		ADDRESS_INUSE,		// !< a socket is already bound to this address
-		CONNECTION_FAILED,	// !< connecting sockets failed
-		NOT_CONNECTED,		// !< using a method for connected sockets on unconnected socket
+		INVALID_IP,			//!< ip address invalid
+		INVALID_PORT,		//!< port invalid
+		ADDRESS_INUSE,		//!< a socket is already bound to this address
+		CONNECTION_FAILED,	//!< connecting sockets failed
+		NOT_CONNECTED,		//!< using a method for connected sockets on unconnected socket
 		// iniParser
-		VALUE_NOTFOUND,		// !< value not found
+		VALUE_NOTFOUND,		//!< value not found
 		//
-		UNKNOWN,
+		UNKNOWN,			//!< an error occured, but the error isn't wrapped yet
 		ERROR_COUNT
 	};
 

@@ -18,7 +18,7 @@
  */
 
 /**
- * \addtogroup clockutils
+ * \addtogroup compression
  * @{
  */
 
@@ -35,6 +35,7 @@ namespace algorithm {
 
 	/**
 	 * \brief class for Huffman compression using a fixed dictionary
+	 * has no header like HuffmanGeneric, but can't optimize as good as HuffmanGeneric
 	 */
 	class CLOCK_COMPRESSION_API HuffmanFixed : public HuffmanBase {
 	public:

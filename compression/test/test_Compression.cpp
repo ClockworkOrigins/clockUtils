@@ -19,7 +19,6 @@
 
 #include <random>
 
-#include "clockUtils/errors.h"
 #include "clockUtils/compression/Compression.h"
 #include "clockUtils/compression/algorithm/HuffmanFixed.h"
 #include "clockUtils/compression/algorithm/HuffmanGeneric.h"
