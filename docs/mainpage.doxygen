@@ -5,6 +5,13 @@
  *
  * clockUtils is a collection of libraries helping in different parts of development
  *
+ * \section sec_libraries Libraries
+ *
+ * - argParser: parses the command line arguments of a program to allow the common linux scheme for parameters
+ * - compression: allows compression of data
+ * - iniParser: to read and write ini files
+ * - sockets: simple usage of tcp and udp sockets. We designed this library to solve some problems we faced using the boost sockets. Our sockets support multithreaded access, invalidating the data immediatly after issuing an async write and sending packet and stream style data. Changing from boost to clockUtils significantly reduced our network code size and increased speed by a magnitude.
+ *
  * \section sec_main_links Links
  *
  * - \ref page_argParser
