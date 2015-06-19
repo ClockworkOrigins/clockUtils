@@ -65,6 +65,7 @@
  * And the client side of this example looks like this:
  * \code{.cpp}
  * clockUtils::sockets::UdpSocket socket;
+ * socket.bind(12346);
  * std::string message = "REQUEST?";
  * socket.writePacket("127.0.0.1", 12345, message.c_str(), message.length());
  * std::string ip;
