@@ -30,20 +30,20 @@ namespace clockUtils {
 	enum class ClockError {
 		SUCCESS,
 		// general
-		NOT_READY,
-		TIMEOUT,
+		NOT_READY,		// !< not initialized yet
+		TIMEOUT,		// !< waiting time expired
 		INVALID_ARGUMENT,	// !< parameters are invalid
 		INVALID_USAGE,		// !< library is used in wrong way
-		IN_PROGRESS,
-		WRONG_TYPE,			// !< value couldn't be cast in expected type
+		IN_PROGRESS,		// !< current action already in progress
+		WRONG_TYPE,		// !< value couldn't be cast in expected type
 		WRONG_SYNTAX,		// !< syntax of parsed file is not as expected
 		FILENOTFOUND,		// !< file does not exist
 		// sockets
-		INVALID_IP,
-		INVALID_PORT,
-		ADDRESS_INUSE,
-		CONNECTION_FAILED,
-		NOT_CONNECTED,
+		INVALID_IP,		// !< ip address invalid
+		INVALID_PORT,		// !< port invalid
+		ADDRESS_INUSE,		// !< a socket is already bound to this address
+		CONNECTION_FAILED,	// !< connecting sockets failed
+		NOT_CONNECTED,		// !< using a method for connected sockets on unconnected socket
 		// iniParser
 		VALUE_NOTFOUND,		// !< value not found
 		//

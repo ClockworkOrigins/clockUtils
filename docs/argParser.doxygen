@@ -5,7 +5,7 @@
  */
  
 /**
- * \page page_argParser How to use
+ * \page page_argParser How to use argParser
  *
  * You need to include this header
  * \code{.cpp}
@@ -31,7 +31,25 @@
  * The next step is to parse your list. Therefor exist two macros:\n
  * PARSE_COMMANDLINE() parses the arguments of the main method (argc and argv)\n
  * PARSE_ARGUMENTS(buffer, length) parses an own list\n
- * If you use the first one, make sure argc and argv are defined. furthermore, argv needs to be const
+ * If you use the first one, make sure argc and argv are defined. Furthermore, argv needs to be const.\n\n
+ *
+ * You can also use the automatically available parameter --help. If --help was entered on commandline, the macro HELPSET() returns true and the text output can be retrieved using GETHELPTEXT()
+ * Example:\n
+ * \code{.cpp}
+ * if (HELPSET()) {
+ * 	std::cout << GETHELPTEXT() << std::endl;
+ * }
+ * \endcode
+ * \n
+ * In some cases you want to ignore additional entries at the end of the commandline or you want a to support more than one parameter e.g. parsing multiple files. Therefore you can register a std::vector<std::string> using REGISTER_VARIABLE_ARGUMENTS(name) where name is the name of the variable. All additional entries are pushed into this vector and they don't cause an error any more as they did before.
+ * Example:\n
+ * \code{.cpp}
+ * int main(int argc, const char ** argv) {
+ * 	REGISTER_VARIABLE_ARGUMENTS(files);
+ *	PARSE_COMMANDLINE();
+ * }
+ * \endcode
+ * Calling this main compiles to foobar with "./foobar a b c" results in vector files containing entries a, b and c.
  *
  */
  
