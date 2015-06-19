@@ -1,4 +1,4 @@
-/**
+/*
  * clockUtils
  * Copyright (2015) Michael Baer, Daniel Bonrath, All rights reserved.
  *
@@ -15,6 +15,11 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+/**
+ * \addtogroup argParser
+ * @{
  */
 
 #ifndef __CLOCKUTILS_ARGPARSER_ARGUMENTPARSER_H__
@@ -75,3 +80,7 @@
 	clockUtils::argParser::Parser::getHelpText()
 
 #endif /* __CLOCKUTILS_ARGPARSER_ARGUMENTPARSER_H__ */
+
+/**
+ * @}
+ */

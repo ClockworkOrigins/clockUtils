@@ -1,4 +1,4 @@
-/**
+/*
  * clockUtils
  * Copyright (2015) Michael Baer, Daniel Bonrath, All rights reserved.
  *
@@ -52,10 +52,6 @@
 #ifdef _MSC_VER
 	#pragma warning(disable : 4251) // dll interface to be used by clients...
 #endif
-
-/**
- * @}
- */
 
 #endif /* __CLOCKUTILS_SYSTEMPARAMETERS_H__ */
 

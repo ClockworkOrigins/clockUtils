@@ -1,4 +1,4 @@
-/**
+/*
  * clockUtils
  * Copyright (2015) Michael Baer, Daniel Bonrath, All rights reserved.
  *
@@ -15,6 +15,11 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+/**
+ * \addtogroup compression
+ * @{
  */
 
 #ifndef __CLOCKUTILS_COMPRESSION_COMPRESSION_H__
@@ -50,3 +55,7 @@ namespace compression {
 } /* namespace clockUtils */
 
 #endif /* __CLOCKUTILS_COMPRESSION_COMPRESSION_H__ */
+
+/**
+ * @}
+ */

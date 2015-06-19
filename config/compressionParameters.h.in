@@ -1,4 +1,4 @@
-/**
+/*
  * clockUtils
  * Copyright (2015) Michael Baer, Daniel Bonrath, All rights reserved.
  *

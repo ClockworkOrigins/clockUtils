@@ -1,4 +1,4 @@
-/**
+/*
  * clockUtils
  * Copyright (2015) Michael Baer, Daniel Bonrath, All rights reserved.
  *
@@ -18,7 +18,7 @@
  */
 
 /**
- * \addtogroup sockets
+ * \addtogroup argParser
  * @{
  */
 
@@ -46,10 +46,6 @@
 		#define CLOCK_ARGPARSER_API
 	#endif
 #endif
-
-/**
- * @}
- */
 
 #endif /* __CLOCKUTILS_ARGPARSER_ARGPARSERPARAMETERS_H__ */
 
