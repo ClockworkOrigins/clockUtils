@@ -18,4 +18,6 @@
  * - \ref page_compression
  * - \ref page_iniParser
  * - \ref page_sockets
+ * - \ref page_cmake
+ *
  */

@@ -1,0 +1,22 @@
+/**
+ * \addtogroup cmake
+ * @{
+ */
+ 
+/**
+ * \page page_cmake All CMake variables
+ *
+ * Variable | Default | Description
+ * ---------|------------|-----------
+ * WITH_TESTING | OFF | Enables building of tests, requires gtest
+ * WITH_LIBRARY_ARGPARSER | ON | Enables build of the argParser library
+ * WITH_LIBRARY_COMPRESSION | ON | Enables build of the compression library
+ * WITH_LIBRARY_INIPARSER | ON | Enables build of the iniParser library
+ * WITH_LIBRARY_SOCKETS | ON | Enables build of the sockets library
+ * 32BIT | OFF | Enables 32bit on 64bit machines
+ *
+ */
+ 
+/**
+ * @}
+ */
