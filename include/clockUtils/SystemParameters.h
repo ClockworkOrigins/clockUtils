@@ -20,6 +20,8 @@
 #ifndef __CLOCKUTILS_SYSTEMPARAMETERS_H__
 #define __CLOCKUTILS_SYSTEMPARAMETERS_H__
 
+#include "clockUtils/Config.h"
+
 // Global platform specific defines
 #define CLOCKUTILS_PLATFORM_WIN32 1
 #define CLOCKUTILS_PLATFORM_LINUX 2

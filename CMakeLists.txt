@@ -39,7 +39,6 @@ IF(WITH_TESTING AND NOT WIN32)
 	option(CLOCKUTILS_BUILD_SHARED "build project with shared libraries" OFF)
 ELSE(WITH_TESTING AND NOT WIN32)
 	option(CLOCKUTILS_BUILD_SHARED "build project with shared libraries" ON)
-	ADD_DEFINITIONS(-DCLOCKUTILS_BUILD_SHARED)
 ENDIF(WITH_TESTING AND NOT WIN32)
 
 project(clockUtils)
