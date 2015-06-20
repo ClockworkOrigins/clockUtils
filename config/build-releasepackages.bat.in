@@ -1,11 +1,16 @@
 Set version=@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@
 
 Set sourcePackage=@PACKAGE_NAME@-%version%-src
-Set prebuiltPackage=@PACKAGE_NAME@-%version%-msvc13_32bit
+Set prebuiltPackage32=@PACKAGE_NAME@-%version%-msvc13_x86
+Set prebuiltPackage64=@PACKAGE_NAME@-%version%-msvc13_x64
 
 mkdir "%sourcePackage%"
-mkdir "%prebuiltPackage%"
-mkdir "%prebuiltPackage%/bin"
+mkdir "%prebuiltPackage32%"
+mkdir "%prebuiltPackage32%/bin"
+mkdir "%prebuiltPackage64%"
+mkdir "%prebuiltPackage64%/bin"
+
+REM SOURCE PACKAGE
 
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/argParser" "@CMAKE_BINARY_DIR@/%sourcePackage%/argParser"
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/compression" "@CMAKE_BINARY_DIR@/%sourcePackage%/compression"
@@ -19,17 +24,34 @@ xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/docs" "@CMAKE_BINARY_DIR@/%sourcePackage%/doc
 xcopy /F "@CMAKE_SOURCE_DIR@/CMakeLists.txt" "@CMAKE_BINARY_DIR@/%sourcePackage%/CMakeLists.txt*"
 xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE" "@CMAKE_BINARY_DIR@/%sourcePackage%/LICENSE*"
 
-xcopy /S /Y /I "@CMAKE_BINARY_DIR@/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/include"
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/include"
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/argParser/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/include"
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/compression/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/include"
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/iniParser/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/include"
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/sockets/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/include"
+REM 32Bit package
 
-xcopy /F "@CMAKE_BINARY_DIR@/bin/Release/clock_*.dll" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/bin/"
-xcopy /F "@CMAKE_BINARY_DIR@/bin/Release/clock_*.lib" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/lib/"
+xcopy /S /Y /I "@CMAKE_BINARY_DIR@/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage32%/include"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage32%/include"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/argParser/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage32%/include"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/compression/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage32%/include"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/iniParser/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage32%/include"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/sockets/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage32%/include"
 
-xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/LICENSE*"
+xcopy /F "@CMAKE_BINARY_DIR@/bin/Release/clock_*.dll" "@CMAKE_BINARY_DIR@/%prebuiltPackage32%/bin/"
+xcopy /F "@CMAKE_BINARY_DIR@/bin/Release/clock_*.lib" "@CMAKE_BINARY_DIR@/%prebuiltPackage32%/lib/"
+
+xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE" "@CMAKE_BINARY_DIR@/%prebuiltPackage32%/LICENSE*"
+
+REM 64Bit package
+
+xcopy /S /Y /I "@CMAKE_BINARY_DIR@/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage64%/include"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage64%/include"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/argParser/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage64%/include"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/compression/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage64%/include"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/iniParser/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage64%/include"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/sockets/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage64%/include"
+
+xcopy /F "@CMAKE_BINARY_DIR@/bin/Release/clock_*.dll" "@CMAKE_BINARY_DIR@/%prebuiltPackage64%/bin/"
+xcopy /F "@CMAKE_BINARY_DIR@/bin/Release/clock_*.lib" "@CMAKE_BINARY_DIR@/%prebuiltPackage64%/lib/"
+
+xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE" "@CMAKE_BINARY_DIR@/%prebuiltPackage64%/LICENSE*"
 
 winrar a -afzip -df %sourcePackage%.zip %sourcePackage%
-winrar a -afzip -df %prebuiltPackage%.zip %prebuiltPackage%
+winrar a -afzip -df %prebuiltPackage32%.zip %prebuiltPackage32%
+winrar a -afzip -df %prebuiltPackage64%.zip %prebuiltPackage64%

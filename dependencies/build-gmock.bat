@@ -1,3 +1,10 @@
+IF [%1] == [64] (
+	SET ARCH=Visual Studio 12 Win64
+)
+IF [%1] == [] (
+	SET ARCH=Visual Studio 12
+)
+
 call build-common.bat
 
 Set ARCHIVE=gmock-1.7.0.zip
@@ -7,21 +14,21 @@ Set PREFIX=%cd%/gmock
 echo "Compile GoogleMock with GoogleTest"
 
 echo "Extracting GoogleMock with GoogleTest"
-if not exist %BUILD_ROOT% exit
+if not exist %BUILD_ROOT% exit /b
 cd %BUILD_ROOT%
 
 if exist %BUILD_DIR% RD /S /Q "%BUILD_DIR%"
 
 winrar.exe x %EX_DIR%/%ARCHIVE%
 
-if not exist %BUILD_DIR% exit
+if not exist %BUILD_DIR% exit /b
 
 echo "Configuring GoogleMock with GoogleTest"
 cd %BUILD_DIR%
-cmake . -DCMAKE_INSTALL_PREFIX=%PREFIX% -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON .
+cmake . -DCMAKE_INSTALL_PREFIX=%PREFIX% -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -G "%ARCH%" .
 
 echo "Building GoogleMock with GoogleTest"
-MSBuild.exe gmock.sln /p:Configuration=Release > NUL
+MSBuild.exe gmock.sln /p:Configuration=Release
 
 echo "Installing GoogleMock with GoogleTest"
 mkdir "%PREFIX%"
