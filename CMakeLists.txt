@@ -150,7 +150,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include/)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include
 	DESTINATION ${CMAKE_INSTALL_PREFIX}
 	COMPONENT devel)
-	
+
 configure_file(${CMAKE_SOURCE_DIR}/config/clockUtilsConfig.h.in ${CMAKE_BINARY_DIR}/include/clockUtils/Config.h @ONLY)
 
 include_directories(${CMAKE_BINARY_DIR}/include/)
@@ -218,6 +218,8 @@ ENDIF(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 IF(WIN32)
 	configure_file(${CMAKE_SOURCE_DIR}/config/build-releasepackages.bat.in ${CMAKE_BINARY_DIR}/build-releasepackages.bat @ONLY)
 	add_custom_target(releasePackages COMMAND build-releasepackages.bat WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+ELSE()
+	configure_file(${CMAKE_SOURCE_DIR}/config/PKGBUILD.in ${CMAKE_BINARY_DIR}/PKGBUILD @ONLY)
 ENDIF(WIN32)
 
 SET(PACKAGE_NAME "clockutils" CACHE STRING "The name for archives and packages")
