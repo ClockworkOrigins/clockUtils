@@ -85,7 +85,7 @@ ENDIF()
 
 # Setting current version
 SET(VERSION_MAJOR 0)
-SET(VERSION_MINOR 4)
+SET(VERSION_MINOR 5)
 SET(VERSION_PATCH 0)
 SET(DESCRIPTION "A lightweight c++ library for commonly needed tasks. Optimized for simplicity and speed.")
 
