@@ -2,7 +2,7 @@
 pkgname=clockutils
 pkgver=@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@
 pkgrel=1
-pkgdesc="@CPACK_PACKAGE_DESCRIPTION_SUMMARY@"
+pkgdesc="@DESCRIPTION@"
 arch=('i686' 'x86_64')
 url="http://clockwork-origins.de/en/clockUtils"
 license=('LGPL2.1')

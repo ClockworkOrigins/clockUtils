@@ -87,6 +87,7 @@ ENDIF()
 SET(VERSION_MAJOR 0)
 SET(VERSION_MINOR 4)
 SET(VERSION_PATCH 0)
+SET(DESCRIPTION "A lightweight c++ library for commonly needed tasks. Optimized for simplicity and speed.")
 
 #########################################################################
 #Global Directory Definitions
@@ -226,7 +227,7 @@ SET(PACKAGE_NAME "clockutils" CACHE STRING "The name for archives and packages")
 
 SET(CPACK_INSTALL_PREFIX "/usr")
 SET(CPACK_PACKAGE_CONTACT "contact@clockwork-origins.de")
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A lightweight c++ library for commonly needed tasks. Optimized for simplicity and speed.")
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY ${DESCRIPTION})
 SET(CPACK_PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 SET(CPACK_PACKAGE_VERSION_MAJOR "${VERSION_MAJOR}")
 SET(CPACK_PACKAGE_VERSION_MINOR "${VERSION_MINOR}")
