@@ -61,7 +61,7 @@ namespace sockets {
 			});
 	}
 
-	TcpSocket::TcpSocket(int fd) : TcpSocket() {
+	TcpSocket::TcpSocket(SOCKET fd) : TcpSocket() {
 		_sock = fd;
 		_status = SocketStatus::CONNECTED;
 	}
@@ -132,7 +132,7 @@ namespace sockets {
 				if (acceptMultiple) {
 					while (true) {
 						errno = 0;
-						int clientSock = ::accept(_sock, nullptr, nullptr);
+						SOCKET clientSock = ::accept(_sock, nullptr, nullptr);
 						if (clientSock == -1) {
 							close();
 							return;
@@ -141,7 +141,7 @@ namespace sockets {
 						thrd2.detach();
 					}
 				} else {
-					int clientSock = ::accept(_sock, nullptr, nullptr);
+					SOCKET clientSock = ::accept(_sock, nullptr, nullptr);
 					close();
 					if (clientSock == -1) {
 						return;
@@ -209,7 +209,7 @@ namespace sockets {
 				tv.tv_usec = (timeout % 1000) * 1000;
 				FD_ZERO(&myset);
 				FD_SET(_sock, &myset);
-				if (select(_sock + 1, NULL, &myset, NULL, &tv) > 0) {
+				if (select(int(_sock + 1), NULL, &myset, NULL, &tv) > 0) {
 					socklen_t lon = sizeof(int);
 					int valopt;
 
@@ -311,7 +311,7 @@ namespace sockets {
 		return static_cast<uint16_t>(ntohs(localAddress.sin_port));
 	}
 
-	ClockError TcpSocket::writePacket(const void * str, const uint32_t length) {
+	ClockError TcpSocket::writePacket(const void * str, const size_t length) {
 		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
@@ -426,7 +426,7 @@ namespace sockets {
 		return ClockError::SUCCESS;
 	}
 
-	ClockError TcpSocket::write(const void * str, uint32_t length) {
+	ClockError TcpSocket::write(const void * str, size_t length) {
 		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
@@ -434,7 +434,7 @@ namespace sockets {
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 		int rc = send(_sock, reinterpret_cast<const char *>(str), length, MSG_NOSIGNAL);
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
-		int rc = send(_sock, reinterpret_cast<const char *>(str), length, 0);
+		int rc = send(_sock, reinterpret_cast<const char *>(str), int(length), 0);
 #endif
 
 		if (rc == -1) {

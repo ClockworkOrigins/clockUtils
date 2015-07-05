@@ -55,7 +55,7 @@ namespace sockets {
 		return ClockError::SUCCESS;
 	}
 
-	ClockError UdpSocket::writePacket(const std::string & ip, uint16_t port, const void * str, const uint32_t length) {
+	ClockError UdpSocket::writePacket(const std::string & ip, uint16_t port, const void * str, const size_t length) {
 		if (_sock == -1) {
 			return ClockError::NOT_READY;
 		}
@@ -80,7 +80,7 @@ namespace sockets {
 		return writePacket(ip, port, const_cast<const unsigned char *>(&str[0]), str.size());
 	}
 
-	ClockError UdpSocket::write(const std::string & ip, uint16_t port, const void * str, uint32_t length) {
+	ClockError UdpSocket::write(const std::string & ip, uint16_t port, const void * str, size_t length) {
 		if (_sock == -1) {
 			return ClockError::NOT_READY;
 		}
@@ -91,9 +91,9 @@ namespace sockets {
 		addr.sin_port = htons(port);
 		addr.sin_addr.s_addr = inet_addr(ip.c_str());
 
-		for (uint32_t i = 0; i < length / MAX_PACKET_SIZE + 1; i++) {
-			uint32_t sendLength = (i < length / MAX_PACKET_SIZE) ? MAX_PACKET_SIZE : length - (i * MAX_PACKET_SIZE);
-			if (sendto(_sock, &reinterpret_cast<const char *>(str)[i * MAX_PACKET_SIZE], sendLength, 0, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
+		for (size_t i = 0; i < length / MAX_PACKET_SIZE + 1; i++) {
+			size_t sendLength = (i < length / MAX_PACKET_SIZE) ? MAX_PACKET_SIZE : length - (i * MAX_PACKET_SIZE);
+			if (sendto(_sock, &reinterpret_cast<const char *>(str)[i * MAX_PACKET_SIZE], int(sendLength), 0, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
 				ClockError error = getLastError();
 				return error;
 			}

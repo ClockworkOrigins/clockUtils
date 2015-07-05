@@ -50,6 +50,8 @@
 	#include <sys/socket.h>
 	#include <sys/types.h>
 	#include <unistd.h>
+
+	typedef int SOCKET;
 #endif
 
 namespace std {
@@ -140,7 +142,7 @@ namespace sockets {
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
-		ClockError writePacket(const void * str, const uint32_t length);
+		ClockError writePacket(const void * str, const size_t length);
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
@@ -175,7 +177,7 @@ namespace sockets {
 		 * \brief sends a message, doesn't work with receivePacket
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
-		ClockError write(const void * str, uint32_t length);
+		ClockError write(const void * str, size_t length);
 
 		/**
 		 * \brief sends a message, doesn't work with receivePacket
@@ -240,7 +242,7 @@ namespace sockets {
 		 * \brief constructor being called during accept
 		 * \param[in] fd file descriptor for the new socket
 		 */
-		TcpSocket(int fd);
+		TcpSocket(SOCKET fd);
 
 		/**
 		 * \brief reads platform specific error codes and returns a ClockError
@@ -250,7 +252,7 @@ namespace sockets {
 		/**
 		 * \brief stores the local socket descriptor or -1 if not active
 		 */
-		int _sock;
+		SOCKET _sock;
 
 		/**
 		 * \brief current socket status
