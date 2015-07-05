@@ -76,8 +76,8 @@ namespace sockets {
 		return error;
 	}
 
-	ClockError UdpSocket::writePacket(const std::string & ip, uint16_t port, const std::vector<uint8_t> & str) {
-		return writePacket(ip, port, const_cast<const unsigned char *>(&str[0]), str.size());
+	ClockError UdpSocket::writePacket(const std::string & ip, uint16_t port, const std::vector<uint8_t> & vec) {
+		return writePacket(ip, port, const_cast<const unsigned char *>(&vec[0]), vec.size());
 	}
 
 	ClockError UdpSocket::write(const std::string & ip, uint16_t port, const void * str, size_t length) {
@@ -153,7 +153,7 @@ namespace sockets {
 
 			if (length == 0) {
 				if (result.size() >= 5) {
-					length = static_cast<uint32_t>(result[1] * 256 * 256 * 256 + result[2] * 256 * 256 + result[3] * 256 + result[4]);
+					length = uint32_t(result[1] * 256 * 256 * 256 + result[2] * 256 * 256 + result[3] * 256 + result[4]);
 				}
 			}
 

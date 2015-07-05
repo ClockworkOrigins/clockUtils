@@ -332,20 +332,36 @@ namespace sockets {
 		return error;
 	}
 
-	ClockError TcpSocket::writePacket(const std::vector<uint8_t> & str) {
+	ClockError TcpSocket::writePacket(const std::vector<uint8_t> & vec) {
 		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
-		return writePacket(const_cast<const unsigned char *>(&str[0]), str.size());
+		return writePacket(const_cast<const unsigned char *>(&vec[0]), vec.size());
 	}
 
-	ClockError TcpSocket::writePacketAsync(const std::vector<uint8_t> & str) {
+	ClockError TcpSocket::writePacketAsync(const void * str, const size_t length) {
+		if (_status != SocketStatus::CONNECTED) {
+			return ClockError::NOT_READY;
+		}
+
+		std::vector<uint8_t> vec(length);
+		for (size_t i = 0; i < length; i++) {
+			vec[i] = reinterpret_cast<uint8_t *>(const_cast<void *>(str))[i];
+		}
+		_todoLock.lock();
+		_todo.push(vec);
+		_todoLock.unlock();
+		_objCondExecutable.notify_all();
+		return ClockError::SUCCESS;
+	}
+
+	ClockError TcpSocket::writePacketAsync(const std::vector<uint8_t> & vec) {
 		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
 
 		_todoLock.lock();
-		_todo.push(str);
+		_todo.push(vec);
 		_todoLock.unlock();
 		_objCondExecutable.notify_all();
 		return ClockError::SUCCESS;

@@ -108,13 +108,37 @@ namespace sockets {
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
-		ClockError writePacket(const std::string & ip, uint16_t port, const std::vector<uint8_t> & str);
+		ClockError writePacket(const std::string & ip, uint16_t port, const std::vector<uint8_t> & vec);
+
+		/**
+		 * \brief sends a packet being able to be completely received in one call of receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writePacket(const std::string & ip, uint16_t port, const std::string & str) {
+			return writePacket(ip, port, str.c_str(), str.length());
+		}
 
 		/**
 		 * \brief sends a packet, doesn't work with receivePacket
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
 		ClockError write(const std::string & ip, uint16_t port, const void * str, size_t length);
+
+		/**
+		 * \brief sends a packet, doesn't work with receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError write(const std::string & ip, uint16_t port, const std::vector<uint8_t> & vec) {
+			return write(ip, port, const_cast<const unsigned char *>(&vec[0]), vec.size());
+		}
+
+		/**
+		 * \brief sends a packet, doesn't work with receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError write(const std::string & ip, uint16_t port, const std::string & str) {
+			return write(ip, port, str.c_str(), str.length());
+		}
 
 		/**
 		 * \brief receives a packet sent with writePacket, doesn't work with write
