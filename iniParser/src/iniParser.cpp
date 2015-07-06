@@ -127,7 +127,7 @@ namespace iniParser {
 			value = std::string();
 			return ClockError::VALUE_NOTFOUND;
 		}
-		for (const std::tuple<std::string, std::string, uint32_t, std::string> & t : it->second) {
+		for (const std::tuple<std::string, std::string, size_t, std::string> & t : it->second) {
 			if (std::get<SECTION>(t) == section && std::get<FIELD>(t) == field) {
 				value = std::get<VALUE>(t);
 				return ClockError::SUCCESS;

@@ -55,7 +55,7 @@ namespace sockets {
 		return ClockError::SUCCESS;
 	}
 
-	ClockError UdpSocket::writePacket(const std::string & ip, uint16_t port, const void * str, const uint32_t length) {
+	ClockError UdpSocket::writePacket(const std::string & ip, uint16_t port, const void * str, const size_t length) {
 		if (_sock == -1) {
 			return ClockError::NOT_READY;
 		}
@@ -76,11 +76,11 @@ namespace sockets {
 		return error;
 	}
 
-	ClockError UdpSocket::writePacket(const std::string & ip, uint16_t port, const std::vector<uint8_t> & str) {
-		return writePacket(ip, port, const_cast<const unsigned char *>(&str[0]), str.size());
+	ClockError UdpSocket::writePacket(const std::string & ip, uint16_t port, const std::vector<uint8_t> & vec) {
+		return writePacket(ip, port, const_cast<const unsigned char *>(&vec[0]), vec.size());
 	}
 
-	ClockError UdpSocket::write(const std::string & ip, uint16_t port, const void * str, uint32_t length) {
+	ClockError UdpSocket::write(const std::string & ip, uint16_t port, const void * str, size_t length) {
 		if (_sock == -1) {
 			return ClockError::NOT_READY;
 		}
@@ -91,9 +91,9 @@ namespace sockets {
 		addr.sin_port = htons(port);
 		addr.sin_addr.s_addr = inet_addr(ip.c_str());
 
-		for (uint32_t i = 0; i < length / MAX_PACKET_SIZE + 1; i++) {
-			uint32_t sendLength = (i < length / MAX_PACKET_SIZE) ? MAX_PACKET_SIZE : length - (i * MAX_PACKET_SIZE);
-			if (sendto(_sock, &reinterpret_cast<const char *>(str)[i * MAX_PACKET_SIZE], sendLength, 0, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
+		for (size_t i = 0; i < length / MAX_PACKET_SIZE + 1; i++) {
+			size_t sendLength = (i < length / MAX_PACKET_SIZE) ? MAX_PACKET_SIZE : length - (i * MAX_PACKET_SIZE);
+			if (sendto(_sock, &reinterpret_cast<const char *>(str)[i * MAX_PACKET_SIZE], int(sendLength), 0, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
 				ClockError error = getLastError();
 				return error;
 			}
@@ -153,7 +153,7 @@ namespace sockets {
 
 			if (length == 0) {
 				if (result.size() >= 5) {
-					length = static_cast<uint32_t>(result[1] * 256 * 256 * 256 + result[2] * 256 * 256 + result[3] * 256 + result[4]);
+					length = uint32_t(result[1] * 256 * 256 * 256 + result[2] * 256 * 256 + result[3] * 256 + result[4]);
 				}
 			}
 

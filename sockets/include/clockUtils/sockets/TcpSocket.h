@@ -50,6 +50,8 @@
 	#include <sys/socket.h>
 	#include <sys/types.h>
 	#include <unistd.h>
+
+	typedef int SOCKET;
 #endif
 
 namespace std {
@@ -140,19 +142,41 @@ namespace sockets {
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
-		ClockError writePacket(const void * str, const uint32_t length);
+		ClockError writePacket(const void * str, const size_t length);
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
-		ClockError writePacket(const std::vector<uint8_t> & str);
+		ClockError writePacket(const std::vector<uint8_t> & vec);
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
-		ClockError writePacketAsync(const std::vector<uint8_t> & str);
+		ClockError writePacket(const std::string & str) {
+			return writePacket(str.c_str(), str.size());
+		}
+
+		/**
+		 * \brief sends a packet being able to be completely received in one call of receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writePacketAsync(const void * str, const size_t length);
+
+		/**
+		 * \brief sends a packet being able to be completely received in one call of receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writePacketAsync(const std::vector<uint8_t> & vec);
+
+		/**
+		 * \brief sends a packet being able to be completely received in one call of receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writePacketAsync(const std::string & str) {
+			return writePacketAsync(std::vector<uint8_t>(str.begin(), str.end()));
+		}
 
 		/**
 		 * \brief receives a packet sent with writePacket, doesn't work with write
@@ -161,27 +185,35 @@ namespace sockets {
 		ClockError receivePacket(std::vector<uint8_t> & buffer);
 
 		/**
+		 * \brief receives a packet sent with writePacket, doesn't work with write
+		 */
+		ClockError receivePacket(std::string & buffer);
+
+		/**
 		 * \brief calls the callback for every packet that is received on this socket
 		 * This function will return immediately
 		 */
 		ClockError receiveCallback(packetCallback pcb);
 
 		/**
-		 * \brief receives a packet sent with writePacket, doesn't work with write
+		 * \brief sends a message, doesn't work with receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
-		ClockError receivePacket(std::string & buffer);
+		ClockError write(const void * str, size_t length);
 
 		/**
 		 * \brief sends a message, doesn't work with receivePacket
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
-		ClockError write(const void * str, uint32_t length);
+		ClockError write(const std::vector<uint8_t> & vec);
 
 		/**
 		 * \brief sends a message, doesn't work with receivePacket
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
-		ClockError write(const std::vector<uint8_t> & str);
+		ClockError write(const std::string & str) {
+			return write(str.c_str(), str.length());
+		}
 
 		/**
 		 * \brief receives data on the socket
@@ -240,7 +272,7 @@ namespace sockets {
 		 * \brief constructor being called during accept
 		 * \param[in] fd file descriptor for the new socket
 		 */
-		TcpSocket(int fd);
+		TcpSocket(SOCKET fd);
 
 		/**
 		 * \brief reads platform specific error codes and returns a ClockError
@@ -250,7 +282,7 @@ namespace sockets {
 		/**
 		 * \brief stores the local socket descriptor or -1 if not active
 		 */
-		int _sock;
+		SOCKET _sock;
 
 		/**
 		 * \brief current socket status

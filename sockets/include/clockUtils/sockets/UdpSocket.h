@@ -51,6 +51,8 @@
 	#include <sys/socket.h>
 	#include <sys/types.h>
 	#include <unistd.h>
+
+	typedef int SOCKET;
 #endif
 
 namespace std {
@@ -74,7 +76,7 @@ namespace sockets {
 		/**
 		 * \brief maximum size one packet is allowed to have, otherwise it can't be sent
 		 */
-		const int MAX_PACKET_SIZE = 32 * 1024;
+		const size_t MAX_PACKET_SIZE = 32 * 1024;
 
 		/**
 		 * \brief constructor
@@ -100,19 +102,43 @@ namespace sockets {
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
-		ClockError writePacket(const std::string & ip, uint16_t port, const void * str, const uint32_t length);
+		ClockError writePacket(const std::string & ip, uint16_t port, const void * str, const size_t length);
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
-		ClockError writePacket(const std::string & ip, uint16_t port, const std::vector<uint8_t> & str);
+		ClockError writePacket(const std::string & ip, uint16_t port, const std::vector<uint8_t> & vec);
+
+		/**
+		 * \brief sends a packet being able to be completely received in one call of receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writePacket(const std::string & ip, uint16_t port, const std::string & str) {
+			return writePacket(ip, port, str.c_str(), str.length());
+		}
 
 		/**
 		 * \brief sends a packet, doesn't work with receivePacket
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
-		ClockError write(const std::string & ip, uint16_t port, const void * str, uint32_t length);
+		ClockError write(const std::string & ip, uint16_t port, const void * str, size_t length);
+
+		/**
+		 * \brief sends a packet, doesn't work with receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError write(const std::string & ip, uint16_t port, const std::vector<uint8_t> & vec) {
+			return write(ip, port, const_cast<const unsigned char *>(&vec[0]), vec.size());
+		}
+
+		/**
+		 * \brief sends a packet, doesn't work with receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError write(const std::string & ip, uint16_t port, const std::string & str) {
+			return write(ip, port, str.c_str(), str.length());
+		}
 
 		/**
 		 * \brief receives a packet sent with writePacket, doesn't work with write
@@ -149,7 +175,7 @@ namespace sockets {
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 				rc = recvfrom(_sock, &buffer[0], MAX_PACKET_SIZE, 0, (struct sockaddr *) &remaddr, &addrlen);
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
-				rc = recvfrom(_sock, reinterpret_cast<char *>(&buffer[0]), MAX_PACKET_SIZE, 0, (struct sockaddr *) &remaddr, &addrlen);
+				rc = recvfrom(_sock, reinterpret_cast<char *>(&buffer[0]), int(MAX_PACKET_SIZE), 0, (struct sockaddr *) &remaddr, &addrlen);
 #endif
 
 				port = static_cast<uint16_t>(ntohs(remaddr.sin_port));
@@ -184,7 +210,7 @@ namespace sockets {
 		/**
 		 * \brief stores the local socket descriptor or -1 if not active
 		 */
-		int _sock;
+		SOCKET _sock;
 
 		/**
 		 * \brief if a receivePacket gets more data than the packet contains, the rest is buffered in this variable

@@ -74,7 +74,7 @@ namespace iniParser {
 			if (it == _data.end()) {
 				return ClockError::VALUE_NOTFOUND;
 			}
-			for (const std::tuple<std::string, std::string, uint32_t, std::string> & t : it->second) {
+			for (const std::tuple<std::string, std::string, size_t, std::string> & t : it->second) {
 				if (std::get<SECTION>(t) == section && std::get<FIELD>(t) == field) {
 					std::stringstream ss(std::get<VALUE>(t));
 					if ((ss >> value).fail() || !ss.eof()) {
@@ -104,7 +104,7 @@ namespace iniParser {
 				_allLines[section].push_back(""); // empty line. will be overritten anyways
 				return;
 			}
-			for (std::tuple<std::string, std::string, uint32_t, std::string> & t : _data[section]) {
+			for (std::tuple<std::string, std::string, size_t, std::string> & t : _data[section]) {
 				if (std::get<SECTION>(t) == section && std::get<FIELD>(t) == field) {
 					std::get<VALUE>(t) = ss.str();
 					return;
@@ -131,7 +131,7 @@ namespace iniParser {
 		};
 
 		// one vector with lines/values for each section
-		std::map<std::string, std::vector<std::tuple<std::string, std::string, uint32_t, std::string>>> _data;
+		std::map<std::string, std::vector<std::tuple<std::string, std::string, size_t, std::string>>> _data;
 		std::map<std::string, std::vector<std::string>> _allLines;
 	};
 

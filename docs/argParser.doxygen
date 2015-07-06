@@ -31,7 +31,7 @@
  * The next step is to parse your list. Therefor exist two macros:\n
  * PARSE_COMMANDLINE() parses the arguments of the main method (argc and argv)\n
  * PARSE_ARGUMENTS(buffer, length) parses an own list\n
- * If you use the first one, make sure argc and argv are defined. Furthermore, argv needs to be const.\n\n
+ * If you use the first one, make sure argc and argv are defined.\n\n
  *
  * You can also use the automatically available parameter --help. If --help was entered on commandline, the macro HELPSET() returns true and the text output can be retrieved using GETHELPTEXT()
  * Example:\n
