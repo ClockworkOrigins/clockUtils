@@ -52,6 +52,15 @@ namespace argParser {
 		static ClockError parseArguments(const char ** argv, int argc);
 
 		/**
+		 * \brief parses argument line
+		 * \param[in] argv list of all strings in the argument line
+		 * \param[in] argc amount of entries in the list
+		 */
+		static ClockError parseArguments(char ** argv, int argc) {
+			return parseArguments(const_cast<const char **>(argv), argc);
+		}
+
+		/**
 		 * \brief returns last error or empty string
 		 */
 		static std::string getLastParserError();
