@@ -39,23 +39,34 @@ namespace sockets {
 	};
 #endif
 
-	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _todoLock(), _todo(), _buffer(), _terminate(false), _worker(nullptr), _listenThread(nullptr), _objCondExecutable(), _objCondMut(), _objCondUniqLock(_objCondMut), _callbackThread(nullptr) {
+	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _writePacketAsyncLock(), _writeAsyncLock(), _writePacketAsyncQueue(), _writeAsyncQueue(), _buffer(), _terminate(false), _worker(nullptr), _listenThread(nullptr), _objCondExecutable(), _objCondMut(), _objCondUniqLock(_objCondMut), _callbackThread(nullptr) {
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 		static WSAHelper wsa;
 #endif
 		_worker = new std::thread([this]() {
 				while (!_terminate) {
-					_todoLock.lock();
-					while (_todo.size() > 0) {
-						std::vector<uint8_t> tmp = std::move(_todo.front());
-						_todoLock.unlock();
+					_writePacketAsyncLock.lock();
+					while (_writePacketAsyncQueue.size() > 0) {
+						std::vector<uint8_t> tmp = std::move(_writePacketAsyncQueue.front());
+						_writePacketAsyncLock.unlock();
 
 						writePacket(const_cast<const unsigned char *>(&tmp[0]), tmp.size());
 
-						_todoLock.lock();
-						_todo.pop();
+						_writePacketAsyncLock.lock();
+						_writePacketAsyncQueue.pop();
 					}
-					_todoLock.unlock();
+					_writePacketAsyncLock.unlock();
+					_writeAsyncLock.lock();
+					while (_writeAsyncQueue.size() > 0) {
+						std::vector<uint8_t> tmp = std::move(_writeAsyncQueue.front());
+						_writeAsyncLock.unlock();
+
+						write(const_cast<const unsigned char *>(&tmp[0]), tmp.size());
+
+						_writeAsyncLock.lock();
+						_writeAsyncQueue.pop();
+					}
+					_writeAsyncLock.unlock();
 					_objCondExecutable.wait(_objCondUniqLock);
 				}
 			});
@@ -348,9 +359,9 @@ namespace sockets {
 		for (size_t i = 0; i < length; i++) {
 			vec[i] = reinterpret_cast<uint8_t *>(const_cast<void *>(str))[i];
 		}
-		_todoLock.lock();
-		_todo.push(vec);
-		_todoLock.unlock();
+		_writePacketAsyncLock.lock();
+		_writePacketAsyncQueue.push(vec);
+		_writePacketAsyncLock.unlock();
 		_objCondExecutable.notify_all();
 		return ClockError::SUCCESS;
 	}
@@ -360,9 +371,37 @@ namespace sockets {
 			return ClockError::NOT_READY;
 		}
 
-		_todoLock.lock();
-		_todo.push(vec);
-		_todoLock.unlock();
+		_writePacketAsyncLock.lock();
+		_writePacketAsyncQueue.push(vec);
+		_writePacketAsyncLock.unlock();
+		_objCondExecutable.notify_all();
+		return ClockError::SUCCESS;
+	}
+
+	ClockError TcpSocket::writeAsync(const void * str, const size_t length) {
+		if (_status != SocketStatus::CONNECTED) {
+			return ClockError::NOT_READY;
+		}
+
+		std::vector<uint8_t> vec(length);
+		for (size_t i = 0; i < length; i++) {
+			vec[i] = reinterpret_cast<uint8_t *>(const_cast<void *>(str))[i];
+		}
+		_writeAsyncLock.lock();
+		_writeAsyncQueue.push(vec);
+		_writeAsyncLock.unlock();
+		_objCondExecutable.notify_all();
+		return ClockError::SUCCESS;
+	}
+
+	ClockError TcpSocket::writeAsync(const std::vector<uint8_t> & vec) {
+		if (_status != SocketStatus::CONNECTED) {
+			return ClockError::NOT_READY;
+		}
+
+		_writeAsyncLock.lock();
+		_writeAsyncQueue.push(vec);
+		_writeAsyncLock.unlock();
 		_objCondExecutable.notify_all();
 		return ClockError::SUCCESS;
 	}

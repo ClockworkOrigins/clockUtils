@@ -216,6 +216,26 @@ namespace sockets {
 		}
 
 		/**
+		 * \brief sends a message asynchron, doesn't work with receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writeAsync(const void * str, const size_t length);
+
+		/**
+		 * \brief sends a message asynchron, doesn't work with receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writeAsync(const std::vector<uint8_t> & vec);
+
+		/**
+		 * \brief sends a message asynchron, doesn't work with receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writeAsync(const std::string & str) {
+			return writeAsync(std::vector<uint8_t>(str.begin(), str.end()));
+		}
+
+		/**
 		 * \brief receives data on the socket
 		 */
 		template<class Container>
@@ -292,12 +312,14 @@ namespace sockets {
 		/**
 		 * \brief mutex guarding the queue for async packets
 		 */
-		std::mutex _todoLock;
+		std::mutex _writePacketAsyncLock;
+		std::mutex _writeAsyncLock;
 
 		/**
 		 * \brief queue containing all packets to be sent in an extra worker thread
 		 */
-		std::queue<std::vector<uint8_t>> _todo;
+		std::queue<std::vector<uint8_t>> _writePacketAsyncQueue;
+		std::queue<std::vector<uint8_t>> _writeAsyncQueue;
 
 		/**
 		 * \brief if a receivePacket gets more data than the packet contains, the rest is buffered in this variable

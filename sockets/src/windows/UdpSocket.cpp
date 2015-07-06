@@ -38,11 +38,44 @@ namespace sockets {
 		}
 	};
 
-	UdpSocket::UdpSocket() : _sock(-1), _buffer(), _callbackThread(nullptr) {
+	UdpSocket::UdpSocket() : _sock(-1), _buffer(), _callbackThread(nullptr), _writePacketAsyncLock(), _writeAsyncLock(), _writePacketAsyncQueue(), _writeAsyncQueue(), _objCondExecutable(), _objCondMut(), _objCondUniqLock(_objCondMut), _worker(nullptr), _terminate(false) {
 		static WSAHelper wsa;
+		_worker = new std::thread([this]() {
+			while (!_terminate) {
+				_writePacketAsyncLock.lock();
+				while (_writePacketAsyncQueue.size() > 0) {
+					std::tuple<std::vector<uint8_t>, std::string, uint16_t> tmp = std::move(_writePacketAsyncQueue.front());
+					_writePacketAsyncLock.unlock();
+
+					writePacket(std::get<AsyncQueueInfo::IP>(tmp), std::get<AsyncQueueInfo::Port>(tmp), const_cast<const unsigned char *>(&std::get<AsyncQueueInfo::Message>(tmp)[0]), std::get<AsyncQueueInfo::Message>(tmp).size());
+
+					_writePacketAsyncLock.lock();
+					_writePacketAsyncQueue.pop();
+				}
+				_writePacketAsyncLock.unlock();
+				_writeAsyncLock.lock();
+				while (_writeAsyncQueue.size() > 0) {
+					std::tuple<std::vector<uint8_t>, std::string, uint16_t> tmp = std::move(_writeAsyncQueue.front());
+					_writeAsyncLock.unlock();
+
+					write(std::get<AsyncQueueInfo::IP>(tmp), std::get<AsyncQueueInfo::Port>(tmp), const_cast<const unsigned char *>(&std::get<AsyncQueueInfo::Message>(tmp)[0]), std::get<AsyncQueueInfo::Message>(tmp).size());
+
+					_writeAsyncLock.lock();
+					_writeAsyncQueue.pop();
+				}
+				_writeAsyncLock.unlock();
+				_objCondExecutable.wait(_objCondUniqLock);
+			}
+		});
 	}
 
 	UdpSocket::~UdpSocket() {
+		_terminate = true;
+		_objCondExecutable.notify_all();
+		if (_worker->joinable()) {
+			_worker->join();
+		}
+		delete _worker;
 		close();
 	}
 

@@ -119,6 +119,26 @@ namespace sockets {
 		}
 
 		/**
+		 * \brief sends a packet asynchronous being able to be completely received in one call of receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writePacketAsync(const std::string & ip, uint16_t port, const void * str, const size_t length);
+
+		/**
+		 * \brief sends a packet asynchronous being able to be completely received in one call of receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writePacketAsync(const std::string & ip, uint16_t port, const std::vector<uint8_t> & vec);
+
+		/**
+		 * \brief sends a packet asynchronous being able to be completely received in one call of receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writePacketAsync(const std::string & ip, uint16_t port, const std::string & str) {
+			return writePacketAsync(ip, port, std::vector<uint8_t>(str.begin(), str.end()));
+		}
+
+		/**
 		 * \brief sends a packet, doesn't work with receivePacket
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
@@ -138,6 +158,26 @@ namespace sockets {
 		 */
 		ClockError write(const std::string & ip, uint16_t port, const std::string & str) {
 			return write(ip, port, str.c_str(), str.length());
+		}
+
+		/**
+		 * \brief sends a message asynchronous, doesn't work with receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writeAsync(const std::string & ip, uint16_t port, const void * str, size_t length);
+
+		/**
+		 * \brief sends a message asynchronous, doesn't work with receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writeAsync(const std::string & ip, uint16_t port, const std::vector<uint8_t> & vec);
+
+		/**
+		 * \brief sends a message asynchronous, doesn't work with receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writeAsync(const std::string & ip, uint16_t port, const std::string & str) {
+			return writeAsync(ip, port, std::vector<uint8_t>(str.begin(), str.end()));
 		}
 
 		/**
@@ -221,6 +261,31 @@ namespace sockets {
 		 * \brief thread for polling messages
 		 */
 		std::thread * _callbackThread;
+
+		/**
+		 * \brief mutex guarding the queue for async packets
+		 */
+		std::mutex _writePacketAsyncLock;
+		std::mutex _writeAsyncLock;
+
+		/**
+		 * \brief queue containing all packets to be sent in an extra worker thread
+		 */
+		enum AsyncQueueInfo {
+			Message,
+			IP,
+			Port
+		};
+		std::queue<std::tuple<std::vector<uint8_t>, std::string, uint16_t>> _writePacketAsyncQueue;
+		std::queue<std::tuple<std::vector<uint8_t>, std::string, uint16_t>> _writeAsyncQueue;
+
+		std::condition_variable _objCondExecutable;
+		std::mutex _objCondMut;
+		std::unique_lock<std::mutex> _objCondUniqLock;
+
+		std::thread * _worker;
+
+		bool _terminate;
 
 		UdpSocket(const UdpSocket &) = delete;
 		UdpSocket & operator=(const UdpSocket &) = delete;

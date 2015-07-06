@@ -1031,3 +1031,32 @@ TEST(TcpSocket, writePacketAsyncMultiple) {
 
 	sock2.close();
 }
+
+TEST(TcpSocket, writeAsyncMultiple) {
+	TcpSocket sock1, sock2;
+	std::vector<uint8_t> v1 = { 0x1, 0x2, 0x3, 0x4, 0x5, 0x0, 0x5, 0x4, 0x3, 0x2, 0x1 };
+	std::vector<uint8_t> v2 = { 0x11, 0x12, 0x13, 0x14, 0x15, 0x0, 0x15, 0x14, 0x13, 0x12, 0x11 };
+	std::vector<uint8_t> vSum = v1;
+	vSum.insert(vSum.end(), v2.begin(), v2.end());
+
+	sock1.listen(12345, 1, false, [v1, v2](TcpSocket * sock) {
+		sock->writeAsync(v1);
+		sock->writeAsync(v2);
+		_socketList.push_back(sock);
+	});
+	sock2.connect("127.0.0.1", 12345, 500);
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+	std::vector<uint8_t> v3;
+	sock2.read(v3);
+	EXPECT_EQ(vSum, v3);
+	sock1.close();
+	sock2.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
+}

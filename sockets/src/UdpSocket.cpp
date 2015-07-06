@@ -101,6 +101,58 @@ namespace sockets {
 		return ClockError::SUCCESS;
 	}
 
+	ClockError UdpSocket::writePacketAsync(const std::string & ip, uint16_t port, const void * str, const size_t length) {
+		if (_sock == -1) {
+			return ClockError::NOT_READY;
+		}
+		std::vector<uint8_t> vec(length);
+		for (size_t i = 0; i < length; i++) {
+			vec[i] = reinterpret_cast<uint8_t *>(const_cast<void *>(str))[i];
+		}
+		_writePacketAsyncLock.lock();
+		_writePacketAsyncQueue.push(std::make_tuple(vec, ip, port));
+		_writePacketAsyncLock.unlock();
+		_objCondExecutable.notify_all();
+		return ClockError::SUCCESS;
+	}
+
+	ClockError UdpSocket::writePacketAsync(const std::string & ip, uint16_t port, const std::vector<uint8_t> & vec) {
+		if (_sock == -1) {
+			return ClockError::NOT_READY;
+		}
+		_writePacketAsyncLock.lock();
+		_writePacketAsyncQueue.push(std::make_tuple(vec, ip, port));
+		_writePacketAsyncLock.unlock();
+		_objCondExecutable.notify_all();
+		return ClockError::SUCCESS;
+	}
+
+	ClockError UdpSocket::writeAsync(const std::string & ip, uint16_t port, const void * str, const size_t length) {
+		if (_sock == -1) {
+			return ClockError::NOT_READY;
+		}
+		std::vector<uint8_t> vec(length);
+		for (size_t i = 0; i < length; i++) {
+			vec[i] = reinterpret_cast<uint8_t *>(const_cast<void *>(str))[i];
+		}
+		_writeAsyncLock.lock();
+		_writeAsyncQueue.push(std::make_tuple(vec, ip, port));
+		_writeAsyncLock.unlock();
+		_objCondExecutable.notify_all();
+		return ClockError::SUCCESS;
+	}
+
+	ClockError UdpSocket::writeAsync(const std::string & ip, uint16_t port, const std::vector<uint8_t> & vec) {
+		if (_sock == -1) {
+			return ClockError::NOT_READY;
+		}
+		_writeAsyncLock.lock();
+		_writeAsyncQueue.push(std::make_tuple(vec, ip, port));
+		_writeAsyncLock.unlock();
+		_objCondExecutable.notify_all();
+		return ClockError::SUCCESS;
+	}
+
 	ClockError UdpSocket::receivePacket(std::vector<uint8_t> & buffer, std::string & ip, uint16_t & port) {
 		if (_sock == -1) {
 			return ClockError::NOT_READY;
