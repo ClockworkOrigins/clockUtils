@@ -357,8 +357,8 @@ TEST(ArgumentParser, help) {
 TEST(ArgumentParser, parseCommandLine) {
 	REGISTER_VARIABLE(std::string, s, "", "A string variable");
 	REGISTER_VARIABLE(int, i, 15, "An integer variable");
-	char * buffer[] = { "-/program", "-s", "foobar", "-i", "42" };
-	char ** argv = buffer;
+	const char * buffer[] = { "-/program", "-s", "foobar", "-i", "42" };
+	const char ** argv = buffer;
 	int argc = 5;
 	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_COMMANDLINE());
 	EXPECT_FALSE(HELPSET());
