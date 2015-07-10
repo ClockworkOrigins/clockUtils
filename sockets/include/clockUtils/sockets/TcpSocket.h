@@ -248,11 +248,11 @@ namespace sockets {
 			int rc = -1;
 
 			do {
-	#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 				rc = recv(_sock, &buffer[0], 256, 0);
-	#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 				rc = recv(_sock, reinterpret_cast<char *>(&buffer[0]), 256, 0);
-	#endif
+#endif
 
 				if (rc == -1) {
 					ClockError error = getLastError();

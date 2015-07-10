@@ -245,6 +245,7 @@ namespace sockets {
 
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 		iMode = 0;
+		ioctlsocket(_sock, FIONBIO, &iMode);
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 		arg &= (~O_NONBLOCK);
 		fcntl(_sock, F_SETFL, arg);
