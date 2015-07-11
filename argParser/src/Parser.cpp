@@ -19,7 +19,6 @@
 
 #include "clockUtils/argParser/Parser.h"
 
-#include <iostream>
 #include <map>
 
 #include "clockUtils/errors.h"
@@ -50,26 +49,49 @@ namespace argParser {
 					if (name.find(bv->getName()) == 0) {
 						found = true;
 						if (bv->isBool()) {
-							if (bv->getName().length() == name.length()) {
-								bv->setValue("1");
-								if (parsed.find(bv->getName()) != parsed.end()) {
-									arguments = nullptr;
-									return ClockError::INVALID_USAGE;
+							if (bv->getName().length() == name.length()) { // boolean is special case: variable name and parsed name are the same, so it can be "-b" or "-b true", which are both valid
+								if (argc > 1 && argv[1][0] != '-') { // case "-b true"
+									if (!bv->setValue(argv[1])) {
+										error = std::string(argv[1]) + std::string(" is not a valid value for variable ") + name;
+										arguments = nullptr;
+										return ClockError::INVALID_USAGE;
+									}
+									if (parsed.find(bv->getName()) != parsed.end()) {
+										arguments = nullptr;
+										return ClockError::INVALID_USAGE;
+									}
+									bv->_set = true;
+									parsed[bv->getName()] = true;
+									argc--;
+									argv++;
+								} else { // case "-b"
+									bv->setValue("1");
+									if (parsed.find(bv->getName()) != parsed.end()) {
+										arguments = nullptr;
+										return ClockError::INVALID_USAGE;
+									}
+									bv->_set = true;
+									parsed[bv->getName()] = true;
 								}
-								bv->_set = true;
-								parsed[bv->getName()] = true;
-							} else {
-								found = false;
-								continue;
-							}
-						} else {
-							if (name.length() > bv->getName().length()) {
+							} else { // in this case the text has to look like "-b=true"
 								size_t startIndex = bv->getName().length();
 								if (name.at(startIndex) == '=') {
 									startIndex++;
 								}
 								if (!bv->setValue(name.substr(startIndex, name.length()))) {
-									error = std::string(argv[1]) + std::string(" is not a valid value for variable ") + name;
+									error = name.substr(startIndex, name.length()) + std::string(" is not a valid value for variable ") + name;
+									arguments = nullptr;
+									return ClockError::INVALID_USAGE;
+								}
+							}
+						} else {
+							if (name.length() > bv->getName().length()) { // parsed text is longer than variable name, so there is something behind
+								size_t startIndex = bv->getName().length();
+								if (name.at(startIndex) == '=') {
+									startIndex++;
+								}
+								if (!bv->setValue(name.substr(startIndex, name.length()))) {
+									error = name.substr(startIndex, name.length()) + std::string(" is not a valid value for variable ") + name;
 									arguments = nullptr;
 									return ClockError::INVALID_USAGE;
 								}

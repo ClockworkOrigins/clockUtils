@@ -19,6 +19,8 @@
 
 #include "clockUtils/argParser/BasicVariable.h"
 
+#include <algorithm>
+
 #include "clockUtils/argParser/Parser.h"
 
 namespace clockUtils {
@@ -54,6 +56,22 @@ namespace argParser {
 		bool ret = value.size() == 1;
 		if (ret) {
 			_value = value.at(0);
+		}
+		return ret;
+	}
+
+	template<>
+	bool Variable<bool>::setValue(const std::string & value) {
+		std::string result = value;
+		std::transform(value.begin(), value.end(), result.begin(), ::tolower);
+		bool ret = true;
+		if (result == "true") {
+			_value = true;
+		} else if (result == "false") {
+			_value = false;
+		} else {
+			std::stringstream ss(value);
+			ret = !(ss >> (_value)).fail() && ss.eof();
 		}
 		return ret;
 	}

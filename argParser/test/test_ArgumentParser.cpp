@@ -26,7 +26,7 @@
 #include "gtest/gtest.h"
 
 TEST(ArgumentParser, parseBool) {
-	REGISTER_VARIABLE(bool, b, false, "A test boolean");
+	REGISTER_VARIABLE(bool, bo, false, "A test boolean");
 	REGISTER_VARIABLE(bool, d, false, "A test boolean");
 	REGISTER_VARIABLE(bool, foo, false, "A test boolean");
 	REGISTER_VARIABLE(bool, bar, false, "A test boolean");
@@ -34,32 +34,32 @@ TEST(ArgumentParser, parseBool) {
 	const char * buffer1[] = { "-c", "-e", "3" };
 	int length1 = sizeof(buffer1) / sizeof(char *);
 
-	const char * buffer2[] = { "-b" };
+	const char * buffer2[] = { "-bo" };
 	int length2 = sizeof(buffer2) / sizeof(char *);
 
-	const char * buffer3[] = { "-b", "-d", "-foo", "-bar" };
+	const char * buffer3[] = { "-bo", "-d", "-foo", "-bar" };
 	int length3 = sizeof(buffer3) / sizeof(char *);
 
-	EXPECT_FALSE(b);
+	EXPECT_FALSE(bo);
 
 	EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer1, length1));
 
 	EXPECT_EQ("argument -c not registered!", GETLASTPARSERERROR());
-	EXPECT_FALSE(b);
+	EXPECT_FALSE(bo);
 
 	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer2, length2));
 
 	EXPECT_TRUE(GETLASTPARSERERROR().empty());
 
-	EXPECT_EQ(true, b);
+	EXPECT_EQ(true, bo);
 
-	b = false;
+	bo = false;
 
 	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer3, length3));
 
 	EXPECT_TRUE(GETLASTPARSERERROR().empty());
 
-	EXPECT_EQ(true, b);
+	EXPECT_EQ(true, bo);
 	EXPECT_EQ(true, d);
 	EXPECT_EQ(true, foo);
 	EXPECT_EQ(true, bar);
@@ -364,4 +364,52 @@ TEST(ArgumentParser, parseCommandLine) {
 	EXPECT_FALSE(HELPSET());
 	EXPECT_EQ("foobar", s);
 	EXPECT_EQ(42, i);
+}
+
+TEST(ArgumentParser, parseBoolToggleOff) {
+	{
+		REGISTER_VARIABLE(bool, b, false, "A test boolean");
+		REGISTER_VARIABLE(bool, d, true, "A test boolean");
+
+		const char * buffer[] = { "-b", "-d" };
+		int length = sizeof(buffer) / sizeof(char *);
+
+		EXPECT_FALSE(b);
+		EXPECT_TRUE(d);
+
+		EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer, length));
+
+		EXPECT_TRUE(b);
+		EXPECT_TRUE(d);
+	}
+	{
+		REGISTER_VARIABLE(bool, b, false, "A test boolean");
+		REGISTER_VARIABLE(bool, d, true, "A test boolean");
+
+		const char * buffer[] = { "-b=false" };
+		int length = sizeof(buffer) / sizeof(char *);
+
+		EXPECT_FALSE(b);
+		EXPECT_TRUE(d);
+
+		EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer, length));
+
+		EXPECT_FALSE(b);
+		EXPECT_TRUE(d);
+	}
+	{
+		REGISTER_VARIABLE(bool, b, false, "A test boolean");
+		REGISTER_VARIABLE(bool, d, true, "A test boolean");
+
+		const char * buffer[] = { "-b=true", "-d", "false" };
+		int length = sizeof(buffer) / sizeof(char *);
+
+		EXPECT_FALSE(b);
+		EXPECT_TRUE(d);
+
+		EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer, length));
+
+		EXPECT_TRUE(b);
+		EXPECT_FALSE(d);
+	}
 }

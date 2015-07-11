@@ -187,6 +187,12 @@ namespace argParser {
 	template<>
 	bool CLOCK_ARGPARSER_API Variable<char>::setValue(const std::string & value);
 
+	/**
+	 * \brief specialization of setValue for bool because it shall also allow usage of true and false
+	 */
+	template<>
+	bool CLOCK_ARGPARSER_API Variable<bool>::setValue(const std::string & value);
+
 } /* namespace argParser */
 } /* namespace clockUtils */
 
