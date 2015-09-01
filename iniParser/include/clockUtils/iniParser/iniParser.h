@@ -69,7 +69,7 @@ namespace iniParser {
 		 * If the section or field was not found, value stays unchanged. Otherwise the streamoperator will be called
 		 */
 		template<typename T>
-		ClockError getValue(const std::string & section, const std::string & field, T & value) const {
+		typename std::enable_if<!std::is_enum<T>::value, ClockError>::type getValue(const std::string & section, const std::string & field, T & value) const {
 			auto it = _data.find(section);
 			if (it == _data.end()) {
 				return ClockError::VALUE_NOTFOUND;
@@ -87,6 +87,27 @@ namespace iniParser {
 			return ClockError::VALUE_NOTFOUND;
 		}
 
+		template<typename T>
+		typename std::enable_if<std::is_enum<T>::value, ClockError>::type getValue(const std::string & section, const std::string & field, T & value) const {
+			auto it = _data.find(section);
+			if (it == _data.end()) {
+				return ClockError::VALUE_NOTFOUND;
+			}
+			for (const std::tuple<std::string, std::string, size_t, std::string> & t : it->second) {
+				if (std::get<SECTION>(t) == section && std::get<FIELD>(t) == field) {
+					std::stringstream ss(std::get<VALUE>(t));
+					int v;
+					if ((ss >> v).fail() || !ss.eof()) {
+						return ClockError::WRONG_TYPE;
+					}
+					value = T(v);
+					return ClockError::SUCCESS;
+				}
+			}
+
+			return ClockError::VALUE_NOTFOUND;
+		}
+
 		/**
 		 * \brief sets value for a variable
 		 * \param[in] section the section of the variable
@@ -94,27 +115,38 @@ namespace iniParser {
 		 * \param[in] value the value to be stored
 		 */
 		template<typename T>
-		void setValue(const std::string & section, const std::string & field, const T & value) {
+		typename std::enable_if<!std::is_enum<T>::value, void>::type setValue(const std::string & section, const std::string & field, const T & value) {
 			std::stringstream ss;
 			ss << value;
+			setValue(section, field, ss.str());
+		}
+
+		template<typename T>
+		typename std::enable_if<std::is_enum<T>::value, void>::type setValue(const std::string & section, const std::string & field, const T & value) {
+			std::stringstream ss;
+			ss << int(value);
+			setValue(section, field, ss.str());
+		}
+
+		void setValue(const std::string & section, const std::string & field, const std::string & value) {
 			if (_data.find(section) == _data.end()) {
 				// create new section
 				_allLines[section].push_back("[" + section + "]");
-				_data[section].push_back(make_tuple(section, field, 1, ss.str()));
+				_data[section].push_back(make_tuple(section, field, 1, value));
 				_allLines[section].push_back(""); // empty line. will be overritten anyways
 				return;
 			}
 			for (std::tuple<std::string, std::string, size_t, std::string> & t : _data[section]) {
 				if (std::get<SECTION>(t) == section && std::get<FIELD>(t) == field) {
-					std::get<VALUE>(t) = ss.str();
+					std::get<VALUE>(t) = value;
 					return;
 				}
 			}
 			// value not found. Insert at end
 			if (_allLines[section].back() == "" && std::get<INDEX>(_data[section].back()) != _allLines[section].size() - 1) {
-				_data[section].push_back(make_tuple(section, field, _allLines[section].size() - 1, ss.str()));
+				_data[section].push_back(make_tuple(section, field, _allLines[section].size() - 1, value));
 			} else {
-				_data[section].push_back(make_tuple(section, field, _allLines[section].size(), ss.str()));
+				_data[section].push_back(make_tuple(section, field, _allLines[section].size(), value));
 			}
 			_allLines[section].push_back(""); // empty line. will be overritten anyways
 		}

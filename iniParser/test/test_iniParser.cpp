@@ -121,11 +121,11 @@ TEST(IniParser, setNewValue) {
 	EXPECT_EQ(ClockError::SUCCESS, i1.load("resources/example1.ini"));
 
 	int s1e1;
-	EXPECT_EQ(ClockError::VALUE_NOTFOUND, i1.getValue<int>("SECTION1", "entry4", s1e1));
+	EXPECT_EQ(ClockError::VALUE_NOTFOUND, i1.getValue("SECTION1", "entry4", s1e1));
 	s1e1 = 11;
-	i1.setValue<int>("SECTION1", "entry4", s1e1);
+	i1.setValue("SECTION1", "entry4", s1e1);
 	s1e1 = 0;
-	EXPECT_EQ(ClockError::SUCCESS, i1.getValue<int>("SECTION1", "entry4", s1e1));
+	EXPECT_EQ(ClockError::SUCCESS, i1.getValue("SECTION1", "entry4", s1e1));
 	EXPECT_EQ(11, s1e1);
 
 	EXPECT_EQ(ClockError::SUCCESS, i1.save("resources/example1saved2.ini"));
@@ -194,4 +194,36 @@ TEST(IniParser, getValueWithSpaces) {
 	std::string str;
 	EXPECT_EQ(ClockError::SUCCESS, i1.getValue<std::string>("SECTION1", "string", str));
 	EXPECT_EQ("hello world;", str);
+}
+
+TEST(IniParser, enumValues) {
+	enum TestEnumA {
+		ValA1,
+		ValA2,
+		ValA3
+	};
+	enum class TestEnumB {
+		ValB1,
+		ValB2,
+		ValB3
+	};
+	IniParser i;
+	EXPECT_EQ(ClockError::SUCCESS, i.load("resources/exampleEnum.ini"));
+
+	TestEnumA v1;
+	EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION1", "enumA1", v1));
+	EXPECT_EQ(TestEnumA::ValA1, v1);
+	EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION1", "enumA2", v1));
+	EXPECT_EQ(TestEnumA::ValA2, v1);
+
+	TestEnumB v2;
+	EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION1", "enumB1", v2));
+	EXPECT_EQ(TestEnumB::ValB1, v2);
+	EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION1", "enumB2", v2));
+	EXPECT_EQ(TestEnumB::ValB2, v2);
+
+	TestEnumB v3 = TestEnumB::ValB3;
+	i.setValue("SECTION1", "enumB3", v3);
+	EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION1", "enumB3", v2));
+	EXPECT_EQ(TestEnumB::ValB3, v2);
 }
