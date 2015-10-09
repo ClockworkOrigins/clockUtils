@@ -557,5 +557,17 @@ namespace sockets {
 		}
 	}
 
+	template<>
+	TcpSocket & TcpSocket::operator<<<std::string>(const std::string & a) {
+		writePacket(a);
+		return *this;
+	}
+
+	template<>
+	TcpSocket & TcpSocket::operator>><std::string>(std::string & a) {
+		receivePacket(a);
+		return *this;
+	}
+
 } /* namespace sockets */
 } /* namespace clockUtils */

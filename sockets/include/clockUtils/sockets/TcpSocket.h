@@ -353,6 +353,12 @@ namespace sockets {
 		TcpSocket & operator=(const TcpSocket &) = delete;
 	};
 
+	template<>
+	CLOCK_SOCKETS_API TcpSocket & TcpSocket::operator<<<std::string>(const std::string & a);
+
+	template<>
+	CLOCK_SOCKETS_API TcpSocket & TcpSocket::operator>><std::string>(std::string & a);
+
 } /* namespace sockets */
 } /* namespace clockUtils */
 
