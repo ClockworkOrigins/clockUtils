@@ -273,16 +273,47 @@ namespace sockets {
 			return ClockError::SUCCESS;
 		}
 
+		/**
+		 * \brief sends parameter as a packet being receivable using operator>> or receivePacket
+		 * T is an enum value
+		 */
 		template<typename T>
-		TcpSocket & operator<<(const T & a) {
+		typename std::enable_if<std::is_enum<T>::value, TcpSocket &>::type operator<<(const T & a) {
+			std::stringstream ss;
+			ss << uint32_t(a);
+			writePacket(ss.str());
+			return *this;
+		}
+		
+		/**
+		 * \brief sends parameter as a packet being receivable using operator>> or receivePacket
+		 * T has to be streamable
+		 */
+		template<typename T>
+		typename std::enable_if<!std::is_enum<T>::value, TcpSocket &>::type operator<<(const T & a) {
 			std::stringstream ss;
 			ss << a;
 			writePacket(ss.str());
 			return *this;
 		}
+		
+		/**
+		 * \brief receives a packet being sent using operator<< or writePacket(Async)
+		 * T is an enum value
+		 */
+		template<typename T>
+		typename std::enable_if<std::is_enum<T>::value, TcpSocket &>::type operator>>(T & a) {
+			std::string buffer;
+			receivePacket(buffer);
+			std::stringstream ss(buffer);
+			uint32_t e;
+			ss >> e;
+			a = T(e);
+			return *this;
+		}
 
 		template<typename T>
-		TcpSocket & operator>>(T & a) {
+		typename std::enable_if<!std::is_enum<T>::value, TcpSocket &>::type operator>>(T & a) {
 			std::string buffer;
 			receivePacket(buffer);
 			std::stringstream ss(buffer);
@@ -352,12 +383,18 @@ namespace sockets {
 		TcpSocket(const TcpSocket &) = delete;
 		TcpSocket & operator=(const TcpSocket &) = delete;
 	};
-
+	
+	/**
+	 * \brief specialization of stream operator for std::string to reduce overhead through converting to std::string using stringstream
+	 */
 	template<>
-	CLOCK_SOCKETS_API TcpSocket & TcpSocket::operator<<<std::string>(const std::string & a);
-
+	CLOCK_SOCKETS_API TcpSocket & TcpSocket::operator<< <std::string>(const std::string & s);
+	
+	/**
+	 * \brief specialization of stream operator for std::string to reduce overhead through converting to std::string using stringstream
+	 */
 	template<>
-	CLOCK_SOCKETS_API TcpSocket & TcpSocket::operator>><std::string>(std::string & a);
+	CLOCK_SOCKETS_API TcpSocket & TcpSocket::operator>> <std::string>(std::string & s);
 
 } /* namespace sockets */
 } /* namespace clockUtils */

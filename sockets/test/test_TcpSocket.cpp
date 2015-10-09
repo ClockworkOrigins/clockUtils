@@ -1067,8 +1067,14 @@ TEST(TcpSocket, writeAsyncMultiple) {
 TEST(TcpSocket, streamOperator) {
 	TcpSocket sock1, sock2;
 
+	enum class StreamTestEnum {
+		Value0,
+		Value1,
+		Value2
+	};
+
 	sock1.listen(12345, 1, false, [](TcpSocket * sock) {
-		*sock << 1 << std::string("Hello");
+		*sock << 1 << std::string("Hello") << StreamTestEnum::Value0 << StreamTestEnum::Value1 << StreamTestEnum::Value2;
 		delete sock;
 	});
 	EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
@@ -1077,10 +1083,14 @@ TEST(TcpSocket, streamOperator) {
 
 	int i;
 	std::string s;
-	sock2 >> i >> s;
+	StreamTestEnum ste1, ste2, ste3;
+	sock2 >> i >> s >> ste1 >> ste2 >> ste3;
 
 	EXPECT_EQ(1, i);
 	EXPECT_EQ("Hello", s);
+	EXPECT_EQ(StreamTestEnum::Value0, ste1);
+	EXPECT_EQ(StreamTestEnum::Value1, ste2);
+	EXPECT_EQ(StreamTestEnum::Value2, ste3);
 
 	sock1.close();
 
