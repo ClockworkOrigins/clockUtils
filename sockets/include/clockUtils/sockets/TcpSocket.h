@@ -311,7 +311,11 @@ namespace sockets {
 			a = T(e);
 			return *this;
 		}
-
+		
+		/**
+		 * \brief receives a packet being sent using operator<< or writePacket(Async)
+		 * T has to be streamable
+		 */
 		template<typename T>
 		typename std::enable_if<!std::is_enum<T>::value, TcpSocket &>::type operator>>(T & a) {
 			std::string buffer;
