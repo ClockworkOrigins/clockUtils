@@ -1060,3 +1060,29 @@ TEST(TcpSocket, writeAsyncMultiple) {
 
 	_socketList.clear();
 }
+
+/**
+ * tests sending messages as stream
+ */
+TEST(TcpSocket, streamOperator) {
+	TcpSocket sock1, sock2;
+
+	sock1.listen(12345, 1, false, [](TcpSocket * sock) {
+		*sock << 1 << std::string("Hello");
+		delete sock;
+	});
+	EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
+	
+	sock2.connect("127.0.0.1", 12345, 500);
+
+	int i;
+	std::string s;
+	sock2 >> i >> s;
+
+	EXPECT_EQ(1, i);
+	EXPECT_EQ("Hello", s);
+
+	sock1.close();
+
+	sock2.close();
+}

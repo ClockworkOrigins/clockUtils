@@ -273,10 +273,22 @@ namespace sockets {
 			return ClockError::SUCCESS;
 		}
 
-		// TODO: (Daniel) stream operators for sockets (CU-24)
-		/* void operator<<(int a);
+		template<typename T>
+		TcpSocket & operator<<(const T & a) {
+			std::stringstream ss;
+			ss << a;
+			writePacket(ss.str());
+			return *this;
+		}
 
-		void operator>>(int & a); */
+		template<typename T>
+		TcpSocket & operator>>(T & a) {
+			std::string buffer;
+			receivePacket(buffer);
+			std::stringstream ss(buffer);
+			ss >> a;
+			return *this;
+		}
 
 	private:
 		/**
