@@ -42,12 +42,12 @@ namespace algorithm {
 		/**
 		 * \brief compresses the given string and returns result
 		 */
-		static std::string compress(const std::string & text);
+		static ClockError compress(const std::string & uncompressed, std::string & compressed);
 
 		/**
 		 * \brief decompresses the given string and returns result
 		 */
-		static std::string decompress(const std::string & text);
+		static ClockError decompress(const std::string & compressed, std::string & decompressed);
 
 	private:
 		/**

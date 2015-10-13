@@ -32,6 +32,9 @@
 #include "clockUtils/compression/compressionParameters.h"
 
 namespace clockUtils {
+
+	enum class ClockError;
+
 namespace compression {
 namespace algorithm {
 
@@ -93,7 +96,7 @@ namespace algorithm {
 		 * \param[in] length the amount of characters that are encoded in the compressed string
 		 * \param[in,out] result the resulting string containing the decompressed string
 		 */
-		static void getChar(const std::string & compressed, const std::shared_ptr<Tree> & tree, size_t length, std::string & result);
+		static ClockError getChar(const std::string & compressed, const std::shared_ptr<Tree> & tree, size_t length, std::string & result);
 	};
 
 } /* namespace algorithm */

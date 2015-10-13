@@ -24,6 +24,8 @@
 #endif
 #include <queue>
 
+#include "clockUtils/errors.h"
+
 namespace clockUtils {
 namespace compression {
 namespace algorithm {
@@ -138,7 +140,7 @@ namespace algorithm {
 		return 0;
 	}
 
-	void HuffmanBase::getChar(const std::string & compressed, const std::shared_ptr<HuffmanBase::Tree> & tree, size_t length, std::string & result) {
+	ClockError HuffmanBase::getChar(const std::string & compressed, const std::shared_ptr<HuffmanBase::Tree> & tree, size_t length, std::string & result) {
 		// start char
 		size_t index = 0;
 		uint8_t currentChar = compressed[index];
@@ -146,18 +148,26 @@ namespace algorithm {
 		for (size_t i = 0; i < length; i++) {
 			std::shared_ptr<Node> node = ((currentChar & (1 << (7 - index % 8))) == (1 << (7 - index % 8))) ? tree->left : tree->right;
 			index++;
+			if (index / 8 == compressed.length()) {
+				return ClockError::INVALID_ARGUMENT;
+			}
 			if (index % 8 == 0) {
 				currentChar = compressed[index / 8];
 			}
 			while (node->left != nullptr || node->right != nullptr) {
 				node = ((currentChar & (1 << (7 - index % 8))) == (1 << (7 - index % 8))) ? node->left : node->right;
 				index++;
+				if (index / 8 == compressed.length()) {
+					return ClockError::INVALID_ARGUMENT;
+				}
 				if (index % 8 == 0) {
 					currentChar = compressed[index / 8];
 				}
 			}
 			result[i] = node->c;
 		}
+
+		return (index / 8 == compressed.length() - 1) ? ClockError::SUCCESS : ClockError::INVALID_ARGUMENT;
 	}
 
 } /* namespace algorithm */

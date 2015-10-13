@@ -21,42 +21,52 @@
 
 #include <map>
 
+#include "clockUtils/errors.h"
+
 namespace clockUtils {
 namespace compression {
 namespace algorithm {
 
-	std::string HuffmanGeneric::compress(const std::string & text) {
-		std::vector<uint8_t> header = getHeader(text);
+	ClockError HuffmanGeneric::compress(const std::string & uncompressed, std::string & compressed) {
+		if (uncompressed.length() > INT32_MAX / 2) {
+			return ClockError::INVALID_ARGUMENT;
+		}
+		std::vector<uint8_t> header = getHeader(uncompressed);
 
-		std::string result(header.begin(), header.end());
+		compressed = std::string(header.begin(), header.end());
 
-		result += char((((text.length() / 256) / 256) / 256) % 256);
-		result += char(((text.length() / 256) / 256) % 256);
-		result += char((text.length() / 256) % 256);
-		result += char(text.length() % 256);
-		result += char(uint8_t(0x0));
+		compressed += char((((uncompressed.length() / 256) / 256) / 256) % 256);
+		compressed += char(((uncompressed.length() / 256) / 256) % 256);
+		compressed += char((uncompressed.length() / 256) % 256);
+		compressed += char(uncompressed.length() % 256);
+		compressed += char(uint8_t(0x0));
 
 		std::shared_ptr<Tree> tree = buildTree(header);
 
-		convert(text, tree, 260 * 8, result);
+		convert(uncompressed, tree, 260 * 8, compressed);
 
-		return result;
+		return ClockError::SUCCESS;
 	}
 
-	std::string HuffmanGeneric::decompress(const std::string & text) {
-		std::vector<uint8_t> header(text.begin(), text.begin() + 256);
+	ClockError HuffmanGeneric::decompress(const std::string & compressed, std::string & decompressed) {
+		if (compressed.length() < 260) { // length of the string + header
+			return ClockError::INVALID_ARGUMENT;
+		}
+		std::vector<uint8_t> header(compressed.begin(), compressed.begin() + 256);
 
 		std::shared_ptr<Tree> tree = buildTree(header);
 
-		std::string realText(text.begin() + 260, text.end());
+		std::string realText(compressed.begin() + 260, compressed.end());
 
-		size_t length = size_t(uint8_t(text[256]) * 256 * 256 * 256 + uint8_t(text[257]) * 256 * 256 + uint8_t(text[258]) * 256 + uint8_t(text[259]));
+		size_t length = size_t(uint8_t(compressed[256]) * 256 * 256 * 256 + uint8_t(compressed[257]) * 256 * 256 + uint8_t(compressed[258]) * 256 + uint8_t(compressed[259]));
 
-		std::string result(length, 0x0);
+		if (length > INT32_MAX / 2) {
+			return ClockError::INVALID_ARGUMENT;
+		}
 
-		getChar(realText, tree, length, result);
+		decompressed = std::string(length, 0x0);
 
-		return result;
+		return getChar(realText, tree, length, decompressed);
 	}
 
 	void HuffmanGeneric::convert(const std::string & text, const std::shared_ptr<Tree> & tree, size_t index, std::string & result) {

@@ -19,6 +19,8 @@
 
 #include "clockUtils/compression/algorithm/HuffmanFixed.h"
 
+#include "clockUtils/errors.h"
+
 namespace clockUtils {
 namespace compression {
 namespace algorithm {
@@ -55,28 +57,36 @@ namespace algorithm {
 	std::shared_ptr<HuffmanBase::Tree> HuffmanFixed::tree = HuffmanFixed::buildTree(preVec);
 	std::map<uint8_t, std::pair<size_t, std::vector<uint8_t>>> HuffmanFixed::mappings = std::map<uint8_t, std::pair<size_t, std::vector<uint8_t>>>();
 
-	std::string HuffmanFixed::compress(const std::string & text) {
-		std::string result(5, 0x0);
-		result[0] = char((((text.length() / 256) / 256) / 256) % 256);
-		result[1] = char(((text.length() / 256) / 256) % 256);
-		result[2] = char((text.length() / 256) % 256);
-		result[3] = char(text.length() % 256);
+	ClockError HuffmanFixed::compress(const std::string & uncompressed, std::string & compressed) {
+		if (uncompressed.length() > INT32_MAX / 2) {
+			return ClockError::INVALID_ARGUMENT;
+		}
+		compressed = std::string(5, 0x0);
+		compressed[0] = char((((uncompressed.length() / 256) / 256) / 256) % 256);
+		compressed[1] = char(((uncompressed.length() / 256) / 256) % 256);
+		compressed[2] = char((uncompressed.length() / 256) % 256);
+		compressed[3] = char(uncompressed.length() % 256);
 
-		convert(text, 32, result);
+		convert(uncompressed, 32, compressed);
 
-		return result;
+		return ClockError::SUCCESS;
 	}
 
-	std::string HuffmanFixed::decompress(const std::string & text) {
-		std::string realText(text.begin() + 4, text.end());
+	ClockError HuffmanFixed::decompress(const std::string & compressed, std::string & decompressed) {
+		if (compressed.length() < 4) {
+			return ClockError::INVALID_ARGUMENT;
+		}
+		std::string realText(compressed.begin() + 4, compressed.end());
 
-		size_t length = size_t(uint8_t(text[0]) * 256 * 256 * 256 + uint8_t(text[1]) * 256 * 256 + uint8_t(text[2]) * 256 + uint8_t(text[3]));
+		size_t length = size_t(uint8_t(compressed[0]) * 256 * 256 * 256 + uint8_t(compressed[1]) * 256 * 256 + uint8_t(compressed[2]) * 256 + uint8_t(compressed[3]));
 
-		std::string result(length, 0x0);
+		if (length > INT32_MAX / 2) {
+			return ClockError::INVALID_ARGUMENT;
+		}
 
-		getChar(realText, tree, length, result);
+		decompressed = std::string(length, 0x0);
 
-		return result;
+		return getChar(realText, tree, length, decompressed);
 	}
 
 	void HuffmanFixed::convert(const std::string & text, size_t index, std::string & result) {

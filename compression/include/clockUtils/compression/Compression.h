@@ -28,6 +28,9 @@
 #include <string>
 
 namespace clockUtils {
+
+	enum class ClockError;
+
 namespace compression {
 
 	/**
@@ -39,15 +42,15 @@ namespace compression {
 		/**
 		 * \brief compresses the given string and returns result
 		 */
-		std::string compress(const std::string & text) const {
-			return Algorithm::compress(text);
+		ClockError compress(const std::string & uncompressed, std::string & compressed) const {
+			return Algorithm::compress(uncompressed, compressed);
 		}
 
 		/**
 		 * \brief decompresses the given string and returns result
 		 */
-		std::string decompress(const std::string & text) const {
-			return Algorithm::decompress(text);
+		ClockError decompress(const std::string & compressed, std::string & decompressed) const {
+			return Algorithm::decompress(compressed, decompressed);
 		}
 	};
 
