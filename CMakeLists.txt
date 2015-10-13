@@ -90,7 +90,7 @@ SET(VERSION_PATCH 0)
 SET(DESCRIPTION "A lightweight c++ library for commonly needed tasks. Optimized for simplicity and speed.")
 
 #########################################################################
-#Global Directory Definitions
+# Global Directory Definitions
 #########################################################################
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules/" ${CMAKE_MODULE_PATH})
@@ -108,7 +108,19 @@ IF(APPLE)
 ENDIF(APPLE)
 
 #########################################################################
-#Library Section
+# Dependency Path extensions
+#########################################################################
+
+IF(WIN32)
+	IF(CMAKE_GENERATOR MATCHES "Win64")
+		SET(DEP_DIR_BUILD "x64")
+	ELSE(CMAKE_GENERATOR MATCHES "Win64")
+		SET(DEP_DIR_BUILD "x86")
+	ENDIF(CMAKE_GENERATOR MATCHES "Win64")
+ENDIF(WIN32)
+
+#########################################################################
+# Library Section
 #########################################################################
 
 #----------------------------------------------------
@@ -125,7 +137,7 @@ ENDIF(NOT WIN32)
 IF(WITH_TESTING)
 	SET(LIBNAME "GTEST")
 	SET(LIBHEADER "gtest/gtest.h")
-	SET(GTEST_ROOT ${CMAKE_SOURCE_DIR}/dependencies/gmock)
+	SET(GTEST_ROOT ${CMAKE_SOURCE_DIR}/dependencies/${DEP_DIR_BUILD}/gmock)
 	find_package(EasyFind REQUIRED COMPONENTS gmock_main gmock gtest)
 	include_directories(SYSTEM ${GTEST_INCLUDE_DIR})
 ENDIF(WITH_TESTING)
@@ -203,7 +215,7 @@ ENDIF(WITH_LIBRARY_SOCKETS)
 add_subdirectory(docs)
 
 IF(WIN32)
-	file(GLOB_RECURSE files "${CMAKE_SOURCE_DIR}/dependencies/*.dll")
+	file(GLOB_RECURSE files "${CMAKE_SOURCE_DIR}/dependencies/${DEP_DIR_BUILD}/*.dll")
 	foreach(filename ${files})
 		execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${filename} ${CMAKE_BINARY_DIR}/bin)
 	endforeach()
@@ -212,7 +224,7 @@ ENDIF(WIN32)
 # set symlinks if it is an out-of-source-build
 IF(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 	IF(UNIX)
-		execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/dependencies ${CMAKE_BINARY_DIR}/dependencies)
+		execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/dependencies/${DEP_DIR_BUILD} ${CMAKE_BINARY_DIR}/dependencies/${DEP_DIR_BUILD})
 	ENDIF()
 ENDIF(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 
