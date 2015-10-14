@@ -24,6 +24,7 @@ include_directories("include")
 set(srcdir ./src)
 
 set(argParserSrc
+	${srcdir}/ArgumentList.cpp
 	${srcdir}/BasicVariable.cpp
 	${srcdir}/Parser.cpp
 )

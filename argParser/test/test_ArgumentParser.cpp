@@ -419,9 +419,7 @@ TEST(ArgumentParser, definingListBeingDestroyedBeforeUsage) {
 	{
 		REGISTER_VARIABLE_ARGUMENTS(args);
 	}
-	std::map<int, int> m;
-	m.insert(std::make_pair(1, 1));
-	const char * buffer1[] = { "a1", "a2" };
+	const char * buffer1[] = { "a1", "a2", "a3", "a4", "a5", "a6" };
 	int length1 = sizeof(buffer1) / sizeof(char *);
 	EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer1, length1));
 }
