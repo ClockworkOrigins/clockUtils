@@ -112,11 +112,21 @@ ENDIF(APPLE)
 #########################################################################
 
 IF(WIN32)
+	IF(CMAKE_GENERATOR MATCHES "Visual Studio 12")
+		SET(DEP_DIR_BUILD "msvc12")
+	ELSEIF(CMAKE_GENERATOR MATCHES "Visual Studio 14")
+		SET(DEP_DIR_BUILD "msvc14")
+	ELSE(CMAKE_GENERATOR MATCHES "Win64")
+		MESSAGE([WARNING] "Toolchain not supported yet!")
+	ENDIF()
+
 	IF(CMAKE_GENERATOR MATCHES "Win64")
 		SET(DEP_DIR_BUILD "x64")
-	ELSE(CMAKE_GENERATOR MATCHES "Win64")
+	ELSEIF(CMAKE_GENERATOR MATCHES "ARM")
+		SET(DEP_DIR_BUILD "arm")
+	ELSE()
 		SET(DEP_DIR_BUILD "x86")
-	ENDIF(CMAKE_GENERATOR MATCHES "Win64")
+	ENDIF()
 ENDIF(WIN32)
 
 #########################################################################
