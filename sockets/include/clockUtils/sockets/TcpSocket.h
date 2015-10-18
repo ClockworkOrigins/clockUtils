@@ -289,17 +289,6 @@ namespace sockets {
 		};
 
 		/**
-		 * \brief constructor being called during accept
-		 * \param[in] fd file descriptor for the new socket
-		 */
-		TcpSocket(SOCKET fd);
-
-		/**
-		 * \brief reads platform specific error codes and returns a ClockError
-		 */
-		ClockError getLastError();
-
-		/**
 		 * \brief stores the local socket descriptor or -1 if not active
 		 */
 		SOCKET _sock;
@@ -331,11 +320,26 @@ namespace sockets {
 		std::thread * _worker;
 		std::thread * _listenThread;
 
-		std::condition_variable _objCondExecutable;
-		std::mutex _objCondMut;
-		std::unique_lock<std::mutex> _objCondUniqLock;
+		std::condition_variable _condVar;
+		std::mutex _condMutex;
 
 		std::thread * _callbackThread;
+
+		/**
+		 * \brief constructor being called during accept
+		 * \param[in] fd file descriptor for the new socket
+		 */
+		TcpSocket(SOCKET fd);
+
+		/**
+		 * \brief reads platform specific error codes and returns a ClockError
+		 */
+		ClockError getLastError();
+
+		/**
+		 * \brief worker method for async write
+		 */
+		void work();
 
 		TcpSocket(const TcpSocket &) = delete;
 		TcpSocket & operator=(const TcpSocket &) = delete;

@@ -243,11 +243,6 @@ namespace sockets {
 
 	private:
 		/**
-		 * \brief reads platform specific error codes and returns a ClockError
-		 */
-		ClockError getLastError();
-
-		/**
 		 * \brief stores the local socket descriptor or -1 if not active
 		 */
 		SOCKET _sock;
@@ -279,13 +274,19 @@ namespace sockets {
 		std::queue<std::tuple<std::vector<uint8_t>, std::string, uint16_t>> _writePacketAsyncQueue;
 		std::queue<std::tuple<std::vector<uint8_t>, std::string, uint16_t>> _writeAsyncQueue;
 
-		std::condition_variable _objCondExecutable;
-		std::mutex _objCondMut;
-		std::unique_lock<std::mutex> _objCondUniqLock;
-
+		std::condition_variable _condVar;
+		std::mutex _condMutex;
+		
 		std::thread * _worker;
 
 		bool _terminate;
+
+		/**
+		 * \brief reads platform specific error codes and returns a ClockError
+		 */
+		ClockError getLastError();
+
+		void work();
 
 		UdpSocket(const UdpSocket &) = delete;
 		UdpSocket & operator=(const UdpSocket &) = delete;

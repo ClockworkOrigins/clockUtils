@@ -39,37 +39,11 @@ namespace sockets {
 	};
 #endif
 
-	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _writePacketAsyncLock(), _writeAsyncLock(), _writePacketAsyncQueue(), _writeAsyncQueue(), _buffer(), _terminate(false), _worker(nullptr), _listenThread(nullptr), _objCondExecutable(), _objCondMut(), _objCondUniqLock(_objCondMut), _callbackThread(nullptr) {
+	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _writePacketAsyncLock(), _writeAsyncLock(), _writePacketAsyncQueue(), _writeAsyncQueue(), _buffer(), _terminate(false), _worker(nullptr), _listenThread(nullptr), _condVar(), _condMutex(), _callbackThread(nullptr) {
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 		static WSAHelper wsa;
 #endif
-		_worker = new std::thread([this]() {
-				while (!_terminate) {
-					_writePacketAsyncLock.lock();
-					while (_writePacketAsyncQueue.size() > 0) {
-						std::vector<uint8_t> tmp = std::move(_writePacketAsyncQueue.front());
-						_writePacketAsyncLock.unlock();
-
-						writePacket(const_cast<const unsigned char *>(&tmp[0]), tmp.size());
-
-						_writePacketAsyncLock.lock();
-						_writePacketAsyncQueue.pop();
-					}
-					_writePacketAsyncLock.unlock();
-					_writeAsyncLock.lock();
-					while (_writeAsyncQueue.size() > 0) {
-						std::vector<uint8_t> tmp = std::move(_writeAsyncQueue.front());
-						_writeAsyncLock.unlock();
-
-						write(const_cast<const unsigned char *>(&tmp[0]), tmp.size());
-
-						_writeAsyncLock.lock();
-						_writeAsyncQueue.pop();
-					}
-					_writeAsyncLock.unlock();
-					_objCondExecutable.wait(_objCondUniqLock);
-				}
-			});
+		_worker = new std::thread(std::bind(&TcpSocket::work, this));
 	}
 
 	TcpSocket::TcpSocket(SOCKET fd) : TcpSocket() {
@@ -79,7 +53,7 @@ namespace sockets {
 
 	TcpSocket::~TcpSocket() {
 		_terminate = true;
-		_objCondExecutable.notify_all();
+		_condVar.notify_all();
 		if (_worker->joinable()) {
 			_worker->join();
 		}
@@ -363,7 +337,7 @@ namespace sockets {
 		_writePacketAsyncLock.lock();
 		_writePacketAsyncQueue.push(vec);
 		_writePacketAsyncLock.unlock();
-		_objCondExecutable.notify_all();
+		_condVar.notify_all();
 		return ClockError::SUCCESS;
 	}
 
@@ -375,7 +349,7 @@ namespace sockets {
 		_writePacketAsyncLock.lock();
 		_writePacketAsyncQueue.push(vec);
 		_writePacketAsyncLock.unlock();
-		_objCondExecutable.notify_all();
+		_condVar.notify_all();
 		return ClockError::SUCCESS;
 	}
 
@@ -391,7 +365,7 @@ namespace sockets {
 		_writeAsyncLock.lock();
 		_writeAsyncQueue.push(vec);
 		_writeAsyncLock.unlock();
-		_objCondExecutable.notify_all();
+		_condVar.notify_all();
 		return ClockError::SUCCESS;
 	}
 
@@ -403,7 +377,7 @@ namespace sockets {
 		_writeAsyncLock.lock();
 		_writeAsyncQueue.push(vec);
 		_writeAsyncLock.unlock();
-		_objCondExecutable.notify_all();
+		_condVar.notify_all();
 		return ClockError::SUCCESS;
 	}
 
@@ -554,6 +528,35 @@ namespace sockets {
 			}
 		} catch (std::system_error &) {
 			// this can only be a deadlock, so do nothing here and delete thread in destructor
+		}
+	}
+
+	void TcpSocket::work() {
+		while (!_terminate) {
+			_writePacketAsyncLock.lock();
+			while (_writePacketAsyncQueue.size() > 0) {
+				std::vector<uint8_t> tmp = std::move(_writePacketAsyncQueue.front());
+				_writePacketAsyncLock.unlock();
+
+				writePacket(const_cast<const unsigned char *>(&tmp[0]), tmp.size());
+
+				_writePacketAsyncLock.lock();
+				_writePacketAsyncQueue.pop();
+			}
+			_writePacketAsyncLock.unlock();
+			_writeAsyncLock.lock();
+			while (_writeAsyncQueue.size() > 0) {
+				std::vector<uint8_t> tmp = std::move(_writeAsyncQueue.front());
+				_writeAsyncLock.unlock();
+
+				write(const_cast<const unsigned char *>(&tmp[0]), tmp.size());
+
+				_writeAsyncLock.lock();
+				_writeAsyncQueue.pop();
+			}
+			_writeAsyncLock.unlock();
+			std::unique_lock<std::mutex> ul(_condMutex);
+			_condVar.wait(ul);
 		}
 	}
 
