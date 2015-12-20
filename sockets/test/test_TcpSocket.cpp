@@ -1060,3 +1060,26 @@ TEST(TcpSocket, writeAsyncMultiple) {
 
 	_socketList.clear();
 }
+
+TEST(TcpSocket, writeAsyncMultipleWithFastShutdown) {
+	TcpSocket sock1;
+	std::vector<uint8_t> v1 = { 0x1, 0x2, 0x3, 0x4, 0x5, 0x0, 0x5, 0x4, 0x3, 0x2, 0x1 };
+
+	sock1.listen(12345, 1, false, [](TcpSocket * sock) {
+		_socketList.push_back(sock);
+	});
+	TcpSocket * sock2 = new TcpSocket();
+	sock2->connect("127.0.0.1", 12345, 500);
+
+	for (int i = 0; i < 1000; i++) {
+		sock2->writePacketAsync(v1);
+	}
+	sock2->close();
+	delete sock2;
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+
+	_socketList.clear();
+}

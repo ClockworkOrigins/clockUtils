@@ -53,6 +53,16 @@ namespace sockets {
 
 	TcpSocket::~TcpSocket() {
 		_terminate = true;
+		_writePacketAsyncLock.lock();
+		while (!_writePacketAsyncQueue.empty()) {
+			_writePacketAsyncQueue.pop();
+		}
+		_writePacketAsyncLock.unlock();
+		_writeAsyncLock.lock();
+		while (!_writeAsyncQueue.empty()) {
+			_writeAsyncQueue.pop();
+		}
+		_writeAsyncLock.unlock();
 		_condVar.notify_all();
 		if (_worker->joinable()) {
 			_worker->join();
@@ -533,30 +543,30 @@ namespace sockets {
 
 	void TcpSocket::work() {
 		while (!_terminate) {
+			std::unique_lock<std::mutex> ul(_condMutex);
+			_condVar.wait(ul);
 			_writePacketAsyncLock.lock();
 			while (_writePacketAsyncQueue.size() > 0) {
 				std::vector<uint8_t> tmp = std::move(_writePacketAsyncQueue.front());
+				_writePacketAsyncQueue.pop();
 				_writePacketAsyncLock.unlock();
 
 				writePacket(const_cast<const unsigned char *>(&tmp[0]), tmp.size());
 
 				_writePacketAsyncLock.lock();
-				_writePacketAsyncQueue.pop();
 			}
 			_writePacketAsyncLock.unlock();
 			_writeAsyncLock.lock();
 			while (_writeAsyncQueue.size() > 0) {
 				std::vector<uint8_t> tmp = std::move(_writeAsyncQueue.front());
+				_writeAsyncQueue.pop();
 				_writeAsyncLock.unlock();
 
 				write(const_cast<const unsigned char *>(&tmp[0]), tmp.size());
 
 				_writeAsyncLock.lock();
-				_writeAsyncQueue.pop();
 			}
 			_writeAsyncLock.unlock();
-			std::unique_lock<std::mutex> ul(_condMutex);
-			_condVar.wait(ul);
 		}
 	}
 
