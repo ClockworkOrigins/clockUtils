@@ -131,7 +131,7 @@ namespace sockets {
 					if (clientSock == -1) {
 						return;
 					}
-					acb(new TcpSocket(clientSock));
+					std::thread(std::bind(acb, new TcpSocket(clientSock))).detach();
 				}
 			});
 

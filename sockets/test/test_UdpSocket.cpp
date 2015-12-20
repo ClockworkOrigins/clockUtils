@@ -37,6 +37,8 @@ TEST(UdpSocket, bind) { // tests binding a socket to a port
 	EXPECT_EQ(ClockError::SUCCESS, server.bind(12345));
 	EXPECT_EQ(ClockError::INVALID_USAGE, server.bind(12345));
 	EXPECT_EQ(ClockError::ADDRESS_INUSE, server2.bind(12345));
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(20));
 }
 
 TEST(UdpSocket, sendRead) { // tests communication between two sockets
@@ -80,12 +82,16 @@ TEST(UdpSocket, useUnready) {
 	EXPECT_EQ(ClockError::NOT_READY, sock1.write("127.0.0.1", 12345, reinterpret_cast<char *>(&buffer[0]), buffer.size()));
 	EXPECT_EQ(ClockError::NOT_READY, sock1.receivePacket(buffer, ip, port));
 	EXPECT_EQ(ClockError::NOT_READY, sock1.receivePacket(str, ip, port));
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(20));
 }
 
 TEST(UdpSocket, closeFails) {
 	UdpSocket sock1;
 	sock1.close();
 	sock1.close();
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(20));
 }
 
 TEST(UdpSocket, writePacketMultiple) {
@@ -194,6 +200,8 @@ TEST(UdpSocket, writePacketAsyncMultiple) {
 
 	sock1.bind(12345);
 	sock2.bind(12346);
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
 	sock1.writePacketAsync("127.0.0.1", 12346, v1);
 	sock1.writePacketAsync("127.0.0.1", 12346, v2);
