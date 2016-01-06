@@ -1039,17 +1039,19 @@ TEST(TcpSocket, writeAsyncMultiple) {
 	std::vector<uint8_t> vSum = v1;
 	vSum.insert(vSum.end(), v2.begin(), v2.end());
 
-	sock1.listen(12345, 1, false, [v1, v2](TcpSocket * sock) {
+	ClockError err = sock1.listen(12345, 1, false, [v1, v2](TcpSocket * sock) {
 		sock->writeAsync(v1);
 		sock->writeAsync(v2);
 		_socketList.push_back(sock);
 	});
-	sock2.connect("127.0.0.1", 12345, 500);
+	EXPECT_EQ(ClockError::SUCCESS, err);
+
+	EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	std::vector<uint8_t> v3;
-	sock2.read(v3);
+	EXPECT_EQ(ClockError::SUCCESS, sock2.read(v3));
 	EXPECT_EQ(vSum, v3);
 	sock1.close();
 	sock2.close();

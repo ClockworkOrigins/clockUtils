@@ -62,7 +62,7 @@ namespace std {
 namespace clockUtils {
 	enum class ClockError;
 namespace sockets {
-	
+
 	/**
 	 * \brief class for sockets using udp
 	 */
@@ -183,11 +183,17 @@ namespace sockets {
 		/**
 		 * \brief receives a packet sent with writePacket, doesn't work with write
 		 * this functions blocks until a packet is received
+		 * \param[out] buffer The data is stored in this buffer. Old data in this vector is deleted. Enough memory is allocated automatically.
+		 * \param[out] ip The IP of the sender
+		 * \param[out] port The port of the sender
 		 */
 		ClockError receivePacket(std::vector<uint8_t> & buffer, std::string & ip, uint16_t & port);
 
 		/**
 		 * \brief receives a packet sent with writePacket, doesn't work with write
+		 * \param[out] buffer The data is stored in this buffer. Old data in this string is deleted. Enough memory is allocated automatically.
+		 * \param[out] ip The IP of the sender
+		 * \param[out] port The port of the sender
 		 */
 		ClockError receivePacket(std::string & buffer, std::string & ip, uint16_t & port);
 
@@ -276,7 +282,7 @@ namespace sockets {
 
 		std::condition_variable _condVar;
 		std::mutex _condMutex;
-		
+
 		std::thread * _worker;
 
 		bool _terminate;

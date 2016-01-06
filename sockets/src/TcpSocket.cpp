@@ -53,17 +53,10 @@ namespace sockets {
 
 	TcpSocket::~TcpSocket() {
 		_terminate = true;
-		_writePacketAsyncLock.lock();
-		while (!_writePacketAsyncQueue.empty()) {
-			_writePacketAsyncQueue.pop();
+		{
+			std::unique_lock<std::mutex> ul(_condMutex);
+			_condVar.notify_all();
 		}
-		_writePacketAsyncLock.unlock();
-		_writeAsyncLock.lock();
-		while (!_writeAsyncQueue.empty()) {
-			_writeAsyncQueue.pop();
-		}
-		_writeAsyncLock.unlock();
-		_condVar.notify_all();
 		if (_worker->joinable()) {
 			_worker->join();
 		}
@@ -347,7 +340,10 @@ namespace sockets {
 		_writePacketAsyncLock.lock();
 		_writePacketAsyncQueue.push(vec);
 		_writePacketAsyncLock.unlock();
-		_condVar.notify_all();
+		{
+			std::unique_lock<std::mutex> ul(_condMutex);
+			_condVar.notify_all();
+		}
 		return ClockError::SUCCESS;
 	}
 
@@ -359,7 +355,10 @@ namespace sockets {
 		_writePacketAsyncLock.lock();
 		_writePacketAsyncQueue.push(vec);
 		_writePacketAsyncLock.unlock();
-		_condVar.notify_all();
+		{
+			std::unique_lock<std::mutex> ul(_condMutex);
+			_condVar.notify_all();
+		}
 		return ClockError::SUCCESS;
 	}
 
@@ -375,7 +374,11 @@ namespace sockets {
 		_writeAsyncLock.lock();
 		_writeAsyncQueue.push(vec);
 		_writeAsyncLock.unlock();
-		_condVar.notify_all();
+
+		{
+			std::unique_lock<std::mutex> ul(_condMutex);
+			_condVar.notify_all();
+		}
 		return ClockError::SUCCESS;
 	}
 
@@ -387,7 +390,11 @@ namespace sockets {
 		_writeAsyncLock.lock();
 		_writeAsyncQueue.push(vec);
 		_writeAsyncLock.unlock();
-		_condVar.notify_all();
+
+		{
+			std::unique_lock<std::mutex> ul(_condMutex);
+			_condVar.notify_all();
+		}
 		return ClockError::SUCCESS;
 	}
 
@@ -542,9 +549,26 @@ namespace sockets {
 	}
 
 	void TcpSocket::work() {
-		while (!_terminate) {
-			std::unique_lock<std::mutex> ul(_condMutex);
-			_condVar.wait(ul);
+		bool finish = false;
+		// loop until finish is set. This ensures handling the pending writes
+		do {
+			{ // synchronize with destructor. Inside a scope to unlock _condMutex after waiting
+				// aquire the condition mutex
+				std::unique_lock<std::mutex> ul(_condMutex);
+				// The normal case is waiting for new write request
+				// Exceptions are:
+				//	* _terminate  -> socket will be closed soon
+				//	* size() != 0 -> new requests arrived
+				// this check needs to be inside the lock to avoid a lost wake-up
+				// if this 'if' or the 'else if' is true, the lock ensures that the notify is called *after* the wait call
+				if (_terminate) {
+					finish = true;
+				} else if (_writePacketAsyncQueue.size() != 0 || _writeAsyncQueue.size() != 0) {
+					// nothing
+				} else {
+					_condVar.wait(ul);
+				}
+			}
 			_writePacketAsyncLock.lock();
 			while (_writePacketAsyncQueue.size() > 0) {
 				std::vector<uint8_t> tmp = std::move(_writePacketAsyncQueue.front());
@@ -567,7 +591,7 @@ namespace sockets {
 				_writeAsyncLock.lock();
 			}
 			_writeAsyncLock.unlock();
-		}
+		} while(!finish);
 	}
 
 } /* namespace sockets */

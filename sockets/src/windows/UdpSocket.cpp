@@ -45,7 +45,10 @@ namespace sockets {
 
 	UdpSocket::~UdpSocket() {
 		_terminate = true;
-		_condVar.notify_all();
+		{
+			std::unique_lock<std::mutex> ul(_condMutex);
+			_condVar.notify_all();
+		}
 		if (_worker->joinable()) {
 			_worker->join();
 		}
