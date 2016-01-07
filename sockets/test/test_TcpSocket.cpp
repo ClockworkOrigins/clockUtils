@@ -257,6 +257,39 @@ TEST(TcpSocket, sendRead) { // tests communication between two sockets
 	_socketList.clear();
 }
 
+std::string receivedMessage = "";
+
+TEST(TcpSocket, sendFromServer) { // tests communication between two sockets
+	TcpSocket server;
+	TcpSocket client;
+
+	ClockError e = server.listen(12345, 10, false, [](TcpSocket * ts) {
+			ClockError e2 = ts->writePacket("test", 4);
+			EXPECT_EQ(ClockError::SUCCESS, e2);
+			ts->close();
+			delete ts;
+		});
+	EXPECT_EQ(ClockError::SUCCESS, e);
+
+	e = client.connect("127.0.0.1", 12345, 500);
+	EXPECT_EQ(ClockError::SUCCESS, e);
+
+	std::vector<uint8_t> recMsg;
+
+	client.receiveCallback([recMsg](const std::vector<uint8_t> & message, TcpSocket * sock, ClockError error) {
+			for (uint8_t i : message) {
+				receivedMessage += char(i);
+			}
+		});
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+	EXPECT_EQ("test", receivedMessage);
+
+	server.close();
+	client.close();
+}
+
 TEST(TcpSocket, getIP) { // tests IP before and after connection
 	TcpSocket ts;
 	std::string s2 = ts.getPublicIP();
@@ -1103,7 +1136,7 @@ TEST(TcpSocket, streamOperator) {
 		delete sock;
 	});
 	EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
-	
+
 	sock2.connect("127.0.0.1", 12345, 500);
 
 	int i;
