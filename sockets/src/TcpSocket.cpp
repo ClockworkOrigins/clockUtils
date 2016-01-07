@@ -526,7 +526,7 @@ namespace sockets {
 		if (_status != SocketStatus::INACTIVE) {
 			// needed to stop pending accept operations
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
-			::shutdown(_sock, SHUT_RDWR); // can fail, but doesn't matter. Was e.g. not connected befor
+			::shutdown(_sock, SHUT_RDWR); // can fail, but doesn't matter. Was e.g. not connected before
 			::close(_sock); // can fail, but doesn't matter. Was e.g. not connected before
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 			shutdown(_sock, SD_BOTH);
@@ -548,6 +548,18 @@ namespace sockets {
 		}
 	}
 
+	template<>
+	TcpSocket & TcpSocket::operator<< <std::string>(const std::string & s) {
+		writePacket(s);
+		return *this;
+	}
+	
+	template<>
+	TcpSocket & TcpSocket::operator>> <std::string>(std::string & s) {
+		receivePacket(s);
+		return *this;
+	}
+	
 	void TcpSocket::work() {
 		bool finish = false;
 		// loop until finish is set. This ensures handling the pending writes
