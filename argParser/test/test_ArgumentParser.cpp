@@ -52,6 +52,9 @@ TEST(ArgumentParser, parseBool) {
 	EXPECT_TRUE(GETLASTPARSERERROR().empty());
 
 	EXPECT_EQ(true, bo);
+	EXPECT_EQ(false, d);
+	EXPECT_EQ(false, foo);
+	EXPECT_EQ(false, bar);
 
 	bo = false;
 

@@ -106,18 +106,6 @@ TEST(DoubleBufferQueue, Clear) {
 	}
 }
 
-TEST(DoubleBufferQueue, Exception) {
-	DoubleBufferQueue<int, false, false> q;
-	ASSERT_THROW(q.pop(), std::exception);
-	ASSERT_THROW(q.front(), std::exception);
-	ASSERT_THROW(q.poll(), std::exception);
-	q.push(23);
-	q.pop();
-	ASSERT_THROW(q.pop(), std::exception);
-	ASSERT_THROW(q.front(), std::exception);
-	ASSERT_THROW(q.poll(), std::exception);
-}
-
 void pusher(DoubleBufferQueue<int, true, true> * q, int amount, int value) {
 	for (int i = 0; i < amount; ++i) {
 		q->push(value);

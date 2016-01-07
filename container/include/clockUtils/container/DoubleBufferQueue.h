@@ -137,12 +137,9 @@ namespace container {
 			std::lock_guard<std::mutex> lg(_readLock);
 			if (_queueRead->empty()) {
 				swap();
-
-				if (_queueRead->empty()) {
-					throw std::exception((std::string("DoubleBufferQueue nothing to pop: ") + std::string(__FILE__) + std::string(":") + std::to_string(__LINE__)).c_str());
-				}
 			}
 
+			// empty queue results in undefined behaviour (same as STL)
 			_queueRead->pop();
 		}
 
@@ -150,12 +147,9 @@ namespace container {
 			static_assert(!consumer, "Consumer must be false here");
 			if (_queueRead->empty()) {
 				swap();
-
-				if (_queueRead->empty()) {
-					throw std::exception((std::string("DoubleBufferQueue nothing to pop: ") + std::string(__FILE__) + std::string(":") + std::to_string(__LINE__)).c_str());
-				}
 			}
 
+			// empty queue results in undefined behaviour (same as STL)
 			_queueRead->pop();
 		}
 
@@ -164,11 +158,9 @@ namespace container {
 			std::lock_guard<std::mutex> lg(_readLock);
 			if (_queueRead->empty()) {
 				swap();
-
-				if (_queueRead->empty()) {
-					throw std::exception((std::string("DoubleBufferQueue nothing to get: ") + std::string(__FILE__) + std::string(":") + std::to_string(__LINE__)).c_str());
-				}
 			}
+
+			// empty queue results in undefined behaviour (same as STL)
 			return _queueRead->front();
 		}
 
@@ -176,11 +168,9 @@ namespace container {
 			static_assert(!consumer, "Consumer must be false here");
 			if (_queueRead->empty()) {
 				swap();
-
-				if (_queueRead->empty()) {
-					throw std::exception((std::string("DoubleBufferQueue nothing to get: ") + std::string(__FILE__) + std::string(":") + std::to_string(__LINE__)).c_str());
-				}
 			}
+
+			// empty queue results in undefined behaviour (same as STL)
 			return _queueRead->front();
 		}
 
@@ -189,12 +179,9 @@ namespace container {
 			std::lock_guard<std::mutex> lg(_readLock);
 			if (_queueRead->empty()) {
 				swap();
-
-				if (_queueRead->empty()) {
-					throw std::exception((std::string("DoubleBufferQueue nothing to get: ") + std::string(__FILE__) + std::string(":") + std::to_string(__LINE__)).c_str());
-				}
 			}
 
+			// empty queue results in undefined behaviour (same as STL)
 			T ret = _queueRead->front();
 			_queueRead->pop();
 			return ret;
@@ -204,12 +191,9 @@ namespace container {
 			static_assert(!consumer, "Consumer must be false here");
 			if (_queueRead->empty()) {
 				swap();
-
-				if (_queueRead->empty()) {
-					throw std::exception((std::string("DoubleBufferQueue nothing to get: ") + std::string(__FILE__) + std::string(":") + std::to_string(__LINE__)).c_str());
-				}
 			}
 
+			// empty queue results in undefined behaviour (same as STL)
 			T ret = _queueRead->front();
 			_queueRead->pop();
 			return ret;
