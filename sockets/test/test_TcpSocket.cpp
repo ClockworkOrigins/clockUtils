@@ -1028,14 +1028,15 @@ TEST(TcpSocket, writePacketAsyncMultiple) {
 	std::mutex lock;
 
 	called = 0;
-	sock1.listen(12345, 1, false, [&condVar, &lock](TcpSocket * sock) {
+	sock1.listen(12345, 1, false, [&condVar](TcpSocket * sock) {
 		for (int i = 0; i < 5000; i++) {
 			sock->writePacketAsync(std::vector<uint8_t>({ 0x0, 0x1, 0x2, 0x3, 0x4, 0x5 }));
 		}
 		for (int i = 0; i < 5000; i++) {
 			sock->writePacketAsync(std::vector<uint8_t>({ 0x5, 0x4, 0x3, 0x2, 0x1, 0x0 }));
 		}
-		std::unique_lock<std::mutex> l(lock);
+		std::mutex ll;
+		std::unique_lock<std::mutex> l(ll);
 		condVar.wait(l);
 		delete sock;
 	});
