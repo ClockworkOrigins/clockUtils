@@ -389,6 +389,8 @@ namespace sockets {
 		 */
 		void work();
 
+		void closeSocket();
+
 		TcpSocket(const TcpSocket &) = delete;
 		TcpSocket & operator=(const TcpSocket &) = delete;
 	};

@@ -104,6 +104,7 @@ namespace sockets {
 		errno = 0;
 		if (-1 == bind(_sock, reinterpret_cast<struct sockaddr *>(&name), sizeof(name))) {
 			ClockError error = getLastError();
+			closeSocket();
 			close();
 			return error;
 		}
@@ -111,31 +112,25 @@ namespace sockets {
 		errno = 0;
 		if (-1 == ::listen(_sock, maxParallelConnections)) {
 			ClockError error = getLastError();
+			closeSocket();
 			close();
 			return error;
 		}
 
 		_listenThread = new std::thread([acceptMultiple, acb, this]()
 			{
-				if (acceptMultiple) {
-					while (true) {
-						errno = 0;
-						SOCKET clientSock = ::accept(_sock, nullptr, nullptr);
-						if (clientSock == -1) {
-							close();
-							return;
-						}
-						std::thread thrd2(std::bind(acb, new TcpSocket(clientSock)));
-						thrd2.detach();
-					}
-				} else {
+				do {
+					errno = 0;
 					SOCKET clientSock = ::accept(_sock, nullptr, nullptr);
-					close();
-					if (clientSock == -1) {
+					if (clientSock == -1 || _terminate) {
+						close();
+						closeSocket();
 						return;
 					}
-					std::thread(std::bind(acb, new TcpSocket(clientSock))).detach();
-				}
+					std::thread thrd2(std::bind(acb, new TcpSocket(clientSock)));
+					thrd2.detach();
+				} while (acceptMultiple && !_terminate);
+				close();
 			});
 
 		_status = SocketStatus::LISTENING;
@@ -172,6 +167,7 @@ namespace sockets {
 
 		if (addr.sin_addr.s_addr == INADDR_NONE || addr.sin_addr.s_addr == INADDR_ANY) {
 			close();
+			closeSocket();
 			return ClockError::INVALID_IP;
 		}
 
@@ -207,14 +203,17 @@ namespace sockets {
 					getsockopt(_sock, SOL_SOCKET, SO_ERROR, static_cast<void *>(&valopt), &lon);
 #endif
 					if (valopt) {
+						closeSocket();
 						close();
 						return ClockError::CONNECTION_FAILED;
 					}
 				} else {
+					closeSocket();
 					close();
 					return ClockError::TIMEOUT;
 				}
 			} else {
+				closeSocket();
 				close();
 				return error;
 			}
@@ -527,14 +526,12 @@ namespace sockets {
 			// needed to stop pending accept operations
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 			::shutdown(_sock, SHUT_RDWR); // can fail, but doesn't matter. Was e.g. not connected before
-			::close(_sock); // can fail, but doesn't matter. Was e.g. not connected before
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 			shutdown(_sock, SD_BOTH);
-			closesocket(_sock);
 #endif
-			_sock = -1;
 			_status = SocketStatus::INACTIVE;
 		}
+		closeSocket();
 		try {
 			if (_callbackThread != nullptr) {
 				if (_callbackThread->joinable()) {
@@ -604,6 +601,17 @@ namespace sockets {
 			}
 			_writeAsyncLock.unlock();
 		} while(!finish);
+	}
+
+	void TcpSocket::closeSocket() {
+		if (_sock != -1) {
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
+			::close(_sock); // can fail, but doesn't matter. Was e.g. not connected before
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+			closesocket(_sock);
+#endif
+			_sock = -1;
+		}
 	}
 
 } /* namespace sockets */
