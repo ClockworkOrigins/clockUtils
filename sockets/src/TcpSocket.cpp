@@ -54,9 +54,9 @@ namespace sockets {
 	}
 
 	TcpSocket::~TcpSocket() {
-		_terminate = true;
 		{
 			std::unique_lock<std::mutex> ul(_condMutex);
+			_terminate = true;
 			_condVar.notify_all();
 		}
 		if (_worker->joinable()) {
@@ -488,6 +488,7 @@ namespace sockets {
 			return ClockError::NOT_READY;
 		}
 
+		errno = 0;
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 		int rc = send(_sock, reinterpret_cast<const char *>(str), length, MSG_NOSIGNAL);
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32

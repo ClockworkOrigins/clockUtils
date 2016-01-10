@@ -64,6 +64,20 @@ namespace sockets {
 
 	/**
 	 * \brief class for sockets using tcp
+	 * \section sec_writing Writing to the socket
+	 * Two different writing modes are available: \b stream and \b packet.<br>
+	 * \b Stream is the normal TCP behaviour. Several packets are sent that form a continous stream.
+	 * Several writes can be received with a single read and a single write can be split up in several reads.
+	 * It is the users task to concatenate and split the stream if necessary.<br>
+	 * \b Packet is an addition provided by this socket class. A single packet is received as a single packet.
+	 * This allows to easily send messages, objects, etc. without worrying about the TCP internals.
+	 * The behaviour is similar to UDP sockets but with the reliability of TCP.
+	 * Internally, the packets are mapped to a stream and extracted and the other endpoint.<br>
+	 * \attention Never mix stream and packet on the same socket and retrieve the data with the same method like it was sent.
+	 * Otherwise the socket is likely to crash. However, e.g., sending a string packet and retrieving the packet as a vector is possible.
+	 * \note All write methods return SUCCESS after successfully sending the data (or storing it in the buffer with async operations).
+	 * However, no guarantees about the endpoint receiving the data is given.
+	 * Even shortly after the remote endpoint disconnected ungratefully, writes will return SUCCESS
 	 */
 	class CLOCK_SOCKETS_API TcpSocket {
 	public:
@@ -141,19 +155,22 @@ namespace sockets {
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError writePacket(const void * str, const size_t length);
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError writePacket(const std::vector<uint8_t> & vec);
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError writePacket(const std::string & str) {
 			return writePacket(str.c_str(), str.size());
@@ -161,19 +178,22 @@ namespace sockets {
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError writePacketAsync(const void * str, const size_t length);
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError writePacketAsync(const std::vector<uint8_t> & vec);
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError writePacketAsync(const std::string & str) {
 			return writePacketAsync(std::vector<uint8_t>(str.begin(), str.end()));
@@ -198,19 +218,22 @@ namespace sockets {
 
 		/**
 		 * \brief sends a message, doesn't work with receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError write(const void * str, size_t length);
 
 		/**
 		 * \brief sends a message, doesn't work with receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError write(const std::vector<uint8_t> & vec);
 
 		/**
 		 * \brief sends a message, doesn't work with receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError write(const std::string & str) {
 			return write(str.c_str(), str.length());
@@ -218,19 +241,22 @@ namespace sockets {
 
 		/**
 		 * \brief sends a message asynchron, doesn't work with receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError writeAsync(const void * str, const size_t length);
 
 		/**
 		 * \brief sends a message asynchron, doesn't work with receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError writeAsync(const std::vector<uint8_t> & vec);
 
 		/**
 		 * \brief sends a message asynchron, doesn't work with receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError writeAsync(const std::string & str) {
 			return writeAsync(std::vector<uint8_t>(str.begin(), str.end()));
