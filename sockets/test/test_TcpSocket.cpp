@@ -614,10 +614,12 @@ TEST(TcpSocket, connectDouble) {
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
+	ClockError e = sock3.connect("127.0.0.1", 12345, 500);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
-	EXPECT_EQ(ClockError::CONNECTION_FAILED, sock3.connect("127.0.0.1", 12345, 500));
+	EXPECT_EQ(ClockError::CONNECTION_FAILED, e);
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
-	EXPECT_EQ(ClockError::TIMEOUT, sock3.connect("127.0.0.1", 12345, 500));
+	EXPECT_EQ(ClockError::TIMEOUT, e);
 #endif
 	sock1.close();
 	sock2.close();

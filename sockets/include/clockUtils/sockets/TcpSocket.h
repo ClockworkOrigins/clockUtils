@@ -90,7 +90,7 @@ namespace sockets {
 		/**
 		 * \brief creates listen socket listening on the given port and calling callback for every accepted connection
 		 * \param[in] listenPort the port the socket is listening on
-		 * \param[in] maxParallelConnections the amount of connections being able to be handle at once
+		 * \param[in] maxParallelConnections the amount of connections being able to be handled at once
 		 * \param[in] acceptMultiple if set to false, only one connection is accepted, otherwise infinite
 		 * \param[in] acb the callback to be called for every accepted connection
 		 */
