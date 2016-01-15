@@ -214,7 +214,7 @@ namespace sockets {
 
 			buffer.resize(MAX_PACKET_SIZE + 4);
 			int rc = -1;
-			struct sockaddr_in remaddr = { 0 };
+			struct sockaddr_in remaddr = { 0, 0, { 0 }, "\0\0\0\0\0\0\0" };
 			socklen_t addrlen = sizeof(remaddr);
 
 			do {

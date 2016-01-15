@@ -417,6 +417,8 @@ namespace sockets {
 
 		void closeSocket();
 
+		void listenFunc(SOCKET sock, bool acceptMultiple, const acceptCallback acb);
+
 		TcpSocket(const TcpSocket &) = delete;
 		TcpSocket & operator=(const TcpSocket &) = delete;
 	};

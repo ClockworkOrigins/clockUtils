@@ -118,29 +118,30 @@ namespace sockets {
 		// needs to be before the listen thread. Otherwise the acb thread could see a wrong status
 		_status = SocketStatus::LISTENING;
 
-		_listenThread = new std::thread([acceptMultiple, acb, this]()
-			{
-				SOCKET sock = _sock;
-				do {
-					errno = 0;
-					SOCKET clientSock = ::accept(sock, nullptr, nullptr);
-					if (clientSock == -1 || _terminate) {
-						// silently close. This will be changed in 1.0 to notify the user
-						if (!_terminate) {
-							closeSocket();
-						}
-						return;
-					}
-					std::thread thrd2(std::bind(acb, new TcpSocket(clientSock)));
-					thrd2.detach();
-				} while (acceptMultiple && !_terminate);
-				// needed to stop the socket from listening
+		_listenThread = new std::thread(std::bind(&TcpSocket::listenFunc, this, _sock, acceptMultiple, acb));
+
+		return ClockError::SUCCESS;
+	}
+
+	void TcpSocket::listenFunc(SOCKET sock, bool acceptMultiple, const acceptCallback acb) {
+		do {
+			errno = 0;
+			SOCKET clientSock = ::accept(sock, nullptr, nullptr);
+			if (clientSock == -1 || _terminate) {
+				// silently close. This will be changed in 1.0 to notify the user
 				if (!_terminate) {
 					closeSocket();
 				}
-			});
-
-		return ClockError::SUCCESS;
+				return;
+			}
+			TcpSocket * sockPtr = new TcpSocket(clientSock);
+			std::thread thrd2(std::bind(acb, sockPtr));
+			thrd2.detach();
+		} while (acceptMultiple && !_terminate);
+		// needed to stop the socket from listening
+		if (!_terminate) {
+			closeSocket();
+		}
 	}
 
 	ClockError TcpSocket::connect(const std::string & remoteIP, uint16_t remotePort, unsigned int timeout) {
