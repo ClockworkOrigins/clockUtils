@@ -489,8 +489,6 @@ TEST(TcpSocket, connectOnly) {
 	EXPECT_EQ(ClockError::NOT_READY, sock1.receivePacket(buffer));
 	EXPECT_EQ(ClockError::NOT_READY, sock1.receivePacket(str));
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
 	sock2.writePacket(buffer);
 	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.read(buffer));
 	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.read(str));
