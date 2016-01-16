@@ -31,10 +31,13 @@
 
 #include "clockUtils/errors.h"
 
+#include <iostream>
+
 namespace clockUtils {
 namespace sockets {
 
 	ClockError TcpSocket::getLastError() {
+//	std::cerr << "getting error: " << errno << std::endl;
 		if (errno == EADDRINUSE) {
 			return ClockError::ADDRESS_INUSE;
 		} else if (errno == EINTR) {
@@ -86,7 +89,7 @@ namespace sockets {
 		} else if (errno == EPIPE) {
 			return ClockError::NOT_CONNECTED;
 		}
-
+std::cerr << "Unknown error: " << errno << std::endl;
 		return ClockError::UNKNOWN;
 	}
 

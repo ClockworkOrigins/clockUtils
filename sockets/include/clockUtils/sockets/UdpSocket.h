@@ -62,7 +62,7 @@ namespace std {
 namespace clockUtils {
 	enum class ClockError;
 namespace sockets {
-	
+
 	/**
 	 * \brief class for sockets using udp
 	 */
@@ -183,11 +183,17 @@ namespace sockets {
 		/**
 		 * \brief receives a packet sent with writePacket, doesn't work with write
 		 * this functions blocks until a packet is received
+		 * \param[out] buffer The data is stored in this buffer. Old data in this vector is deleted. Enough memory is allocated automatically.
+		 * \param[out] ip The IP of the sender
+		 * \param[out] port The port of the sender
 		 */
 		ClockError receivePacket(std::vector<uint8_t> & buffer, std::string & ip, uint16_t & port);
 
 		/**
 		 * \brief receives a packet sent with writePacket, doesn't work with write
+		 * \param[out] buffer The data is stored in this buffer. Old data in this string is deleted. Enough memory is allocated automatically.
+		 * \param[out] ip The IP of the sender
+		 * \param[out] port The port of the sender
 		 */
 		ClockError receivePacket(std::string & buffer, std::string & ip, uint16_t & port);
 
@@ -208,7 +214,7 @@ namespace sockets {
 
 			buffer.resize(MAX_PACKET_SIZE + 4);
 			int rc = -1;
-			struct sockaddr_in remaddr;
+			struct sockaddr_in remaddr = { 0, 0, { 0 }, "\0\0\0\0\0\0\0" };
 			socklen_t addrlen = sizeof(remaddr);
 
 			do {
@@ -243,11 +249,6 @@ namespace sockets {
 
 	private:
 		/**
-		 * \brief reads platform specific error codes and returns a ClockError
-		 */
-		ClockError getLastError();
-
-		/**
 		 * \brief stores the local socket descriptor or -1 if not active
 		 */
 		SOCKET _sock;
@@ -279,13 +280,19 @@ namespace sockets {
 		std::queue<std::tuple<std::vector<uint8_t>, std::string, uint16_t>> _writePacketAsyncQueue;
 		std::queue<std::tuple<std::vector<uint8_t>, std::string, uint16_t>> _writeAsyncQueue;
 
-		std::condition_variable _objCondExecutable;
-		std::mutex _objCondMut;
-		std::unique_lock<std::mutex> _objCondUniqLock;
+		std::condition_variable _condVar;
+		std::mutex _condMutex;
 
 		std::thread * _worker;
 
 		bool _terminate;
+
+		/**
+		 * \brief reads platform specific error codes and returns a ClockError
+		 */
+		ClockError getLastError();
+
+		void work();
 
 		UdpSocket(const UdpSocket &) = delete;
 		UdpSocket & operator=(const UdpSocket &) = delete;

@@ -21,6 +21,7 @@
 
 #include <errno.h>
 #include <thread>
+#include <iostream>
 
 namespace clockUtils {
 namespace sockets {
@@ -39,37 +40,12 @@ namespace sockets {
 	};
 #endif
 
-	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _writePacketAsyncLock(), _writeAsyncLock(), _writePacketAsyncQueue(), _writeAsyncQueue(), _buffer(), _terminate(false), _worker(nullptr), _listenThread(nullptr), _objCondExecutable(), _objCondMut(), _objCondUniqLock(_objCondMut), _callbackThread(nullptr) {
+	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _writePacketAsyncLock(), _writeAsyncLock(), _writePacketAsyncQueue(), _writeAsyncQueue(), _buffer(), _terminate(false), _worker(nullptr), _listenThread(nullptr), _condVar(), _condMutex(), _callbackThread(nullptr) {
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 		static WSAHelper wsa;
 #endif
-		_worker = new std::thread([this]() {
-				while (!_terminate) {
-					_writePacketAsyncLock.lock();
-					while (_writePacketAsyncQueue.size() > 0) {
-						std::vector<uint8_t> tmp = std::move(_writePacketAsyncQueue.front());
-						_writePacketAsyncLock.unlock();
-
-						writePacket(const_cast<const unsigned char *>(&tmp[0]), tmp.size());
-
-						_writePacketAsyncLock.lock();
-						_writePacketAsyncQueue.pop();
-					}
-					_writePacketAsyncLock.unlock();
-					_writeAsyncLock.lock();
-					while (_writeAsyncQueue.size() > 0) {
-						std::vector<uint8_t> tmp = std::move(_writeAsyncQueue.front());
-						_writeAsyncLock.unlock();
-
-						write(const_cast<const unsigned char *>(&tmp[0]), tmp.size());
-
-						_writeAsyncLock.lock();
-						_writeAsyncQueue.pop();
-					}
-					_writeAsyncLock.unlock();
-					_objCondExecutable.wait(_objCondUniqLock);
-				}
-			});
+		// This thread handles all write requests
+		_worker = new std::thread(std::bind(&TcpSocket::work, this));
 	}
 
 	TcpSocket::TcpSocket(SOCKET fd) : TcpSocket() {
@@ -78,41 +54,37 @@ namespace sockets {
 	}
 
 	TcpSocket::~TcpSocket() {
-		_terminate = true;
-		_objCondExecutable.notify_all();
+		{
+			std::unique_lock<std::mutex> ul(_condMutex);
+			_terminate = true;
+			_condVar.notify_all();
+		}
 		if (_worker->joinable()) {
 			_worker->join();
 		}
 		delete _worker;
 		close();
-		if (_listenThread) {
-			if (_listenThread->joinable()) {
-				_listenThread->join();
-			}
-			delete _listenThread;
-		}
 	}
 
 	ClockError TcpSocket::listen(uint16_t listenPort, int maxParallelConnections, bool acceptMultiple, const acceptCallback acb) {
+		// check for valid arguments
 		if (listenPort == 0) {
 			return ClockError::INVALID_PORT;
-		}
-		if (_status != SocketStatus::INACTIVE) {
-			return ClockError::INVALID_USAGE;
 		}
 		if (maxParallelConnections < 0) {
 			return ClockError::INVALID_ARGUMENT;
 		}
+
+		// check for correct status
+		if (_status != SocketStatus::INACTIVE) {
+			return ClockError::INVALID_USAGE;
+		}
+
+		// create socket
+		errno = 0;
 		_sock = socket(PF_INET, SOCK_STREAM, 0);
 		if (-1 == _sock) {
-			return ClockError::CONNECTION_FAILED;
-		}
-		if (_listenThread) {
-			if (_listenThread->joinable()) {
-				_listenThread->join();
-			}
-			delete _listenThread;
-			_listenThread = nullptr;
+			return getLastError();
 		}
 
 		// set reusable
@@ -121,81 +93,85 @@ namespace sockets {
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 		int flag = 1;
 #endif
-		setsockopt(_sock, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag));
+		errno = 0;
+		if (-1 == setsockopt(_sock, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag))) {
+			ClockError error = getLastError();
+			closeSocket();
+			return error;
+		}
 
 		struct sockaddr_in name = { AF_INET, htons(listenPort), INADDR_ANY, {0} };
 		errno = 0;
 		if (-1 == bind(_sock, reinterpret_cast<struct sockaddr *>(&name), sizeof(name))) {
 			ClockError error = getLastError();
-			close();
+			closeSocket();
 			return error;
 		}
 
 		errno = 0;
 		if (-1 == ::listen(_sock, maxParallelConnections)) {
 			ClockError error = getLastError();
-			close();
+			closeSocket();
 			return error;
 		}
 
-		_listenThread = new std::thread([acceptMultiple, acb, this]()
-			{
-				if (acceptMultiple) {
-					while (true) {
-						errno = 0;
-						SOCKET clientSock = ::accept(_sock, nullptr, nullptr);
-						if (clientSock == -1) {
-							close();
-							return;
-						}
-						std::thread thrd2(std::bind(acb, new TcpSocket(clientSock)));
-						thrd2.detach();
-					}
-				} else {
-					SOCKET clientSock = ::accept(_sock, nullptr, nullptr);
-					close();
-					if (clientSock == -1) {
-						return;
-					}
-					acb(new TcpSocket(clientSock));
-				}
-			});
-
+		// needs to be before the listen thread. Otherwise the acb thread could see a wrong status
 		_status = SocketStatus::LISTENING;
+
+		_listenThread = new std::thread(std::bind(&TcpSocket::listenFunc, this, _sock, acceptMultiple, acb));
 
 		return ClockError::SUCCESS;
 	}
 
-	ClockError TcpSocket::connect(const std::string & remoteIP, uint16_t remotePort, unsigned int timeout) {
-		if (_status != SocketStatus::INACTIVE) {
-			return ClockError::INVALID_USAGE;
+	void TcpSocket::listenFunc(SOCKET sock, bool acceptMultiple, const acceptCallback acb) {
+		do {
+			errno = 0;
+			SOCKET clientSock = ::accept(sock, nullptr, nullptr);
+			if (clientSock == -1 || _terminate) {
+				// silently close. This will be changed in 1.0 to notify the user
+				if (!_terminate) {
+					closeSocket();
+				}
+				return;
+			}
+			TcpSocket * sockPtr = new TcpSocket(clientSock);
+			std::thread thrd2(std::bind(acb, sockPtr));
+			thrd2.detach();
+		} while (acceptMultiple && !_terminate);
+		// needed to stop the socket from listening
+		if (!_terminate) {
+			closeSocket();
 		}
+	}
 
+	ClockError TcpSocket::connect(const std::string & remoteIP, uint16_t remotePort, unsigned int timeout) {
+		// check for invalid arguments
 		if (remotePort == 0) {
 			return ClockError::INVALID_PORT;
 		}
-
 		if (remoteIP.length() < 8) {
 			return ClockError::INVALID_IP;
 		}
 
-		errno = 0;
-		_sock = socket(PF_INET, SOCK_STREAM, 0);
-
-		if (_sock == -1) {
-			return getLastError();
-		}
-
 		sockaddr_in addr;
-
 		memset(&addr, 0, sizeof(sockaddr_in));
 		addr.sin_family = AF_INET;
 		addr.sin_port = htons(remotePort);
 		addr.sin_addr.s_addr = inet_addr(remoteIP.c_str());
-
 		if (addr.sin_addr.s_addr == INADDR_NONE || addr.sin_addr.s_addr == INADDR_ANY) {
-			close();
 			return ClockError::INVALID_IP;
+		}
+
+		// check status
+		if (_status != SocketStatus::INACTIVE) {
+			return ClockError::INVALID_USAGE;
+		}
+
+		// create socket
+		errno = 0;
+		_sock = socket(PF_INET, SOCK_STREAM, 0);
+		if (-1 == _sock) {
+			return getLastError();
 		}
 
 		// set socket non-blockable
@@ -203,9 +179,21 @@ namespace sockets {
 		u_long iMode = 1;
 		ioctlsocket(_sock, FIONBIO, &iMode);
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
+		errno = 0;
 		long arg = fcntl(_sock, F_GETFL, NULL);
+		if (-1 == arg) {
+			ClockError error = getLastError();
+			closeSocket();
+			return error;
+		}
+		errno = 0;
 		arg |= O_NONBLOCK;
-		fcntl(_sock, F_SETFL, arg);
+		arg = fcntl(_sock, F_SETFL, arg);
+		if (-1 == arg) {
+			ClockError error = getLastError();
+			closeSocket();
+			return error;
+		}
 #endif
 
 		// connect
@@ -230,15 +218,15 @@ namespace sockets {
 					getsockopt(_sock, SOL_SOCKET, SO_ERROR, static_cast<void *>(&valopt), &lon);
 #endif
 					if (valopt) {
-						close();
+						closeSocket();
 						return ClockError::CONNECTION_FAILED;
 					}
 				} else {
-					close();
+					closeSocket();
 					return ClockError::TIMEOUT;
 				}
 			} else {
-				close();
+				closeSocket();
 				return error;
 			}
 		}
@@ -363,7 +351,10 @@ namespace sockets {
 		_writePacketAsyncLock.lock();
 		_writePacketAsyncQueue.push(vec);
 		_writePacketAsyncLock.unlock();
-		_objCondExecutable.notify_all();
+		{
+			std::unique_lock<std::mutex> ul(_condMutex);
+			_condVar.notify_all();
+		}
 		return ClockError::SUCCESS;
 	}
 
@@ -375,7 +366,10 @@ namespace sockets {
 		_writePacketAsyncLock.lock();
 		_writePacketAsyncQueue.push(vec);
 		_writePacketAsyncLock.unlock();
-		_objCondExecutable.notify_all();
+		{
+			std::unique_lock<std::mutex> ul(_condMutex);
+			_condVar.notify_all();
+		}
 		return ClockError::SUCCESS;
 	}
 
@@ -391,7 +385,11 @@ namespace sockets {
 		_writeAsyncLock.lock();
 		_writeAsyncQueue.push(vec);
 		_writeAsyncLock.unlock();
-		_objCondExecutable.notify_all();
+
+		{
+			std::unique_lock<std::mutex> ul(_condMutex);
+			_condVar.notify_all();
+		}
 		return ClockError::SUCCESS;
 	}
 
@@ -403,7 +401,11 @@ namespace sockets {
 		_writeAsyncLock.lock();
 		_writeAsyncQueue.push(vec);
 		_writeAsyncLock.unlock();
-		_objCondExecutable.notify_all();
+
+		{
+			std::unique_lock<std::mutex> ul(_condMutex);
+			_condVar.notify_all();
+		}
 		return ClockError::SUCCESS;
 	}
 
@@ -487,6 +489,7 @@ namespace sockets {
 			return ClockError::NOT_READY;
 		}
 
+		errno = 0;
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 		int rc = send(_sock, reinterpret_cast<const char *>(str), length, MSG_NOSIGNAL);
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
@@ -532,18 +535,35 @@ namespace sockets {
 	}
 
 	void TcpSocket::close() {
-		if (_status != SocketStatus::INACTIVE) {
+		if (_status == SocketStatus::INACTIVE) {
+			return;
+		}
+
+		{
+			std::unique_lock<std::mutex> ul(_condMutex);
 			// needed to stop pending accept operations
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
-			::shutdown(_sock, SHUT_RDWR); // can fail, but doesn't matter. Was e.g. not connected befor
-			::close(_sock); // can fail, but doesn't matter. Was e.g. not connected before
+			::shutdown(_sock, SHUT_RDWR); // can fail, but doesn't matter. Was e.g. not connected before
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 			shutdown(_sock, SD_BOTH);
-			closesocket(_sock);
 #endif
-			_sock = -1;
-			_status = SocketStatus::INACTIVE;
+			if (_sock != -1) {
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
+				::close(_sock); // can fail, but doesn't matter. Was e.g. not connected before
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+				closesocket(_sock);
+#endif
+				_sock = -1;
+			}
 		}
+
+		// after closing, the accept() in the listen thread returns and allows joining
+		if (_listenThread) {
+			_listenThread->join();
+			delete _listenThread;
+			_listenThread = nullptr;
+		}
+
 		try {
 			if (_callbackThread != nullptr) {
 				if (_callbackThread->joinable()) {
@@ -554,6 +574,79 @@ namespace sockets {
 			}
 		} catch (std::system_error &) {
 			// this can only be a deadlock, so do nothing here and delete thread in destructor
+		}
+
+		_status = SocketStatus::INACTIVE;
+	}
+
+	template<>
+	TcpSocket & TcpSocket::operator<< <std::string>(const std::string & s) {
+		writePacket(s);
+		return *this;
+	}
+
+	template<>
+	TcpSocket & TcpSocket::operator>> <std::string>(std::string & s) {
+		receivePacket(s);
+		return *this;
+	}
+
+	void TcpSocket::work() {
+		bool finish = false;
+		// loop until finish is set. This ensures handling the pending writes
+		do {
+			{ // synchronize with destructor. Inside a scope to unlock _condMutex after waiting
+				// aquire the condition mutex
+				std::unique_lock<std::mutex> ul(_condMutex);
+				// The normal case is waiting for new write request
+				// Exceptions are:
+				//	* _terminate  -> socket will be closed soon
+				//	* size() != 0 -> new requests arrived
+				// this check needs to be inside the lock to avoid a lost wake-up
+				// if this 'if' or the 'else if' is true, the lock ensures that the notify is called *after* the wait call
+				if (_terminate) {
+					finish = true;
+				} else if (_writePacketAsyncQueue.size() != 0 || _writeAsyncQueue.size() != 0) {
+					// nothing
+				} else {
+					_condVar.wait(ul);
+				}
+			}
+			_writePacketAsyncLock.lock();
+			while (_writePacketAsyncQueue.size() > 0) {
+				std::vector<uint8_t> tmp = std::move(_writePacketAsyncQueue.front());
+				_writePacketAsyncQueue.pop();
+				_writePacketAsyncLock.unlock();
+
+				writePacket(const_cast<const unsigned char *>(&tmp[0]), tmp.size());
+
+				_writePacketAsyncLock.lock();
+			}
+			_writePacketAsyncLock.unlock();
+			_writeAsyncLock.lock();
+			while (_writeAsyncQueue.size() > 0) {
+				std::vector<uint8_t> tmp = std::move(_writeAsyncQueue.front());
+				_writeAsyncQueue.pop();
+				_writeAsyncLock.unlock();
+
+				write(const_cast<const unsigned char *>(&tmp[0]), tmp.size());
+
+				_writeAsyncLock.lock();
+			}
+			_writeAsyncLock.unlock();
+		} while(!finish);
+	}
+
+	void TcpSocket::closeSocket() {
+		// lock to avoid a race condition between the normal close() and the listenThread
+		std::unique_lock<std::mutex> ul(_condMutex);
+		if (_sock != -1) {
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
+			::close(_sock); // can fail, but doesn't matter. Was e.g. not connected before
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+			closesocket(_sock);
+#endif
+			_sock = -1;
 		}
 	}
 

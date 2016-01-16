@@ -53,6 +53,7 @@
 
 /**
  * \brief registers a variable with a type, the variable and argument name, a default value and a description text for --help
+ * variable will be initialized with default value right away
  */
 #define REGISTER_VARIABLE(type, name, value, description)\
 	{\

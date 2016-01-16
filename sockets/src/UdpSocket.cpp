@@ -112,7 +112,10 @@ namespace sockets {
 		_writePacketAsyncLock.lock();
 		_writePacketAsyncQueue.push(std::make_tuple(vec, ip, port));
 		_writePacketAsyncLock.unlock();
-		_objCondExecutable.notify_all();
+		{
+			std::unique_lock<std::mutex> ul(_condMutex);
+			_condVar.notify_all();
+		}
 		return ClockError::SUCCESS;
 	}
 
@@ -123,7 +126,10 @@ namespace sockets {
 		_writePacketAsyncLock.lock();
 		_writePacketAsyncQueue.push(std::make_tuple(vec, ip, port));
 		_writePacketAsyncLock.unlock();
-		_objCondExecutable.notify_all();
+		{
+			std::unique_lock<std::mutex> ul(_condMutex);
+			_condVar.notify_all();
+		}
 		return ClockError::SUCCESS;
 	}
 
@@ -138,7 +144,10 @@ namespace sockets {
 		_writeAsyncLock.lock();
 		_writeAsyncQueue.push(std::make_tuple(vec, ip, port));
 		_writeAsyncLock.unlock();
-		_objCondExecutable.notify_all();
+		{
+			std::unique_lock<std::mutex> ul(_condMutex);
+			_condVar.notify_all();
+		}
 		return ClockError::SUCCESS;
 	}
 
@@ -149,7 +158,11 @@ namespace sockets {
 		_writeAsyncLock.lock();
 		_writeAsyncQueue.push(std::make_tuple(vec, ip, port));
 		_writeAsyncLock.unlock();
-		_objCondExecutable.notify_all();
+
+		{
+			std::unique_lock<std::mutex> ul(_condMutex);
+			_condVar.notify_all();
+		}
 		return ClockError::SUCCESS;
 	}
 
@@ -245,6 +258,52 @@ namespace sockets {
 			}
 		});
 		return ClockError::SUCCESS;
+	}
+
+	void UdpSocket::work() {
+		bool finish = false;
+		// loop until finish is set. This ensures handling the pending writes
+		do {
+			{ // synchronize with destructor. Inside a scope to unlock _condMutex after waiting
+				// aquire the condition mutex
+				std::unique_lock<std::mutex> ul(_condMutex);
+				// The normal case is waiting for new write request
+				// Exceptions are:
+				//	* _terminate  -> socket will be closed soon
+				//	* size() != 0 -> new requests arrived
+				// this check needs to be inside the lock to avoid a lost wake-up
+				// if this 'if' or the 'else if' is true, the lock ensures that the notify is called *after* the wait call
+				if (_terminate) {
+					finish = true;
+				} else if (_writePacketAsyncQueue.size() != 0 || _writeAsyncQueue.size() != 0) {
+					// nothing
+				} else {
+					_condVar.wait(ul);
+				}
+			}
+			_writePacketAsyncLock.lock();
+			while (_writePacketAsyncQueue.size() > 0) {
+				std::tuple<std::vector<uint8_t>, std::string, uint16_t> tmp = std::move(_writePacketAsyncQueue.front());
+				_writePacketAsyncLock.unlock();
+
+				writePacket(std::get<AsyncQueueInfo::IP>(tmp), std::get<AsyncQueueInfo::Port>(tmp), const_cast<const unsigned char *>(&std::get<AsyncQueueInfo::Message>(tmp)[0]), std::get<AsyncQueueInfo::Message>(tmp).size());
+
+				_writePacketAsyncLock.lock();
+				_writePacketAsyncQueue.pop();
+			}
+			_writePacketAsyncLock.unlock();
+			_writeAsyncLock.lock();
+			while (_writeAsyncQueue.size() > 0) {
+				std::tuple<std::vector<uint8_t>, std::string, uint16_t> tmp = std::move(_writeAsyncQueue.front());
+				_writeAsyncLock.unlock();
+
+				write(std::get<AsyncQueueInfo::IP>(tmp), std::get<AsyncQueueInfo::Port>(tmp), const_cast<const unsigned char *>(&std::get<AsyncQueueInfo::Message>(tmp)[0]), std::get<AsyncQueueInfo::Message>(tmp).size());
+
+				_writeAsyncLock.lock();
+				_writeAsyncQueue.pop();
+			}
+			_writeAsyncLock.unlock();
+		} while (!finish);
 	}
 
 } /* namespace sockets */

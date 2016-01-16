@@ -30,6 +30,7 @@
 #include <functional>
 #include <mutex>
 #include <queue>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -63,6 +64,20 @@ namespace sockets {
 
 	/**
 	 * \brief class for sockets using tcp
+	 * \section sec_writing Writing to the socket
+	 * Two different writing modes are available: \b stream and \b packet.<br>
+	 * \b Stream is the normal TCP behaviour. Several packets are sent that form a continous stream.
+	 * Several writes can be received with a single read and a single write can be split up in several reads.
+	 * It is the users task to concatenate and split the stream if necessary.<br>
+	 * \b Packet is an addition provided by this socket class. A single packet is received as a single packet.
+	 * This allows to easily send messages, objects, etc. without worrying about the TCP internals.
+	 * The behaviour is similar to UDP sockets but with the reliability of TCP.
+	 * Internally, the packets are mapped to a stream and extracted and the other endpoint.<br>
+	 * \attention Never mix stream and packet on the same socket and retrieve the data with the same method like it was sent.
+	 * Otherwise the socket is likely to crash. However, e.g., sending a string packet and retrieving the packet as a vector is possible.
+	 * \note All write methods return SUCCESS after successfully sending the data (or storing it in the buffer with async operations).
+	 * However, no guarantees about the endpoint receiving the data is given.
+	 * Even shortly after the remote endpoint disconnected ungratefully, writes will return SUCCESS
 	 */
 	class CLOCK_SOCKETS_API TcpSocket {
 	public:
@@ -89,7 +104,7 @@ namespace sockets {
 		/**
 		 * \brief creates listen socket listening on the given port and calling callback for every accepted connection
 		 * \param[in] listenPort the port the socket is listening on
-		 * \param[in] maxParallelConnections the amount of connections being able to be handle at once
+		 * \param[in] maxParallelConnections the amount of connections being able to be handled at once
 		 * \param[in] acceptMultiple if set to false, only one connection is accepted, otherwise infinite
 		 * \param[in] acb the callback to be called for every accepted connection
 		 */
@@ -140,19 +155,22 @@ namespace sockets {
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError writePacket(const void * str, const size_t length);
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError writePacket(const std::vector<uint8_t> & vec);
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError writePacket(const std::string & str) {
 			return writePacket(str.c_str(), str.size());
@@ -160,19 +178,22 @@ namespace sockets {
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError writePacketAsync(const void * str, const size_t length);
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError writePacketAsync(const std::vector<uint8_t> & vec);
 
 		/**
 		 * \brief sends a packet being able to be completely received in one call of receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError writePacketAsync(const std::string & str) {
 			return writePacketAsync(std::vector<uint8_t>(str.begin(), str.end()));
@@ -197,19 +218,22 @@ namespace sockets {
 
 		/**
 		 * \brief sends a message, doesn't work with receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError write(const void * str, size_t length);
 
 		/**
 		 * \brief sends a message, doesn't work with receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError write(const std::vector<uint8_t> & vec);
 
 		/**
 		 * \brief sends a message, doesn't work with receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError write(const std::string & str) {
 			return write(str.c_str(), str.length());
@@ -217,19 +241,22 @@ namespace sockets {
 
 		/**
 		 * \brief sends a message asynchron, doesn't work with receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError writeAsync(const void * str, const size_t length);
 
 		/**
 		 * \brief sends a message asynchron, doesn't work with receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError writeAsync(const std::vector<uint8_t> & vec);
 
 		/**
 		 * \brief sends a message asynchron, doesn't work with receivePacket
-		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 * <br>
+		 * See \ref sec_writing
 		 */
 		ClockError writeAsync(const std::string & str) {
 			return writeAsync(std::vector<uint8_t>(str.begin(), str.end()));
@@ -273,10 +300,57 @@ namespace sockets {
 			return ClockError::SUCCESS;
 		}
 
-		// TODO: (Daniel) stream operators for sockets (CU-24)
-		/* void operator<<(int a);
+		/**
+		 * \brief sends parameter as a packet being receivable using operator>> or receivePacket
+		 * T is an enum value
+		 */
+		template<typename T>
+		typename std::enable_if<std::is_enum<T>::value, TcpSocket &>::type operator<<(const T & a) {
+			std::stringstream ss;
+			ss << uint32_t(a);
+			writePacket(ss.str());
+			return *this;
+		}
 
-		void operator>>(int & a); */
+		/**
+		 * \brief sends parameter as a packet being receivable using operator>> or receivePacket
+		 * T has to be streamable
+		 */
+		template<typename T>
+		typename std::enable_if<!std::is_enum<T>::value, TcpSocket &>::type operator<<(const T & a) {
+			std::stringstream ss;
+			ss << a;
+			writePacket(ss.str());
+			return *this;
+		}
+
+		/**
+		 * \brief receives a packet being sent using operator<< or writePacket(Async)
+		 * T is an enum value
+		 */
+		template<typename T>
+		typename std::enable_if<std::is_enum<T>::value, TcpSocket &>::type operator>>(T & a) {
+			std::string buffer;
+			receivePacket(buffer);
+			std::stringstream ss(buffer);
+			uint32_t e;
+			ss >> e;
+			a = T(e);
+			return *this;
+		}
+
+		/**
+		 * \brief receives a packet being sent using operator<< or writePacket(Async)
+		 * T has to be streamable
+		 */
+		template<typename T>
+		typename std::enable_if<!std::is_enum<T>::value, TcpSocket &>::type operator>>(T & a) {
+			std::string buffer;
+			receivePacket(buffer);
+			std::stringstream ss(buffer);
+			ss >> a;
+			return *this;
+		}
 
 	private:
 		/**
@@ -287,17 +361,6 @@ namespace sockets {
 			LISTENING,	// ! socket is listening on connections
 			CONNECTED	// ! socket is connected to another socket
 		};
-
-		/**
-		 * \brief constructor being called during accept
-		 * \param[in] fd file descriptor for the new socket
-		 */
-		TcpSocket(SOCKET fd);
-
-		/**
-		 * \brief reads platform specific error codes and returns a ClockError
-		 */
-		ClockError getLastError();
 
 		/**
 		 * \brief stores the local socket descriptor or -1 if not active
@@ -331,15 +394,46 @@ namespace sockets {
 		std::thread * _worker;
 		std::thread * _listenThread;
 
-		std::condition_variable _objCondExecutable;
-		std::mutex _objCondMut;
-		std::unique_lock<std::mutex> _objCondUniqLock;
+		std::condition_variable _condVar;
+		std::mutex _condMutex;
 
 		std::thread * _callbackThread;
+
+		/**
+		 * \brief constructor being called during accept
+		 * \param[in] fd file descriptor for the new socket
+		 */
+		TcpSocket(SOCKET fd);
+
+		/**
+		 * \brief reads platform specific error codes and returns a ClockError
+		 */
+		ClockError getLastError();
+
+		/**
+		 * \brief worker method for async write
+		 */
+		void work();
+
+		void closeSocket();
+
+		void listenFunc(SOCKET sock, bool acceptMultiple, const acceptCallback acb);
 
 		TcpSocket(const TcpSocket &) = delete;
 		TcpSocket & operator=(const TcpSocket &) = delete;
 	};
+
+	/**
+	 * \brief specialization of stream operator for std::string to reduce overhead through converting to std::string using stringstream
+	 */
+	template<>
+	CLOCK_SOCKETS_API TcpSocket & TcpSocket::operator<< <std::string>(const std::string & s);
+
+	/**
+	 * \brief specialization of stream operator for std::string to reduce overhead through converting to std::string using stringstream
+	 */
+	template<>
+	CLOCK_SOCKETS_API TcpSocket & TcpSocket::operator>> <std::string>(std::string & s);
 
 } /* namespace sockets */
 } /* namespace clockUtils */
