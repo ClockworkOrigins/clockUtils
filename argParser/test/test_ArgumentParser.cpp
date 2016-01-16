@@ -347,7 +347,6 @@ TEST(ArgumentParser, help) {
 	REGISTER_VARIABLE(std::string, s, "", "A string variable");
 	REGISTER_VARIABLE(int, i, 15, "An integer variable");
 	const char * buffer[] = { "--help" };
-	EXPECT_FALSE(HELPSET());
 	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer, 1));
 	EXPECT_TRUE(HELPSET());
 	std::string helpText = "\t-i\t[Default: 15]\t\tAn integer variable\n\t-s\t[Default: \"\"]\t\tA string variable";
