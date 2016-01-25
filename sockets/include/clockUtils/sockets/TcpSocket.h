@@ -84,7 +84,7 @@ namespace sockets {
 		/**
 		 * \brief this function type is used as accept callback, so every accepted socket will reach this function on host
 		 */
-		typedef std::function<void(TcpSocket *)> acceptCallback;
+		typedef std::function<void(TcpSocket *, ClockError)> acceptCallback;
 
 		/**
 		 * \brief this function type is used receiving a packet using receiveCallback and is called for every packet
@@ -106,7 +106,7 @@ namespace sockets {
 		 * \param[in] listenPort the port the socket is listening on
 		 * \param[in] maxParallelConnections the amount of connections being able to be handled at once
 		 * \param[in] acceptMultiple if set to false, only one connection is accepted, otherwise infinite
-		 * \param[in] acb the callback to be called for every accepted connection
+		 * \param[in] acb the callback to be called for every accepted connection. Will also be called when socket is closed during listen or an error occurs. If no error occurs, ClockError::SUCCESS is passed as second parameter
 		 */
 		ClockError listen(uint16_t listenPort, int maxParallelConnections, bool acceptMultiple, const acceptCallback acb);
 
