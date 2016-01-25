@@ -53,6 +53,7 @@
 	#include <unistd.h>
 
 	typedef int SOCKET;
+	#define INVALID_SOCKET -1;
 #endif
 
 namespace std {
@@ -208,7 +209,7 @@ namespace sockets {
 		 */
 		template<class Container>
 		ClockError read(Container & buffer, std::string & ip, uint16_t & port) {
-			if (_sock == -1) {
+			if (_sock == INVALID_SOCKET) {
 				return ClockError::NOT_READY;
 			}
 
@@ -249,7 +250,7 @@ namespace sockets {
 
 	private:
 		/**
-		 * \brief stores the local socket descriptor or -1 if not active
+		 * \brief stores the local socket descriptor or INVALID_SOCKET if not active
 		 */
 		SOCKET _sock;
 

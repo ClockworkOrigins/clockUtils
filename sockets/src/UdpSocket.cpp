@@ -26,13 +26,13 @@ namespace clockUtils {
 namespace sockets {
 
 	ClockError UdpSocket::bind(uint16_t port) {
-		if (_sock != -1) {
+		if (_sock != INVALID_SOCKET) {
 			return ClockError::INVALID_USAGE;
 		}
 
 		struct sockaddr_in si;
 
-		if ((_sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
+		if ((_sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == INVALID_SOCKET) {
 			ClockError error = getLastError();
 			close();
 			return error;
@@ -56,7 +56,7 @@ namespace sockets {
 	}
 
 	ClockError UdpSocket::writePacket(const std::string & ip, uint16_t port, const void * str, const size_t length) {
-		if (_sock == -1) {
+		if (_sock == INVALID_SOCKET) {
 			return ClockError::NOT_READY;
 		}
 		// | + size + str + |
@@ -81,7 +81,7 @@ namespace sockets {
 	}
 
 	ClockError UdpSocket::write(const std::string & ip, uint16_t port, const void * str, size_t length) {
-		if (_sock == -1) {
+		if (_sock == INVALID_SOCKET) {
 			return ClockError::NOT_READY;
 		}
 		struct sockaddr_in addr;
@@ -102,7 +102,7 @@ namespace sockets {
 	}
 
 	ClockError UdpSocket::writePacketAsync(const std::string & ip, uint16_t port, const void * str, const size_t length) {
-		if (_sock == -1) {
+		if (_sock == INVALID_SOCKET) {
 			return ClockError::NOT_READY;
 		}
 		std::vector<uint8_t> vec(length);
@@ -120,7 +120,7 @@ namespace sockets {
 	}
 
 	ClockError UdpSocket::writePacketAsync(const std::string & ip, uint16_t port, const std::vector<uint8_t> & vec) {
-		if (_sock == -1) {
+		if (_sock == INVALID_SOCKET) {
 			return ClockError::NOT_READY;
 		}
 		_writePacketAsyncLock.lock();
@@ -134,7 +134,7 @@ namespace sockets {
 	}
 
 	ClockError UdpSocket::writeAsync(const std::string & ip, uint16_t port, const void * str, const size_t length) {
-		if (_sock == -1) {
+		if (_sock == INVALID_SOCKET) {
 			return ClockError::NOT_READY;
 		}
 		std::vector<uint8_t> vec(length);
@@ -152,7 +152,7 @@ namespace sockets {
 	}
 
 	ClockError UdpSocket::writeAsync(const std::string & ip, uint16_t port, const std::vector<uint8_t> & vec) {
-		if (_sock == -1) {
+		if (_sock == INVALID_SOCKET) {
 			return ClockError::NOT_READY;
 		}
 		_writeAsyncLock.lock();
@@ -167,7 +167,7 @@ namespace sockets {
 	}
 
 	ClockError UdpSocket::receivePacket(std::vector<uint8_t> & buffer, std::string & ip, uint16_t & port) {
-		if (_sock == -1) {
+		if (_sock == INVALID_SOCKET) {
 			return ClockError::NOT_READY;
 		}
 		std::string s;
@@ -182,7 +182,7 @@ namespace sockets {
 	}
 
 	ClockError UdpSocket::receivePacket(std::string & buffer, std::string & ip, uint16_t & port) {
-		if (_sock == -1) {
+		if (_sock == INVALID_SOCKET) {
 			return ClockError::NOT_READY;
 		}
 		std::vector<uint8_t> result;
@@ -246,7 +246,7 @@ namespace sockets {
 			delete _callbackThread;
 		}
 		_callbackThread = new std::thread([pcb, this]() {
-			while (_sock != -1) {
+			while (_sock != INVALID_SOCKET) {
 				std::vector<uint8_t> buffer;
 				std::string ip;
 				uint16_t port;

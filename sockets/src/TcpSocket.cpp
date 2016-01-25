@@ -21,7 +21,6 @@
 
 #include <errno.h>
 #include <thread>
-#include <iostream>
 
 namespace clockUtils {
 namespace sockets {
@@ -40,7 +39,7 @@ namespace sockets {
 	};
 #endif
 
-	TcpSocket::TcpSocket() : _sock(-1), _status(SocketStatus::INACTIVE), _writePacketAsyncLock(), _writeAsyncLock(), _writePacketAsyncQueue(), _writeAsyncQueue(), _buffer(), _terminate(false), _worker(nullptr), _listenThread(nullptr), _condVar(), _condMutex(), _callbackThread(nullptr) {
+	TcpSocket::TcpSocket() : _sock(INVALID_SOCKET), _status(SocketStatus::INACTIVE), _writePacketAsyncLock(), _writeAsyncLock(), _writePacketAsyncQueue(), _writeAsyncQueue(), _buffer(), _terminate(false), _worker(nullptr), _listenThread(nullptr), _condVar(), _condMutex(), _callbackThread(nullptr) {
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 		static WSAHelper wsa;
 #endif
@@ -83,7 +82,7 @@ namespace sockets {
 		// create socket
 		errno = 0;
 		_sock = socket(PF_INET, SOCK_STREAM, 0);
-		if (-1 == _sock) {
+		if (INVALID_SOCKET == _sock) {
 			return getLastError();
 		}
 
@@ -127,7 +126,7 @@ namespace sockets {
 		do {
 			errno = 0;
 			SOCKET clientSock = ::accept(sock, nullptr, nullptr);
-			if (clientSock == -1 || _terminate) {
+			if (clientSock == INVALID_SOCKET || _terminate) {
 				// silently close. This will be changed in 1.0 to notify the user
 				if (!_terminate) {
 					closeSocket();
@@ -170,7 +169,7 @@ namespace sockets {
 		// create socket
 		errno = 0;
 		_sock = socket(PF_INET, SOCK_STREAM, 0);
-		if (-1 == _sock) {
+		if (INVALID_SOCKET == _sock) {
 			return getLastError();
 		}
 
@@ -522,7 +521,7 @@ namespace sockets {
 		}
 		_callbackThread = new std::thread([pcb, this]()
 			{
-				while (_sock != -1) {
+				while (_sock != INVALID_SOCKET) {
 					std::vector<uint8_t> buffer;
 					ClockError err = receivePacket(buffer);
 					pcb(buffer, this, err);
@@ -547,13 +546,13 @@ namespace sockets {
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 			shutdown(_sock, SD_BOTH);
 #endif
-			if (_sock != -1) {
+			if (_sock != INVALID_SOCKET) {
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 				::close(_sock); // can fail, but doesn't matter. Was e.g. not connected before
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 				closesocket(_sock);
 #endif
-				_sock = -1;
+				_sock = INVALID_SOCKET;
 			}
 		}
 
@@ -640,13 +639,13 @@ namespace sockets {
 	void TcpSocket::closeSocket() {
 		// lock to avoid a race condition between the normal close() and the listenThread
 		std::unique_lock<std::mutex> ul(_condMutex);
-		if (_sock != -1) {
+		if (_sock != INVALID_SOCKET) {
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 			::close(_sock); // can fail, but doesn't matter. Was e.g. not connected before
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 			closesocket(_sock);
 #endif
-			_sock = -1;
+			_sock = INVALID_SOCKET;
 		}
 	}
 

@@ -38,7 +38,7 @@ namespace sockets {
 		}
 	};
 
-	UdpSocket::UdpSocket() : _sock(-1), _buffer(), _callbackThread(nullptr), _writePacketAsyncLock(), _writeAsyncLock(), _writePacketAsyncQueue(), _writeAsyncQueue(), _condVar(), _condMutex(), _worker(nullptr), _terminate(false) {
+	UdpSocket::UdpSocket() : _sock(INVALID_SOCKET), _buffer(), _callbackThread(nullptr), _writePacketAsyncLock(), _writeAsyncLock(), _writePacketAsyncQueue(), _writeAsyncQueue(), _condVar(), _condMutex(), _worker(nullptr), _terminate(false) {
 		static WSAHelper wsa;
 		_worker = new std::thread(std::bind(&UdpSocket::work, this));
 	}
@@ -57,9 +57,9 @@ namespace sockets {
 	}
 
 	void UdpSocket::close() {
-		if (_sock != -1) {
+		if (_sock != INVALID_SOCKET) {
 			closesocket(_sock);
-			_sock = -1;
+			_sock = INVALID_SOCKET;
 		}
 		if (_callbackThread != nullptr) {
 			_callbackThread->join();

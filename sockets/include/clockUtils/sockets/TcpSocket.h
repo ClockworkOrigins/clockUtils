@@ -53,6 +53,7 @@
 	#include <unistd.h>
 
 	typedef int SOCKET;
+	#define INVALID_SOCKET -1
 #endif
 
 namespace std {
@@ -357,13 +358,13 @@ namespace sockets {
 		 * \brief enumeration listing states a socket can have
 		 */
 		enum class SocketStatus {
-			INACTIVE,	// ! socket was only created, but is neither listening nor connected
-			LISTENING,	// ! socket is listening on connections
-			CONNECTED	// ! socket is connected to another socket
+			INACTIVE,	//<! socket was only created, but is neither listening nor connected
+			LISTENING,	//<! socket is listening on connections
+			CONNECTED	//<! socket is connected to another socket
 		};
 
 		/**
-		 * \brief stores the local socket descriptor or -1 if not active
+		 * \brief stores the local socket descriptor or INVALID_SOCKET if not active
 		 */
 		SOCKET _sock;
 
