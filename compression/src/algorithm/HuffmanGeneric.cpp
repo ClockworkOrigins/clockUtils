@@ -58,7 +58,7 @@ namespace algorithm {
 
 		std::string realText(compressed.begin() + 260, compressed.end());
 
-		size_t length = size_t(uint8_t(compressed[256]) * 256 * 256 * 256 + uint8_t(compressed[257]) * 256 * 256 + uint8_t(compressed[258]) * 256 + uint8_t(compressed[259]));
+		size_t length = size_t(uint8_t(compressed[256])) * 256 * 256 * 256 + size_t(uint8_t(compressed[257])) * 256 * 256 + size_t(uint8_t(compressed[258])) * 256 + size_t(uint8_t(compressed[259]));
 
 		if (length > INT32_MAX / 2) {
 			return ClockError::INVALID_ARGUMENT;
