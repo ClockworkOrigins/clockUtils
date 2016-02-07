@@ -298,6 +298,7 @@ TEST(TcpSocket, getIP) { // tests IP before and after connection
 
 	TcpSocket server;
 	server.listen(12345, 1, false, [](TcpSocket * client, ClockError) {
+		std::unique_lock<std::mutex> ul(connectionLock);
 		_socketList.push_back(client);
 		std::string s4 = client->getRemoteIP();
 		std::string s5 = client->getPublicIP();
@@ -305,14 +306,19 @@ TEST(TcpSocket, getIP) { // tests IP before and after connection
 		EXPECT_NE(0, s4.length());
 		EXPECT_NE(0, s5.length());
 		EXPECT_EQ("127.0.0.1", s4);
+		conditionVariable.notify_one();
 	});
 
-	ts.connect("127.0.0.1", 12345, 500);
-	s2 = ts.getPublicIP();
-	s3 = ts.getRemoteIP();
+	{
+		std::unique_lock<std::mutex> ul(connectionLock);
+		ts.connect("127.0.0.1", 12345, 500);
+		s2 = ts.getPublicIP();
+		s3 = ts.getRemoteIP();
 
-	EXPECT_NE(0, s2.length());
-	EXPECT_NE(0, s3.length());
+		EXPECT_NE(0, s2.length());
+		EXPECT_NE(0, s3.length());
+		conditionVariable.wait(ul);
+	}
 
 	ts.close();
 	server.close();
@@ -1133,7 +1139,7 @@ TEST(TcpSocket, listenCloseError) {
 	TcpSocket sock1, sock2;
 	ClockError error = ClockError::SUCCESS;
 
-	sock1.listen(12345, 1, false, [&error](TcpSocket * sock, ClockError err) {
+	sock1.listen(12345, 1, true, [&error](TcpSocket * sock, ClockError err) {
 		if (err == ClockError::SUCCESS) {
 			_socketList.push_back(sock);
 		} else {
@@ -1143,14 +1149,12 @@ TEST(TcpSocket, listenCloseError) {
 		}
 	});
 	EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
-
 	{
 		std::unique_lock<std::mutex> ul(connectionLock);
 		sock1.close();
 		conditionVariable.wait(ul);
 	}
-	EXPECT_NE(error, ClockError::SUCCESS);
-	EXPECT_EQ(error, ClockError::NOT_READY);
+	EXPECT_NE(ClockError::SUCCESS, error);
 
 	for (TcpSocket * sock : _socketList) {
 		delete sock;
