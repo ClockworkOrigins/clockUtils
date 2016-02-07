@@ -129,13 +129,13 @@ namespace sockets {
 			if (clientSock == INVALID_SOCKET || _terminate) {
 				// silently close. This will be changed in 1.0 to notify the user
 				if (!_terminate) {
+					std::thread(std::bind(acb, nullptr, getLastError())).detach();
 					closeSocket();
 				}
 				return;
 			}
 			TcpSocket * sockPtr = new TcpSocket(clientSock);
-			std::thread thrd2(std::bind(acb, sockPtr));
-			thrd2.detach();
+			std::thread(std::bind(acb, sockPtr, ClockError::SUCCESS)).detach();
 		} while (acceptMultiple && !_terminate);
 		// needed to stop the socket from listening
 		if (!_terminate) {
