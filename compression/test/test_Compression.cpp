@@ -213,3 +213,31 @@ TEST(Compression, decompressCompressedStringWithDifferentAlgorithm) {
 	std::string decompressedLongFixed;
 	EXPECT_EQ(clockUtils::ClockError::INVALID_ARGUMENT, compressorFixed.decompress(compressedLongGeneric, decompressedLongFixed));
 }
+
+// decompress a string with exakt match of bits in bytes (bits % 8 == 0)
+TEST(Compression, decompressStringWithBitByteMatch) {
+	std::string s("abababab");
+	clockUtils::compression::Compression<clockUtils::compression::algorithm::HuffmanGeneric> compressorGeneric;
+
+	std::string compressedGeneric;
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, compressorGeneric.compress(s, compressedGeneric));
+
+	std::string decompressedGeneric;
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, compressorGeneric.decompress(compressedGeneric, decompressedGeneric));
+
+	EXPECT_EQ(decompressedGeneric, s);
+}
+
+// decompress a string with exakt match of bits in bytes - 1 (bits % 8 == 7)
+TEST(Compression, decompressStringWithBitByteMatchMinus1) {
+	std::string s("abababa");
+	clockUtils::compression::Compression<clockUtils::compression::algorithm::HuffmanGeneric> compressorGeneric;
+
+	std::string compressedGeneric;
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, compressorGeneric.compress(s, compressedGeneric));
+
+	std::string decompressedGeneric;
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, compressorGeneric.decompress(compressedGeneric, decompressedGeneric));
+
+	EXPECT_EQ(decompressedGeneric, s);
+}
