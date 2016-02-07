@@ -19,7 +19,7 @@
 
 #include "clockUtils/compression/algorithm/HuffmanGeneric.h"
 
-#include <map>
+#include <limits>
 
 #include "clockUtils/errors.h"
 
@@ -28,86 +28,71 @@ namespace compression {
 namespace algorithm {
 
 	ClockError HuffmanGeneric::compress(const std::string & uncompressed, std::string & compressed) {
-		if (uncompressed.length() > INT32_MAX / 2) {
+		if (uncompressed.length() > std::numeric_limits<len_t>::max()) {
+			// string is too long
 			return ClockError::INVALID_ARGUMENT;
 		}
-		std::vector<uint8_t> header = getHeader(uncompressed);
+		std::vector<uint8_t> header = calcFrequencies(uncompressed);
 
 		compressed = std::string(header.begin(), header.end());
 
-		compressed += char((((uncompressed.length() / 256) / 256) / 256) % 256);
-		compressed += char(((uncompressed.length() / 256) / 256) % 256);
-		compressed += char((uncompressed.length() / 256) % 256);
-		compressed += char(uncompressed.length() % 256);
-		compressed += char(uint8_t(0x0));
 
-		std::shared_ptr<Tree> tree = buildTree(header);
+		len_t len = uncompressed.length();
+		for (size_t i = 0; i < sizeof(len_t); i++) {
+			compressed += uint8_t((len >> (8 * (sizeof(len_t) - 1 - i))) & 0xFF);
+		}
 
-		convert(uncompressed, tree, 260 * 8, compressed);
+		std::shared_ptr<Node> root = buildTree(header);
+
+		convert(uncompressed, root, (256 + sizeof(len_t)) * 8, compressed);
 
 		return ClockError::SUCCESS;
 	}
 
 	ClockError HuffmanGeneric::decompress(const std::string & compressed, std::string & decompressed) {
-		if (compressed.length() < 260) { // length of the string + header
+		if (compressed.length() < (256 + sizeof(len_t))) { // length of the header
 			return ClockError::INVALID_ARGUMENT;
 		}
 		std::vector<uint8_t> header(compressed.begin(), compressed.begin() + 256);
 
-		std::shared_ptr<Tree> tree = buildTree(header);
+		std::shared_ptr<Node> root = buildTree(header);
 
-		std::string realText(compressed.begin() + 260, compressed.end());
+		std::string realText(compressed.begin() + (256 + sizeof(len_t)), compressed.end());
 
-		size_t length = size_t(uint8_t(compressed[256])) * 256 * 256 * 256 + size_t(uint8_t(compressed[257])) * 256 * 256 + size_t(uint8_t(compressed[258])) * 256 + size_t(uint8_t(compressed[259]));
-
-		if (length > INT32_MAX / 2) {
-			return ClockError::INVALID_ARGUMENT;
+		len_t len = 0;
+		for (size_t i = 0; i < sizeof(len_t); i++) {
+			len *= 0x100; // * 256
+			len += uint8_t(compressed[256 + i]);
 		}
 
-		decompressed = std::string(length, 0x0);
+		decompressed = std::string(len, 0x0);
 
-		return getChar(realText, tree, length, decompressed);
+		return getChar(realText, root, len, decompressed);
 	}
 
-	void HuffmanGeneric::convert(const std::string & text, const std::shared_ptr<Tree> & tree, size_t index, std::string & result) {
-		std::map<uint8_t, std::pair<size_t, std::vector<uint8_t>>> mappings;
+	void HuffmanGeneric::convert(const std::string & text, const std::shared_ptr<Node> & root, size_t index, std::string & result) {
+		std::vector<std::vector<bool>> mappings(256);
+		generateMapping(root, std::vector<bool>(), mappings);
+
 		for (uint8_t c : text) {
-			auto it = mappings.find(c);
+			size_t len = mappings[c].size();
 
-			if (it == mappings.end()) {
-				size_t count = getBitsRec(c, tree, tree->left, 1, index, result);
-
-				if (count == 0) {
-					count = getBitsRec(c, tree, tree->right, 1, index, result);
-				}
-
-				std::vector<uint8_t> vec(count / 8 + 1, 0x0);
-
-				for (size_t i = 0; i < count; i++) {
-					vec[i / 8] += ((result[(index + i) / 8] & (1 << (7 - (index + i) % 8))) == (1 << (7 - (index + i) % 8))) ? (1 << (7 - i % 8)) : 0;
-				}
-
-				mappings.insert(std::make_pair(c, std::make_pair(count, vec)));
-
-				index += count;
-			} else {
-				while ((index + it->second.first) / 8 + 1 > result.size()) {
-					result += char(uint8_t(0x0));
-				}
-
-				for (size_t i = 0; i < it->second.first; i++) {
-					result[(index + i) / 8] += ((it->second.second[i / 8] & (1 << (7 - i % 8))) == (1 << (7 - i % 8))) ? (1 << (7 - (index + i) % 8)) : 0;
-				}
-
-				index += it->second.first;
+			while ((index + len) / 8 + 1 > result.size()) {
+				result += char(uint8_t(0x0));
 			}
+
+			for (size_t i = 0; i < len; i++) {
+				result[(index + i) / 8] |= mappings[c][i] ? (1 << (7 - (index + i) % 8)) : 0;
+			}
+
+			index += len;
 		}
 	}
 
-	std::vector<uint8_t> HuffmanGeneric::getHeader(const std::string & text) {
-		std::vector<int> header(256, 0);
+	std::vector<uint8_t> HuffmanGeneric::calcFrequencies(const std::string & text) {
+		std::vector<len_t> header(256, 0);
 
-		int max = 0;
+		len_t max = 0;
 
 		for (uint8_t c : text) {
 			header[c]++;

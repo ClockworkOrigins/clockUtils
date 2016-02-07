@@ -25,8 +25,6 @@
 #ifndef __CLOCKUTILS_COMPRESSION_ALGORITHM_HUFFMANFIXED_H__
 #define __CLOCKUTILS_COMPRESSION_ALGORITHM_HUFFMANFIXED_H__
 
-#include <map>
-
 #include "clockUtils/compression/algorithm/HuffmanBase.h"
 
 namespace clockUtils {
@@ -53,13 +51,13 @@ namespace algorithm {
 		/**
 		 * \brief the tree in fixed Huffman is always the same, so it can be stored as static member during whole lifetime
 		 */
-		static std::shared_ptr<Tree> tree;
+		static std::shared_ptr<Node> root;
 
 		/**
 		 * \brief because the tree in fixed Huffman stays always the same, also the mappings are constant
 		 */
-		static std::map<unsigned char, std::pair<size_t, std::vector<uint8_t>>> mappings;
-		
+		static std::vector<std::vector<bool>> mappings;
+
 		/**
 		 * \brief converts the text into a bit sequence using the mappings, if possible and otherwise filling the mappings
 		 */

@@ -42,6 +42,9 @@
 	#include <WinSock2.h>
 
 	typedef int32_t socklen_t;
+
+	// already defined by MSVC
+	// #define INVALID_SOCKET -1
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 	#include <arpa/inet.h>
 	#include <cstring>
@@ -53,7 +56,7 @@
 	#include <unistd.h>
 
 	typedef int SOCKET;
-	#define INVALID_SOCKET -1;
+	#define INVALID_SOCKET -1
 #endif
 
 namespace std {

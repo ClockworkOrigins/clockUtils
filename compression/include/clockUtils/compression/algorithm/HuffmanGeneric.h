@@ -51,12 +51,13 @@ namespace algorithm {
 		/**
 		 * \brief converts the given text to a bit sequence using a cache internally to improve performance
 		 */
-		static void convert(const std::string & text, const std::shared_ptr<Tree> & tree, size_t index, std::string & result);
+		static void convert(const std::string & text, const std::shared_ptr<Node> & node, size_t index, std::string & result);
 
 		/**
-		 * \brief calculates the probabilities used for the tree and returns it
+		 * \brief calculates the frequencies of all bytes
+		 * The values are scaled down to 1 Byte to decrease memory usage
 		 */
-		static std::vector<uint8_t> getHeader(const std::string & text);
+		static std::vector<uint8_t> calcFrequencies(const std::string & text);
 	};
 
 } /* namespace algorithm */

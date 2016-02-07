@@ -21,6 +21,9 @@
 
 #include "clockUtils/errors.h"
 
+#include <cassert>
+#include <limits>
+
 namespace clockUtils {
 namespace compression {
 namespace algorithm {
@@ -54,72 +57,60 @@ namespace algorithm {
 		1, 1, 1, 1, 1, 1
 	});
 
-	std::shared_ptr<HuffmanBase::Tree> HuffmanFixed::tree = HuffmanFixed::buildTree(preVec);
-	std::map<uint8_t, std::pair<size_t, std::vector<uint8_t>>> HuffmanFixed::mappings = std::map<uint8_t, std::pair<size_t, std::vector<uint8_t>>>();
+	std::shared_ptr<HuffmanBase::Node> HuffmanFixed::root = HuffmanFixed::buildTree(preVec);
+	std::vector<std::vector<bool>> HuffmanFixed::mappings = std::vector<std::vector<bool>>(256);
 
 	ClockError HuffmanFixed::compress(const std::string & uncompressed, std::string & compressed) {
-		if (uncompressed.length() > INT32_MAX / 2) {
+		if (uncompressed.length() > std::numeric_limits<len_t>::max()) {
+			// string is too long
 			return ClockError::INVALID_ARGUMENT;
 		}
-		compressed = std::string(5, 0x0);
-		compressed[0] = char((((uncompressed.length() / 256) / 256) / 256) % 256);
-		compressed[1] = char(((uncompressed.length() / 256) / 256) % 256);
-		compressed[2] = char((uncompressed.length() / 256) % 256);
-		compressed[3] = char(uncompressed.length() % 256);
+		compressed = std::string(sizeof(len_t), 0x0);
 
-		convert(uncompressed, 32, compressed);
+		len_t len = uncompressed.length();
+		for (size_t i = 0; i < sizeof(len_t); i++) {
+			compressed[i] = uint8_t((len >> (8 * (sizeof(len_t) - 1 - i))) & 0xFF);
+		}
+
+		convert(uncompressed, sizeof(len_t) * 8, compressed);
 
 		return ClockError::SUCCESS;
 	}
 
 	ClockError HuffmanFixed::decompress(const std::string & compressed, std::string & decompressed) {
-		if (compressed.length() < 4) {
+		if (compressed.length() < sizeof(len_t)) {
 			return ClockError::INVALID_ARGUMENT;
 		}
-		std::string realText(compressed.begin() + 4, compressed.end());
+		std::string realText(compressed.begin() + sizeof(len_t), compressed.end());
 
-		size_t length = size_t(uint8_t(compressed[0])) * 256 * 256 * 256 + size_t(uint8_t(compressed[1])) * 256 * 256 + size_t(uint8_t(compressed[2])) * 256 + size_t(uint8_t(compressed[3]));
-
-		if (length > INT32_MAX / 2) {
-			return ClockError::INVALID_ARGUMENT;
+		len_t len = 0;
+		for (size_t i = 0; i < sizeof(len_t); i++) {
+			len *= 0x100; // * 256
+			len += uint8_t(compressed[i]);
 		}
 
-		decompressed = std::string(length, 0x0);
+		decompressed = std::string(len, 0x0);
 
-		return getChar(realText, tree, length, decompressed);
+		return getChar(realText, root, len, decompressed);
 	}
 
 	void HuffmanFixed::convert(const std::string & text, size_t index, std::string & result) {
+		if (mappings[0].size() == 0) {
+			std::vector<bool> vec;
+			generateMapping(root, vec, mappings);
+		}
 		for (uint8_t c : text) {
-			auto it = mappings.find(c);
+			size_t len = mappings[c].size();
 
-			if (it == mappings.end()) {
-				size_t count = getBitsRec(c, tree, tree->left, 1, index, result);
-
-				if (count == 0) {
-					count = getBitsRec(c, tree, tree->right, 1, index, result);
-				}
-
-				std::vector<uint8_t> vec(count / 8 + 1, 0x0);
-
-				for (size_t i = 0; i < count; i++) {
-					vec[i / 8] += ((result[(index + i) / 8] & (1 << (7 - (index + i) % 8))) == (1 << (7 - (index + i) % 8))) ? (1 << (7 - i % 8)) : 0;
-				}
-
-				mappings.insert(std::make_pair(c, std::make_pair(count, vec)));
-
-				index += count;
-			} else {
-				while ((index + it->second.first) / 8 + 1 > result.size()) {
-					result += char(uint8_t(0x0));
-				}
-
-				for (size_t i = 0; i < it->second.first; i++) {
-					result[(index + i) / 8] += ((it->second.second[i / 8] & (1 << (7 - i % 8))) == (1 << (7 - i % 8))) ? (1 << (7 - (index + i) % 8)) : 0;
-				}
-
-				index += it->second.first;
+			while ((index + len) / 8 + 1 > result.size()) { // FIXME if index+len % 8 == 0 -> has 1 byte too much
+				result += char(uint8_t(0x0));
 			}
+
+			for (size_t i = 0; i < len; i++) {
+				result[(index + i) / 8] |= mappings[c][i] ? (1 << (7 - (index + i) % 8)) : 0;
+			}
+
+			index += len;
 		}
 	}
 

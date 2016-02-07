@@ -45,29 +45,20 @@ namespace algorithm {
 	class HuffmanBase {
 	protected:
 		/**
-		 * \brief represents a node in the probability graph
-		 * if left and right are both nullptr this node is a leave and c has a valid value
-		 * if parent is nullptr this nodes parent is the tree itself
+		 * \brief type that should be used as the 'length' counter
+		 * This controls the size of the header, the maximum string length etc.
 		 */
-		struct Node {
-			int value;
-			uint8_t c;
-			std::shared_ptr<Node> parent = nullptr;
-			std::shared_ptr<Node> left = nullptr;
-			std::shared_ptr<Node> right = nullptr;
-		};
+		typedef uint32_t len_t;
 
 		/**
-		 * \brief represents the tree and is used a the root
+		 * \brief represents a node in the probability tree
+		 * if left and right are both nullptr this node is a leave and c has a valid value
 		 */
-		struct Tree {
+		struct Node {
+			len_t value;
+			uint8_t c;
 			std::shared_ptr<Node> left = nullptr;
 			std::shared_ptr<Node> right = nullptr;
-
-			~Tree();
-
-		private:
-			void deleteHelper(const std::shared_ptr<Node> & node);
 		};
 
 		/**
@@ -75,28 +66,24 @@ namespace algorithm {
 		 * header must have size 256 and values have to be between 0 and 255 (unsigned char)
 		 * if a value is zero no node is inserted into the tree and this value isn't accessible
 		 */
-		static std::shared_ptr<Tree> buildTree(const std::vector<uint8_t> & header);
+		static std::shared_ptr<Node> buildTree(const std::vector<uint8_t> & header);
 
 		/**
-		 * \brief recursiv helper function to find bits for given character
-		 * \param[in] c character to be encoded
-		 * \param[in] tree the tree with the encoding
-		 * \param[in] node the current node to be checked
-		 * \param[in] count the amount of recursion steps currently taken, necessary to identify position and to know how many bytes have to be allocated to contain all new bits
-		 * \param[in] index index of the bit found during this call
-		 * \param[in,out] result the resulting string containing the whole bit sequence
-		 * \return returns the count of the leave node found or 0, if current leave doesn't match c
+		 * \brief constructs a mapping from character to a bit sequence
+		 * \param[in] node Root node of the probability tree
+		 * \param[in] bitSeq Bit sequence until this point in the tree
+		 * \param[out] mapping Constructed mapping
 		 */
-		static size_t getBitsRec(uint8_t c, const std::shared_ptr<Tree> & tree, const std::shared_ptr<Node> & node, size_t count, size_t index, std::string & result);
+		static void generateMapping(const std::shared_ptr<Node> & node, const std::vector<bool> & bitSeq, std::vector<std::vector<bool>> & mapping);
 
 		/**
 		 * \brief converts bit sequence to the real character
 		 * \param[in] compressed the compressed string containing the bit sequence
-		 * \param[in] tree the tree with the encoding
+		 * \param[in] root the tree root with the encoding
 		 * \param[in] length the amount of characters that are encoded in the compressed string
 		 * \param[in,out] result the resulting string containing the decompressed string
 		 */
-		static ClockError getChar(const std::string & compressed, const std::shared_ptr<Tree> & tree, size_t length, std::string & result);
+		static ClockError getChar(const std::string & compressed, const std::shared_ptr<Node> & root, len_t length, std::string & result);
 	};
 
 } /* namespace algorithm */
