@@ -30,6 +30,7 @@ cmake_minimum_required (VERSION 2.8)
 option(WITH_TESTING "build clockUtils with tests" OFF)
 option(WITH_LIBRARY_ARGPARSER "builds argument parser library" ON)
 option(WITH_LIBRARY_COMPRESSION "builds compression library" ON)
+option(WITH_LIBRARY_CONTAINER "builds container library" ON)
 option(WITH_LIBRARY_INIPARSER "builds iniParser library" ON)
 option(WITH_LIBRARY_SOCKETS "builds sockets library" ON)
 option(32BIT "builds as 32Bit library" OFF)
@@ -201,6 +202,15 @@ IF(WITH_LIBRARY_COMPRESSION)
 	add_subdirectory(compression)
 	set(COMPRESSION_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/compression/include)
 ENDIF(WITH_LIBRARY_COMPRESSION)
+
+#####################################################################################
+# container
+#####################################################################################
+
+IF(WITH_LIBRARY_CONTAINER)
+	add_subdirectory(container)
+	set(COMPRESSION_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/container/include)
+ENDIF(WITH_LIBRARY_CONTAINER)
 
 #####################################################################################
 # iniParser
