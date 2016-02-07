@@ -36,7 +36,6 @@ namespace algorithm {
 
 		compressed = std::string(header.begin(), header.end());
 
-
 		len_t len = uncompressed.length();
 		for (size_t i = 0; i < sizeof(len_t); i++) {
 			compressed += uint8_t((len >> (8 * (sizeof(len_t) - 1 - i))) & 0xFF);
@@ -65,7 +64,11 @@ namespace algorithm {
 			len += uint8_t(compressed[256 + i]);
 		}
 
-		decompressed = std::string(len, 0x0);
+		try {
+			decompressed = std::string(len, 0x0);
+		} catch (std::bad_alloc & ba) {
+			return ClockError::OUT_OF_MEMORY;
+		}
 
 		return getChar(realText, root, len, decompressed);
 	}

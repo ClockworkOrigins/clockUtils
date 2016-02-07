@@ -65,7 +65,11 @@ namespace algorithm {
 			// string is too long
 			return ClockError::INVALID_ARGUMENT;
 		}
-		compressed = std::string(sizeof(len_t), 0x0);
+		try {
+			compressed = std::string(sizeof(len_t), 0x0);
+		} catch (std::bad_alloc & ba) {
+			return ClockError::OUT_OF_MEMORY;
+		}
 
 		len_t len = uncompressed.length();
 		for (size_t i = 0; i < sizeof(len_t); i++) {
@@ -89,7 +93,11 @@ namespace algorithm {
 			len += uint8_t(compressed[i]);
 		}
 
-		decompressed = std::string(len, 0x0);
+		try {
+			decompressed = std::string(len, 0x0);
+		} catch (std::bad_alloc & ba) {
+			return ClockError::OUT_OF_MEMORY;
+		}
 
 		return getChar(realText, root, len, decompressed);
 	}

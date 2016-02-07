@@ -38,16 +38,17 @@ namespace clockUtils {
 		WRONG_TYPE,			//!< 0x6	value couldn't be cast in expected type
 		WRONG_SYNTAX,		//!< 0x7	syntax of parsed file is not as expected
 		FILENOTFOUND,		//!< 0x8	file does not exist
+		OUT_OF_MEMORY,		//!< 0x9	no more space left
 		// sockets
-		INVALID_IP,			//!< 0x9	ip address invalid
-		INVALID_PORT,		//!< 0xA	port invalid
-		ADDRESS_INUSE,		//!< 0xB	a socket is already bound to this address
-		CONNECTION_FAILED,	//!< 0xC	connecting sockets failed
-		NOT_CONNECTED,		//!< 0xD	using a method for connected sockets on unconnected socket
+		INVALID_IP,			//!< 0xA	ip address invalid
+		INVALID_PORT,		//!< 0xB	port invalid
+		ADDRESS_INUSE,		//!< 0xC	a socket is already bound to this address
+		CONNECTION_FAILED,	//!< 0xD	connecting sockets failed
+		NOT_CONNECTED,		//!< 0xE	using a method for connected sockets on unconnected socket
 		// iniParser
-		VALUE_NOTFOUND,		//!< 0xE	value not found
+		VALUE_NOTFOUND,		//!< 0xF	value not found
 		//
-		UNKNOWN,			//!< 0xF	an error occured, but the error isn't wrapped yet
+		UNKNOWN,			//!< 0x10	an error occured, but the error isn't wrapped yet
 		ERROR_COUNT
 	};
 
