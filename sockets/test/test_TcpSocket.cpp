@@ -339,6 +339,7 @@ TEST(TcpSocket, getPort) { // tests port before and after connection
 
 	TcpSocket server;
 	server.listen(12345, 1, false, [](TcpSocket * client, ClockError) {
+		std::unique_lock<std::mutex> ul(connectionLock);
 		uint16_t s3 = client->getRemotePort();
 		uint16_t s4 = client->getLocalPort();
 
@@ -347,14 +348,19 @@ TEST(TcpSocket, getPort) { // tests port before and after connection
 
 		client->close();
 		delete client;
+		conditionVariable.notify_one();
 	});
 
-	ts.connect("127.0.0.1", 12345, 500);
-	s = ts.getLocalPort();
-	s2 = ts.getRemotePort();
+	{
+		std::unique_lock<std::mutex> ul(connectionLock);
+		ts.connect("127.0.0.1", 12345, 500);
+		s = ts.getLocalPort();
+		s2 = ts.getRemotePort();
 
-	EXPECT_NE(0, s);
-	EXPECT_EQ(12345, s2);
+		EXPECT_NE(0, s);
+		EXPECT_EQ(12345, s2);
+		conditionVariable.wait(ul);
+	}
 
 	ts.close();
 	server.close();
