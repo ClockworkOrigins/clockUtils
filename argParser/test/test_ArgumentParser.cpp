@@ -415,3 +415,13 @@ TEST(ArgumentParser, parseBoolToggleOff) {
 		EXPECT_FALSE(d);
 	}
 }
+
+TEST(ArgumentParser, definingListBeingDestroyedBeforeUsage) {
+	REGISTER_VARIABLE(int32_t, i, -1, "A test integer");
+	{
+		REGISTER_VARIABLE_ARGUMENTS(args);
+	}
+	const char * buffer1[] = { "a1", "a2", "a3", "a4", "a5", "a6" };
+	int length1 = sizeof(buffer1) / sizeof(char *);
+	EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer1, length1));
+}

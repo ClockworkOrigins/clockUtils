@@ -27,6 +27,7 @@
 
 #include "clockUtils/argParser/argParserParameters.h"
 
+#include "clockUtils/argParser/ArgumentList.h"
 #include "clockUtils/argParser/BasicVariable.h"
 #include "clockUtils/argParser/Parser.h"
 
@@ -65,8 +66,7 @@
  * \brief registers a variable where the arguments at the end are parsed into
  */
 #define REGISTER_VARIABLE_ARGUMENTS(name)\
-	std::vector<std::string> name;\
-	clockUtils::argParser::Parser::registerArgumentsVector(&name)
+	clockUtils::argParser::ArgumentList name;
 
 /**
  * \brief returns true if --help was set
