@@ -938,11 +938,7 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 		called = 0;
 
 		sock1.listen(12345, 1, false, [](TcpSocket * sock, ClockError) {
-			sock->receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
-				if (error != ClockError::SUCCESS) {
-					_socketList.push_back(so);
-				}
-			});
+			_socketList.push_back(sock);
 			sock->close();
 		});
 		EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
@@ -974,13 +970,10 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 		called = 0;
 
 		sock1.listen(12345, 1, false, [](TcpSocket * sock, ClockError) {
-			sock->receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
-				if (error != ClockError::SUCCESS) {
-					_socketList.push_back(so);
-				}
-			});
+			_socketList.push_back(sock);
 			sock->close();
 		});
+
 		EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
 		sock2.receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
 				if (error != ClockError::SUCCESS) {
