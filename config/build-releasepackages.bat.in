@@ -1,22 +1,17 @@
 Set version=@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@
 
 Set sourcePackage=@PACKAGE_NAME@-%version%-src
-Set prebuiltPackage32=@PACKAGE_NAME@-%version%-msvc13_x86
-Set prebuiltPackage64=@PACKAGE_NAME@-%version%-msvc13_x64
+Set prebuiltPackage=@PACKAGE_NAME@-%version%-@COMPILER_VERSION@
 
 mkdir "%sourcePackage%"
-mkdir "%prebuiltPackage32%"
-mkdir "%prebuiltPackage32%/bin"
-mkdir "%prebuiltPackage64%"
-mkdir "%prebuiltPackage64%/bin"
+mkdir "%prebuiltPackage%"
+mkdir "%prebuiltPackage%/bin"
 
 REM SOURCE PACKAGE
 
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/argParser" "@CMAKE_BINARY_DIR@/%sourcePackage%/argParser"
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/compression" "@CMAKE_BINARY_DIR@/%sourcePackage%/compression"
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/iniParser" "@CMAKE_BINARY_DIR@/%sourcePackage%/iniParser"
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/sockets" "@CMAKE_BINARY_DIR@/%sourcePackage%/sockets"
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/include" "@CMAKE_BINARY_DIR@/%sourcePackage%/include"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/libs" "@CMAKE_BINARY_DIR@/%sourcePackage%/libs"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/tests" "@CMAKE_BINARY_DIR@/%sourcePackage%/tests"
 
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/cmake_modules" "@CMAKE_BINARY_DIR@/%sourcePackage%/cmake_modules"
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/config" "@CMAKE_BINARY_DIR@/%sourcePackage%/config"
@@ -24,34 +19,30 @@ xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/docs" "@CMAKE_BINARY_DIR@/%sourcePackage%/doc
 xcopy /F "@CMAKE_SOURCE_DIR@/CMakeLists.txt" "@CMAKE_BINARY_DIR@/%sourcePackage%/CMakeLists.txt*"
 xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE" "@CMAKE_BINARY_DIR@/%sourcePackage%/LICENSE*"
 
-REM 32Bit package
+winrar a -afzip -df @CMAKE_BINARY_DIR@\%sourcePackage%.zip %sourcePackage%
 
-xcopy /S /Y /I "@CMAKE_BINARY_DIR@/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage32%/include"
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage32%/include"
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/argParser/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage32%/include"
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/compression/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage32%/include"
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/iniParser/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage32%/include"
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/sockets/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage32%/include"
+REM Binary package
 
-xcopy /F "@CMAKE_BINARY_DIR@/bin/Release/clock_*.dll" "@CMAKE_BINARY_DIR@/%prebuiltPackage32%/bin/"
-xcopy /F "@CMAKE_BINARY_DIR@/bin/Release/clock_*.lib" "@CMAKE_BINARY_DIR@/%prebuiltPackage32%/lib/"
+SET testDir=%TEMP%\clockUtils
+SET currentDir=%cd%
 
-xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE" "@CMAKE_BINARY_DIR@/%prebuiltPackage32%/LICENSE*"
+%testDir:~0,2%
+mkdir %testDir%
 
-REM 64Bit package
+cd %testDir%
 
-xcopy /S /Y /I "@CMAKE_BINARY_DIR@/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage64%/include"
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage64%/include"
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/argParser/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage64%/include"
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/compression/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage64%/include"
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/iniParser/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage64%/include"
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/sockets/include" "@CMAKE_BINARY_DIR@/%prebuiltPackage64%/include"
+cmake -DWITH_LIBRARY_ARGPARSER=ON -DWITH_LIBRARY_COMPRESSION=ON -DWITH_LIBRARY_CONTAINER=ON -DWITH_LIBRARY_INIPARSER=ON -DWITH_LIBRARY_SOCKETS=ON -DCMAKE_INSTALL_PREFIX=@CMAKE_BINARY_DIR@\%prebuiltPackage% -G"@CMAKE_GENERATOR@" @CMAKE_SOURCE_DIR@
 
-xcopy /F "@CMAKE_BINARY_DIR@/bin/Release/clock_*.dll" "@CMAKE_BINARY_DIR@/%prebuiltPackage64%/bin/"
-xcopy /F "@CMAKE_BINARY_DIR@/bin/Release/clock_*.lib" "@CMAKE_BINARY_DIR@/%prebuiltPackage64%/lib/"
+MSBuild clockUtils.sln /p:Configuration="Release" > NUL
+MSBuild INSTALL.vcxproj /p:Configuration="Release" > NUL
 
-xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE" "@CMAKE_BINARY_DIR@/%prebuiltPackage64%/LICENSE*"
+CD ..
 
-winrar a -afzip -df %sourcePackage%.zip %sourcePackage%
-winrar a -afzip -df %prebuiltPackage32%.zip %prebuiltPackage32%
-winrar a -afzip -df %prebuiltPackage64%.zip %prebuiltPackage64%
+RD /S /Q %testDir%
+
+%currentDir:~0,2%
+cd %currentDir%
+
+xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/LICENSE*"
+
+winrar a -afzip -df @CMAKE_BINARY_DIR@\%prebuiltPackage%.zip %prebuiltPackage%
