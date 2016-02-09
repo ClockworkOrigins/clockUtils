@@ -163,14 +163,6 @@ set(LIB_DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" CACHE STRING "Library director
 ## the following are directories where stuff will be installed to
 set(INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}" CACHE PATH "The subdirectory to the header prefix")
 
-###############################################################################
-# Debug and Testing (non permanent subdirs)
-###############################################################################
-
-IF(WITH_TESTING)
-	enable_testing()
-ENDIF(WITH_TESTING)
-
 include_directories(${CMAKE_SOURCE_DIR}/include/)
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include
@@ -185,50 +177,15 @@ install(DIRECTORY ${CMAKE_BINARY_DIR}/include
 	DESTINATION ${CMAKE_INSTALL_PREFIX}
 	COMPONENT devel)
 
-#####################################################################################
-# argument parser
-#####################################################################################
+add_subdirectory(libs)
 
-IF(WITH_LIBRARY_ARGPARSER)
-	add_subdirectory(argParser)
-	set(ARGPARSER_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/argParser/include)
-ENDIF(WITH_LIBRARY_ARGPARSER)
+###############################################################################
+# Debug and Testing (non permanent subdirs)
+###############################################################################
 
-#####################################################################################
-# compression
-#####################################################################################
-
-IF(WITH_LIBRARY_COMPRESSION)
-	add_subdirectory(compression)
-	set(COMPRESSION_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/compression/include)
-ENDIF(WITH_LIBRARY_COMPRESSION)
-
-#####################################################################################
-# container
-#####################################################################################
-
-IF(WITH_LIBRARY_CONTAINER)
-	add_subdirectory(container)
-	set(COMPRESSION_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/container/include)
-ENDIF(WITH_LIBRARY_CONTAINER)
-
-#####################################################################################
-# iniParser
-#####################################################################################
-
-IF(WITH_LIBRARY_INIPARSER)
-	add_subdirectory(iniParser)
-	set(INIPARSER_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/iniParser/include)
-ENDIF(WITH_LIBRARY_INIPARSER)
-
-#####################################################################################
-# sockets
-#####################################################################################
-
-IF(WITH_LIBRARY_SOCKETS)
-	add_subdirectory(sockets)
-	set(SOCKETS_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/sockets/include)
-ENDIF(WITH_LIBRARY_SOCKETS)
+IF(WITH_TESTING)
+	add_subdirectory(tests)
+ENDIF(WITH_TESTING)
 
 ###############################################################################
 # Docs

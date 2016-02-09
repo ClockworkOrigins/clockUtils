@@ -19,8 +19,6 @@
 # argParser cmake
 ################################
 
-include_directories("include")
-
 set(srcdir ./src)
 
 set(argParserSrc
@@ -41,18 +39,8 @@ IF(WIN32)
 	add_custom_command(TARGET clock_argParser POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>/clock_argParser.dll ${CMAKE_BINARY_DIR}/bin)
 ENDIF(WIN32)
 
-########################
-# argument parser tests
-########################
-
-########## Testing ##########
-
-IF(WITH_TESTING)
-	add_subdirectory(test)
-ENDIF(WITH_TESTING)
-
-install(DIRECTORY include
-	DESTINATION ${CMAKE_INSTALL_PREFIX}
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/clockUtils/argParser
+	DESTINATION ${CMAKE_INSTALL_PREFIX}/include/clockUtils
 	COMPONENT devel)
 
 install(TARGETS clock_argParser
