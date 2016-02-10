@@ -150,6 +150,11 @@ namespace sockets {
 		std::string getPublicIP() const;
 
 		/**
+		 * \brief returns the IP for a given hostname (URL)
+		 */
+		static std::string getHostnameIP(const std::string & url);
+
+		/**
 		 * \brief returns the port this socket uses for connection
 		 */
 		uint16_t getLocalPort() const;

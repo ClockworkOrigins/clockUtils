@@ -239,3 +239,12 @@ TEST(UdpSocket, writePacketAsyncMass) {
 	sock1.close();
 	sock2.close();
 }
+
+/**
+* tests dns lookup
+*/
+TEST(UdpSocket, dnsLookup) {
+	EXPECT_EQ("83.169.44.32", UdpSocket::getHostnameIP("clockwork-origins.de"));
+	EXPECT_EQ("127.0.0.1", UdpSocket::getHostnameIP("localhost"));
+	EXPECT_EQ("", UdpSocket::getHostnameIP("lcalhst"));
+}

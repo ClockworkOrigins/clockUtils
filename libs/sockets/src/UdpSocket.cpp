@@ -22,6 +22,10 @@
 #include <errno.h>
 #include <thread>
 
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+	#include <ws2tcpip.h>
+#endif
+
 namespace clockUtils {
 namespace sockets {
 
@@ -258,6 +262,30 @@ namespace sockets {
 			}
 		});
 		return ClockError::SUCCESS;
+	}
+
+	std::string UdpSocket::getHostnameIP(const std::string & url) {
+		int sockfd;
+		struct addrinfo hints, *servinfo, *p;
+		struct sockaddr_in * h;
+		int rv;
+
+		memset(&hints, 0, sizeof hints);
+		hints.ai_family = AF_UNSPEC; // use AF_INET6 to force IPv6
+		hints.ai_socktype = SOCK_STREAM;
+
+		if ((rv = getaddrinfo(url.c_str(), NULL, NULL, &servinfo)) != 0) {
+			return "";
+		}
+		std::string ip;
+		// loop through all the results and connect to the first we can
+		for (p = servinfo; p != NULL; p = p->ai_next) {
+			h = reinterpret_cast<struct sockaddr_in *>(p->ai_addr);
+			ip = inet_ntoa(h->sin_addr);
+		}
+
+		freeaddrinfo(servinfo); // all done with this structure
+		return ip;
 	}
 
 	void UdpSocket::work() {

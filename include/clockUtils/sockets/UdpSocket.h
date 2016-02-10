@@ -250,6 +250,11 @@ namespace sockets {
 
 			return ClockError::SUCCESS;
 		}
+		
+		/**
+		 * \brief returns the IP for a given hostname (URL)
+		 */
+		static std::string getHostnameIP(const std::string & url);
 
 	private:
 		/**
