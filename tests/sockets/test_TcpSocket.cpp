@@ -83,17 +83,17 @@ void receiveMessage(const std::vector<uint8_t> & message, TcpSocket * sock, Cloc
 TEST(TcpSocket, connect) { // tests connect with all possible errors
 	TcpSocket ts;
 	ClockError e = ts.connect("1", 12345, 100);
-
 	EXPECT_EQ(ClockError::INVALID_IP, e);
+
 	e = ts.connect("127.0.0.1", 0, 100);
-
 	EXPECT_EQ(ClockError::INVALID_PORT, e);
+
 	e = ts.connect("192.168.255.255", 12345, 100);
-
 	EXPECT_EQ(ClockError::TIMEOUT, e);
-	ts.connect("127.0.0.1", 12345, 100);
 
+	e = ts.connect("127.0.0.1", 12345, 100);
 	EXPECT_EQ(ClockError::TIMEOUT, e);
+
 	TcpSocket server;
 
 	e = server.listen(12345, 1, true, [](TcpSocket * sock, ClockError) {
@@ -103,11 +103,11 @@ TEST(TcpSocket, connect) { // tests connect with all possible errors
 	});
 
 	e = ts.connect("127.0.0.1", 12345, 100);
-
 	EXPECT_EQ(ClockError::SUCCESS, e);
-	e = ts.connect("127.0.0.1", 12345, 100);
 
+	e = ts.connect("127.0.0.1", 12345, 100);
 	EXPECT_EQ(ClockError::INVALID_USAGE, e);
+
 	ts.close();
 
 	{
