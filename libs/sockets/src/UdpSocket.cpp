@@ -265,7 +265,6 @@ namespace sockets {
 	}
 
 	std::string UdpSocket::getHostnameIP(const std::string & url) {
-		int sockfd;
 		struct addrinfo hints, *servinfo, *p;
 		struct sockaddr_in * h;
 		int rv;

@@ -305,7 +305,6 @@ namespace sockets {
 	}
 
 	std::string TcpSocket::getHostnameIP(const std::string & url) {
-		int sockfd;
 		struct addrinfo hints, * servinfo, * p;
 		struct sockaddr_in * h;
 		int rv;
