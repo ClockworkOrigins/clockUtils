@@ -114,10 +114,10 @@ void pusher(DoubleBufferQueue<int, true, true> * q, int amount, int value) {
 
 void popper(DoubleBufferQueue<int, true, true> * qFrom, DoubleBufferQueue<int, true, false> * qTo, int amount) {
 	for (int i = 0; i < amount; ++i) {
-		try {
+		if (!qFrom->empty()) {
 			int a = qFrom->poll();
 			qTo->push(a);
-		} catch (std::exception &) {
+		} else {
 			i--;
 		}
 	}
