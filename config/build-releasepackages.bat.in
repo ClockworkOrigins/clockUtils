@@ -18,6 +18,7 @@ xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/config" "@CMAKE_BINARY_DIR@/%sourcePackage%/c
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/docs" "@CMAKE_BINARY_DIR@/%sourcePackage%/docs"
 xcopy /F "@CMAKE_SOURCE_DIR@/CMakeLists.txt" "@CMAKE_BINARY_DIR@/%sourcePackage%/CMakeLists.txt*"
 xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE" "@CMAKE_BINARY_DIR@/%sourcePackage%/LICENSE*"
+xcopy /F "@CMAKE_SOURCE_DIR@/README.md" "@CMAKE_BINARY_DIR@/%sourcePackage%/README.md*"
 
 winrar a -afzip -df @CMAKE_BINARY_DIR@\%sourcePackage%.zip %sourcePackage%
 
