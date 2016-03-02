@@ -117,6 +117,29 @@ TEST(UdpSocket, writePacketMultiple) {
 	sock2.close();
 }
 
+TEST(UdpSocket, writePacketToHostnameMultiple) {
+	UdpSocket sock1, sock2;
+	std::vector<uint8_t> v1 = { 0x1, 0x2, 0x3, 0x4, 0x5, 0x0, 0x5, 0x4, 0x3, 0x2, 0x1 };
+	std::vector<uint8_t> v2 = { 0x11, 0x12, 0x13, 0x14, 0x15, 0x0, 0x15, 0x14, 0x13, 0x12, 0x11 };
+
+	sock1.bind(12345);
+	sock2.bind(12346);
+
+	sock1.writePacketToHostname("localhost", 12346, v1);
+	sock1.writePacketToHostname("localhost", 12346, v2);
+
+	std::string ip;
+	uint16_t port;
+
+	std::vector<uint8_t> v3, v4;
+	sock2.receivePacket(v3, ip, port);
+	EXPECT_EQ(v1, v3);
+	sock2.receivePacket(v4, ip, port);
+	EXPECT_EQ(v2, v4);
+	sock1.close();
+	sock2.close();
+}
+
 TEST(UdpSocket, writeMass) {
 	UdpSocket sock1, sock2;
 	std::vector<uint8_t> v1(100000, 'a');
@@ -146,7 +169,7 @@ TEST(UdpSocket, receiveCallback) {
 	int received = 0;
 
 	sock1.bind(12345);
-	sock1.receiveCallback([&received](std::vector<uint8_t> packet, std::string ip, uint16_t port, ClockError err) {
+	sock1.receiveCallback([&received](std::vector<uint8_t> packet, std::string ip, uint16_t, ClockError) {
 		received++;
 	});
 	sock2.bind(12346);
@@ -168,7 +191,7 @@ TEST(UdpSocket, receiveCallbackRemove) {
 	int called = 0;
 
 	sock1.bind(12345);
-	sock1.receiveCallback([&called](std::vector<uint8_t> packet, std::string ip, uint16_t port, ClockError err) {
+	sock1.receiveCallback([&called](std::vector<uint8_t> packet, std::string ip, uint16_t, ClockError err) {
 		called++;
 		if (err != ClockError::SUCCESS) {
 			EXPECT_EQ(2, called);
@@ -205,6 +228,31 @@ TEST(UdpSocket, writePacketAsyncMultiple) {
 
 	sock1.writePacketAsync("127.0.0.1", 12346, v1);
 	sock1.writePacketAsync("127.0.0.1", 12346, v2);
+
+	std::string ip;
+	uint16_t port;
+
+	std::vector<uint8_t> v3, v4;
+	sock2.receivePacket(v3, ip, port);
+	EXPECT_EQ(v1, v3);
+	sock2.receivePacket(v4, ip, port);
+	EXPECT_EQ(v2, v4);
+	sock1.close();
+	sock2.close();
+}
+
+TEST(UdpSocket, writePacketToHostnameAsyncMultiple) {
+	UdpSocket sock1, sock2;
+	std::vector<uint8_t> v1 = { 0x1, 0x2, 0x3, 0x4, 0x5, 0x0, 0x5, 0x4, 0x3, 0x2, 0x1 };
+	std::vector<uint8_t> v2 = { 0x11, 0x12, 0x13, 0x14, 0x15, 0x0, 0x15, 0x14, 0x13, 0x12, 0x11 };
+
+	sock1.bind(12345);
+	sock2.bind(12346);
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+	sock1.writePacketToHostnameAsync("localhost", 12346, v1);
+	sock1.writePacketToHostnameAsync("localhost", 12346, v2);
 
 	std::string ip;
 	uint16_t port;

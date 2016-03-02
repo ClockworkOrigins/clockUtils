@@ -80,7 +80,7 @@ void receiveMessage(const std::vector<uint8_t> & message, TcpSocket *, ClockErro
 	}
 }
 
-TEST(TcpSocket, connect) { // tests connect with all possible errors
+TEST(TcpSocket, connectStringIP) { // tests connect with ip as string with all possible errors
 	TcpSocket ts;
 	ClockError e = ts.connect("1", 12345, 100);
 
@@ -113,6 +113,96 @@ TEST(TcpSocket, connect) { // tests connect with all possible errors
 	{
 		std::unique_lock<std::mutex> ul(connectionLock);
 		e = ts.connect("127.0.0.1", 12345, 100);
+		conditionVariable.wait(ul);
+	}
+
+	EXPECT_EQ(ClockError::SUCCESS, e);
+	server.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+	_socketList.clear();
+}
+
+TEST(TcpSocket, connectVecIP) { // tests connect with std::vector<uint8_t> ip with all possible errors
+	TcpSocket ts;
+	ClockError e = ts.connect(std::vector<uint8_t>({ 0x01, 0x11 }), 12345, 100);
+	EXPECT_EQ(ClockError::INVALID_IP, e);
+
+	e = ts.connect(std::vector<uint8_t>({ 0x7F, 0x00, 0x00, 0x01 }), 0, 100);
+	EXPECT_EQ(ClockError::INVALID_PORT, e);
+
+	e = ts.connect(std::vector<uint8_t>({ 0xC0, 0xA8, 0xFF, 0xFF }), 12345, 100);
+	EXPECT_EQ(ClockError::TIMEOUT, e);
+
+	ts.connect(std::vector<uint8_t>({ 0x7F, 0x00, 0x00, 0x01 }), 12345, 100);
+	EXPECT_EQ(ClockError::TIMEOUT, e);
+
+	TcpSocket server;
+
+	e = server.listen(12345, 1, true, [](TcpSocket * sock, ClockError) {
+		std::unique_lock<std::mutex> ul(connectionLock);
+		_socketList.push_back(sock);
+		conditionVariable.notify_one();
+	});
+
+	e = ts.connect(std::vector<uint8_t>({ 0x7F, 0x00, 0x00, 0x01 }), 12345, 100);
+	EXPECT_EQ(ClockError::SUCCESS, e);
+
+	e = ts.connect(std::vector<uint8_t>({ 0x7F, 0x00, 0x00, 0x01 }), 12345, 100);
+	EXPECT_EQ(ClockError::INVALID_USAGE, e);
+
+	ts.close();
+
+	{
+		std::unique_lock<std::mutex> ul(connectionLock);
+		e = ts.connect(std::vector<uint8_t>({ 0x7F, 0x00, 0x00, 0x01 }), 12345, 100);
+		conditionVariable.wait(ul);
+	}
+
+	EXPECT_EQ(ClockError::SUCCESS, e);
+	server.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+	_socketList.clear();
+}
+
+TEST(TcpSocket, connectToHostname) { // tests connect to a hostname with all possible errors
+	TcpSocket ts;
+	ClockError e = ts.connectToHostname("1", 12345, 100);
+	EXPECT_EQ(ClockError::INVALID_IP, e);
+
+	e = ts.connectToHostname("localhost", 0, 100);
+	EXPECT_EQ(ClockError::INVALID_PORT, e);
+
+	e = ts.connectToHostname("clockwork-origins.de", 12345, 100);
+	EXPECT_EQ(ClockError::TIMEOUT, e);
+
+	ts.connectToHostname("localhost", 12345, 100);
+	EXPECT_EQ(ClockError::TIMEOUT, e);
+
+	TcpSocket server;
+
+	e = server.listen(12345, 1, true, [](TcpSocket * sock, ClockError) {
+		std::unique_lock<std::mutex> ul(connectionLock);
+		_socketList.push_back(sock);
+		conditionVariable.notify_one();
+	});
+
+	e = ts.connectToHostname("localhost", 12345, 100);
+	EXPECT_EQ(ClockError::SUCCESS, e);
+
+	e = ts.connectToHostname("localhost", 12345, 100);
+	EXPECT_EQ(ClockError::INVALID_USAGE, e);
+
+	ts.close();
+
+	{
+		std::unique_lock<std::mutex> ul(connectionLock);
+		e = ts.connectToHostname("localhost", 12345, 100);
 		conditionVariable.wait(ul);
 	}
 

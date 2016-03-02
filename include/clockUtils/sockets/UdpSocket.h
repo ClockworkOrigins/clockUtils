@@ -185,6 +185,102 @@ namespace sockets {
 		}
 
 		/**
+		 * \brief sends a packet being able to be completely received in one call of receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writePacketToHostname(const std::string & hostname, uint16_t port, const void * str, const size_t length) {
+			return writePacket(getHostnameIP(hostname), port, str, length);
+		}
+
+		/**
+		 * \brief sends a packet being able to be completely received in one call of receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writePacketToHostname(const std::string & hostname, uint16_t port, const std::vector<uint8_t> & vec) {
+			return writePacket(getHostnameIP(hostname), port, vec);
+		}
+
+		/**
+		 * \brief sends a packet being able to be completely received in one call of receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writePacketToHostname(const std::string & hostname, uint16_t port, const std::string & str) {
+			return writePacket(getHostnameIP(hostname), port, str.c_str(), str.length());
+		}
+
+		/**
+		 * \brief sends a packet asynchronous being able to be completely received in one call of receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writePacketToHostnameAsync(const std::string & hostname, uint16_t port, const void * str, const size_t length) {
+			return writePacketAsync(getHostnameIP(hostname), port, str, length);
+		}
+
+		/**
+		 * \brief sends a packet asynchronous being able to be completely received in one call of receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writePacketToHostnameAsync(const std::string & hostname, uint16_t port, const std::vector<uint8_t> & vec) {
+			return writePacketAsync(getHostnameIP(hostname), port, vec);
+		}
+
+		/**
+		 * \brief sends a packet asynchronous being able to be completely received in one call of receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writePacketToHostnameAsync(const std::string & hostname, uint16_t port, const std::string & str) {
+			return writePacketAsync(getHostnameIP(hostname), port, std::vector<uint8_t>(str.begin(), str.end()));
+		}
+
+		/**
+		 * \brief sends a packet, doesn't work with receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writeToHostname(const std::string & hostname, uint16_t port, const void * str, size_t length) {
+			return write(getHostnameIP(hostname), port, str, length);
+		}
+
+		/**
+		 * \brief sends a packet, doesn't work with receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writeToHostname(const std::string & hostname, uint16_t port, const std::vector<uint8_t> & vec) {
+			return write(getHostnameIP(hostname), port, const_cast<const unsigned char *>(&vec[0]), vec.size());
+		}
+
+		/**
+		 * \brief sends a packet, doesn't work with receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writeToHostname(const std::string & hostname, uint16_t port, const std::string & str) {
+			return write(getHostnameIP(hostname), port, str.c_str(), str.length());
+		}
+
+		/**
+		 * \brief sends a message asynchronous, doesn't work with receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writeToHostnameAsync(const std::string & hostname, uint16_t port, const void * str, size_t length) {
+			return writeAsync(getHostnameIP(hostname), port, str, length);
+		}
+
+		/**
+		 * \brief sends a message asynchronous, doesn't work with receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writeToHostnameAsync(const std::string & hostname, uint16_t port, const std::vector<uint8_t> & vec) {
+			return writeAsync(getHostnameIP(hostname), port, const_cast<const unsigned char *>(&vec[0]), vec.size());
+		}
+
+		/**
+		 * \brief sends a message asynchronous, doesn't work with receivePacket
+		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
+		 */
+		ClockError writeToHostnameAsync(const std::string & hostname, uint16_t port, const std::string & str) {
+			return writeAsync(getHostnameIP(hostname), port, std::vector<uint8_t>(str.begin(), str.end()));
+		}
+
+		/**
 		 * \brief receives a packet sent with writePacket, doesn't work with write
 		 * this functions blocks until a packet is received
 		 * \param[out] buffer The data is stored in this buffer. Old data in this vector is deleted. Enough memory is allocated automatically.

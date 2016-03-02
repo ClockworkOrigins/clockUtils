@@ -113,11 +113,31 @@ namespace sockets {
 
 		/**
 		 * \brief creates a connection to the given pair of IP and port
-		 * \param[in] remoteIP the ip of the connection listening
+		 * \param[in] remoteIP the ip of the connection listening as std::string
 		 * \param[in] remotePort the port of the connection listening
 		 * \param[in] timeout the time in milliseconds a connect request should last in maximum
 		 */
 		ClockError connect(const std::string & remoteIP, uint16_t remotePort, unsigned int timeout);
+
+		/**
+		 * \brief creates a connection to the given pair of IP and port
+		 * \param[in] remoteIP the ip of the connection listening as std::vector<uint8_t>
+		 * \param[in] remotePort the port of the connection listening
+		 * \param[in] timeout the time in milliseconds a connect request should last in maximum
+		 */
+		ClockError connect(const std::vector<uint8_t> & remoteIP, uint16_t remotePort, unsigned int timeout) {
+			return connect(convertToStringIP(remoteIP), remotePort, timeout);
+		}
+
+		/**
+		 * \brief creates a connection to the given pair of hostname and port
+		 * \param[in] remoteHostname the hostname (URL) of the connection listening
+		 * \param[in] remotePort the port of the connection listening
+		 * \param[in] timeout the time in milliseconds a connect request should last in maximum
+		 */
+		ClockError connectToHostname(const std::string & remoteHostname, uint16_t remotePort, unsigned int timeout) {
+			return connect(getHostnameIP(remoteHostname), remotePort, timeout);
+		}
 
 		/**
 		 * \brief closes a connection if socket is connected
