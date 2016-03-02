@@ -241,10 +241,28 @@ TEST(UdpSocket, writePacketAsyncMass) {
 }
 
 /**
-* tests dns lookup
-*/
+ * tests dns lookup
+ */
 TEST(UdpSocket, dnsLookup) {
 	EXPECT_EQ("83.169.44.32", UdpSocket::getHostnameIP("clockwork-origins.de"));
 	EXPECT_EQ("127.0.0.1", UdpSocket::getHostnameIP("localhost"));
 	EXPECT_EQ("", UdpSocket::getHostnameIP("lcalhst"));
+}
+
+/**
+ * tests conversion of std::vector<uint8_t> to std::string for IP representation
+ */
+TEST(UdpSocket, convertVecToStringIP) {
+	EXPECT_EQ("83.169.44.32", UdpSocket::convertToStringIP({ 0x53, 0xA9, 0x2C, 0x20 }));
+	EXPECT_EQ("127.0.0.1", UdpSocket::convertToStringIP({ 0x7F, 0x00, 0x00, 0x01 }));
+	EXPECT_EQ("", UdpSocket::convertToStringIP({ 0x7F, 0x00, 0x00 }));
+	EXPECT_EQ("", UdpSocket::convertToStringIP({ 0x7F, 0x00, 0x00, 0x00, 0x00 }));
+}
+
+/**
+* tests conversion of std::string to std::vector<uint8_t> for IP representation
+*/
+TEST(UdpSocket, convertStringToVecIP) {
+	EXPECT_EQ(std::vector<uint8_t>({ 0x53, 0xA9, 0x2C, 0x20 }), UdpSocket::convertToVecIP("83.169.44.32"));
+	EXPECT_EQ(std::vector<uint8_t>({ 0x7F, 0x00, 0x00, 0x01 }), UdpSocket::convertToVecIP("127.0.0.1"));
 }

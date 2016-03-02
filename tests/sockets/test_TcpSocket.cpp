@@ -1169,3 +1169,21 @@ TEST(TcpSocket, dnsLookup) {
 	EXPECT_EQ("127.0.0.1", TcpSocket::getHostnameIP("localhost"));
 	EXPECT_EQ("", TcpSocket::getHostnameIP("lcalhst"));
 }
+
+/**
+ * tests conversion of std::vector<uint8_t> to std::string for IP representation
+ */
+TEST(TcpSocket, convertVecToStringIP) {
+	EXPECT_EQ("83.169.44.32", TcpSocket::convertToStringIP({ 0x53, 0xA9, 0x2C, 0x20 }));
+	EXPECT_EQ("127.0.0.1", TcpSocket::convertToStringIP({ 0x7F, 0x00, 0x00, 0x01 }));
+	EXPECT_EQ("", TcpSocket::convertToStringIP({ 0x7F, 0x00, 0x00 }));
+	EXPECT_EQ("", TcpSocket::convertToStringIP({ 0x7F, 0x00, 0x00, 0x00, 0x00 }));
+}
+
+/**
+* tests conversion of std::string to std::vector<uint8_t> for IP representation
+*/
+TEST(TcpSocket, convertStringToVecIP) {
+	EXPECT_EQ(std::vector<uint8_t>({ 0x53, 0xA9, 0x2C, 0x20 }), TcpSocket::convertToVecIP("83.169.44.32"));
+	EXPECT_EQ(std::vector<uint8_t>({ 0x7F, 0x00, 0x00, 0x01 }), TcpSocket::convertToVecIP("127.0.0.1"));
+}

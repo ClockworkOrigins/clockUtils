@@ -256,6 +256,16 @@ namespace sockets {
 		 */
 		static std::string getHostnameIP(const std::string & url);
 
+		/**
+		 * \brief converts a std::string formatted IP to std::vector<uint8_t>
+		 */
+		static std::vector<uint8_t> convertToVecIP(const std::string & ip);
+
+		/**
+		 * \brief converts a std::vector<uint8_t> formatted IP to std::string
+		 */
+		static std::string convertToStringIP(const std::vector<uint8_t> & ip);
+
 	private:
 		/**
 		 * \brief stores the local socket descriptor or INVALID_SOCKET if not active

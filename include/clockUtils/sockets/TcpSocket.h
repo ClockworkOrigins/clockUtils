@@ -155,6 +155,16 @@ namespace sockets {
 		static std::string getHostnameIP(const std::string & url);
 
 		/**
+		 * \brief converts a std::string formatted IP to std::vector<uint8_t>
+		 */
+		static std::vector<uint8_t> convertToVecIP(const std::string & ip);
+
+		/**
+		 * \brief converts a std::vector<uint8_t> formatted IP to std::string
+		 */
+		static std::string convertToStringIP(const std::vector<uint8_t> & ip);
+
+		/**
 		 * \brief returns the port this socket uses for connection
 		 */
 		uint16_t getLocalPort() const;

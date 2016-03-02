@@ -327,6 +327,27 @@ namespace sockets {
 		return ip;
 	}
 
+	std::vector<uint8_t> TcpSocket::convertToVecIP(const std::string & ip) {
+		std::vector<uint8_t> result(4, 0x0);
+		size_t pos = 0;
+		for (size_t i = 0; i < 4; ++i) {
+			size_t bytend = ip.find(".", pos);
+			std::stringstream ss(ip.substr(pos, bytend));
+			int t;
+			ss >> t;
+			result[i] = uint8_t(t);
+			pos = bytend + 1;
+		}
+		return result;
+	}
+
+	std::string TcpSocket::convertToStringIP(const std::vector<uint8_t> & ip) {
+		if (ip.size() != 4) {
+			return "";
+		}
+		return std::to_string(ip[0]) + "." + std::to_string(ip[1]) + "." + std::to_string(ip[2]) + "." + std::to_string(ip[3]);
+	}
+
 	uint16_t TcpSocket::getLocalPort() const {
 		if (_status == SocketStatus::INACTIVE) {
 			return 0;
