@@ -37,8 +37,6 @@ namespace clockUtils {
 namespace sockets {
 
 	ClockError TcpSocket::getLastError() {
-		
-	std::cerr << "getting error: " << errno << std::endl;
 		if (errno == EADDRINUSE) {
 			return ClockError::ADDRESS_INUSE;
 		} else if (errno == EINTR) {

@@ -93,7 +93,7 @@ TEST(TcpSocket, connect) { // tests connect with all possible errors
 	EXPECT_EQ(ClockError::TIMEOUT, e);
 
 	e = ts.connect("127.0.0.1", 12345, 100);
-	EXPECT_NE(ClockError::IN_PROGRESS, e); // can be TIMEOUT or CONNECTION_FAILED
+	EXPECT_TRUE(ClockError::CONNECTION_FAILED == e || ClockError::TIMEOUT == e); // two possibilities depending on platform
 
 	TcpSocket server;
 
@@ -109,10 +109,7 @@ TEST(TcpSocket, connect) { // tests connect with all possible errors
 		std::unique_lock<std::mutex> ul(connectionLock);
 		e = ts.connect("127.0.0.1", 12345, 100);
 		conditionVariable.wait(ul);
-	}
-
 		EXPECT_EQ(ClockError::SUCCESS, e);
-		conditionVariable.wait(ul);
 	}
 
 	e = ts.connect("127.0.0.1", 12345, 100);
@@ -204,11 +201,8 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 	TcpSocket client6;
 	e = client6.connect("127.0.0.1", 12345, 100);
 
-#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
-	EXPECT_EQ(ClockError::CONNECTION_FAILED, e);
-#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
-	EXPECT_EQ(ClockError::TIMEOUT, e);
-#endif
+	EXPECT_TRUE(ClockError::CONNECTION_FAILED == e || ClockError::TIMEOUT == e); // two possibilities depending on platform
+
 	EXPECT_EQ(3, connectCounter);
 
 	client6.close();
