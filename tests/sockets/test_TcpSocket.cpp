@@ -99,7 +99,6 @@ TEST(TcpSocket, connect) { // tests connect with all possible errors
 	e = server.listen(12345, 1, true, [](TcpSocket * sock, ClockError) {
 		if (sock) {
 			std::unique_lock<std::mutex> ul(connectionLock);
-			std::cout << "listen: " << sock << std::endl;
 			_socketList.push_back(sock);
 			conditionVariable.notify_one();
 		}
