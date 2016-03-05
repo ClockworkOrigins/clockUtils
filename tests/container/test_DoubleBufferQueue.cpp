@@ -50,12 +50,10 @@ TEST(DoubleBufferQueue, PushPop) {
 		q.push(i);
 		EXPECT_FALSE(q.empty());
 		EXPECT_EQ(i + 1, q.size());
-		int value;
 		EXPECT_EQ(ClockError::SUCCESS, q.front(value));
 		EXPECT_EQ(0, value);
 	}
 	for (int i = 0; i < 10; ++i) {
-		int value;
 		EXPECT_EQ(ClockError::SUCCESS, q.front(value));
 		EXPECT_EQ(i, value);
 		EXPECT_EQ(ClockError::SUCCESS, q.pop());
