@@ -152,7 +152,7 @@ namespace sockets {
 		if (remotePort == 0) {
 			return ClockError::INVALID_PORT;
 		}
-		if (remoteIP == 0) {
+		if (remoteIP == NO_IP) {
 			return ClockError::INVALID_IP;
 		}
 

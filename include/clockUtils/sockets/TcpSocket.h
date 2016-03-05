@@ -57,7 +57,6 @@
 	#define INVALID_SOCKET -1
 #endif
 
-#include <iostream>
 namespace std {
 	class thread;
 } /* namespace std */

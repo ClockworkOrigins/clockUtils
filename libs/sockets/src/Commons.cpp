@@ -1,13 +1,14 @@
 #include "clockUtils/sockets/Commons.h"
 
-#include <sstream>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+	#include <ws2tcpip.h>
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_UNIX
+	#include <arpa/inet.h>
+	#include <netdb.h>
+	#include <sys/socket.h>
+	#include <sys/types.h>
+#endif
 
-#include<iostream>
 namespace clockUtils {
 namespace sockets {
 
@@ -20,16 +21,16 @@ namespace sockets {
 		hints.ai_family = AF_UNSPEC; // use AF_INET6 to force IPv6
 		hints.ai_socktype = SOCK_STREAM;
 
-		if ((rv = getaddrinfo(url.c_str(), NULL, NULL, &servinfo)) != 0) {
+		if ((rv = getaddrinfo(url.c_str(), nullptr, nullptr, &servinfo)) != 0) {
 			return NO_IP;
 		}
 
 		uint32_t ip;
 		// loop through all the results and connect to the first we can
-		for (p = servinfo; p != NULL; p = p->ai_next) {
+		for (p = servinfo; p != nullptr; p = p->ai_next) {
 			h = reinterpret_cast<struct sockaddr_in *>(p->ai_addr);
 			ip = h->sin_addr.s_addr;
-			break; // FIXME: we should try the first one first, then the second etc. But the first fails with localhost
+			//break; // FIXME: we should try the first one first, then the second etc. But the first fails with localhost
 		}
 
 		freeaddrinfo(servinfo); // all done with this structure
@@ -37,16 +38,11 @@ namespace sockets {
 	}
 
 	IPv4 convertIP(const std::string & ip) {
-		in_addr res;
-		int e = inet_aton(ip.c_str(), &res);
-		if (e == 0) {
-			return NO_IP;
-		}
-		return res.s_addr;
+		return inet_addr(ip.c_str());
 	}
 
 	std::string convertIP(const IPv4 & ip) {
-		return inet_ntoa(in_addr{ip});
+		return inet_ntoa(*reinterpret_cast<const in_addr *>(&ip));
 	}
 
 } /* namespace sockets */

@@ -25,11 +25,16 @@
 #ifndef __CLOCKUTILS_SOCKETS_COMMONS_H__
 #define __CLOCKUTILS_SOCKETS_COMMONS_H__
 
+#include <cstdint>
 #include <string>
-#include <cstring>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+
+#include "clockUtils/sockets/socketsParameters.h"
+
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+	#include <WinSock2.h>
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_UNIX
+	#include <netinet/in.h>
+#endif
 
 namespace clockUtils {
 namespace sockets {
@@ -41,17 +46,17 @@ namespace sockets {
 	/**
 	 * \brief returns the IP for a given hostname (URL)
 	 */
-	IPv4 resolveHostname(const std::string & url);
+	CLOCK_SOCKETS_API IPv4 resolveHostname(const std::string & url);
 
 	/**
 	 * \brief converts a std::string formatted IP to IPv4 integer
 	 */
-	IPv4 convertIP(const std::string & ip);
+	CLOCK_SOCKETS_API IPv4 convertIP(const std::string & ip);
 
 	/**
 	 * \brief converts an IPv4 formatted IP to std::string
 	 */
-	std::string convertIP(const IPv4 & ip);
+	CLOCK_SOCKETS_API std::string convertIP(const IPv4 & ip);
 
 } /* namespace sockets */
 } /* namespace clockUtils */
