@@ -97,12 +97,20 @@ TEST(TcpSocket, connect) { // tests connect with all possible errors
 	TcpSocket server;
 
 	e = server.listen(12345, 1, true, [](TcpSocket * sock, ClockError) {
-		std::unique_lock<std::mutex> ul(connectionLock);
-		_socketList.push_back(sock);
-		conditionVariable.notify_one();
+		if (sock) {
+			std::unique_lock<std::mutex> ul(connectionLock);
+			std::cout << "listen: " << sock << std::endl;
+			_socketList.push_back(sock);
+			conditionVariable.notify_one();
+		}
 	});
 
-	e = ts.connect("127.0.0.1", 12345, 100);
+	{
+		std::unique_lock<std::mutex> ul(connectionLock);
+		e = ts.connect("127.0.0.1", 12345, 100);
+		conditionVariable.wait(ul);
+	}
+
 	EXPECT_EQ(ClockError::SUCCESS, e);
 
 	e = ts.connect("127.0.0.1", 12345, 100);
