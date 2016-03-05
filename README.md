@@ -13,7 +13,7 @@ clockUtils is a collection of lightweight libraries to solve common tasks. We de
 
 **Argument Parser**
 
- * Define variables and parse commandline or string buffer like most unix-like programs.
+ * Define variables and parse the parameters in a commandline or string buffer like most unix-like programs.
 
 **Compression**
 
@@ -21,8 +21,8 @@ clockUtils is a collection of lightweight libraries to solve common tasks. We de
 
 **Ini File Parser**
 
- * read and write common ini files
- * set and get values also for custom types because of C++ templates
+ * read and write ini files
+ * custom types are possible due to C++ templates
 
 **Sockets**
 
@@ -40,7 +40,7 @@ clockUtils has been tested on:
 
 ## Requirements ##
 
-clockUtils has nearly no requirements. We use CMake (2.8+) for the build system and require a C++11 capable compiler such as g++ 4.7 or Visual Studio 13.
+clockUtils has nearly no requirements. We use CMake (2.8+) for the build system and a C++11 capable compiler such as g++ 4.7 or Visual Studio 13 (or higher).
 
 ## Documentation ##
 
@@ -50,9 +50,10 @@ The doxygen documentation can be found on our homepage: http://clockwork-origins
 
 To build clockUtils from source you need cmake and a C++11 compiler. For a complete library setup just use
 
-cmake .
+$ cmake .
+$ make
 
-You can enable/disable all libraries using -DWITH_LIBRARY_<LIBRARYNAME>=ON/OFF. Tests can be enabled using -DWITH_TESTING=ON. This required gtest on your system (or you build it with the appropriate dependency build script in the dependencies directory).
+You can enable/disable all libraries using -DWITH_LIBRARY_<LIBRARYNAME>=ON/OFF. Tests can be enabled using -DWITH_TESTING=ON. This requires gtest on your system (or you build it with the appropriate dependency build script in the dependencies directory).
 
 ## Contributing Code ##
 
