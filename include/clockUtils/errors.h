@@ -47,8 +47,10 @@ namespace clockUtils {
 		NOT_CONNECTED,		//!< 0xE	using a method for connected sockets on unconnected socket
 		// iniParser
 		VALUE_NOTFOUND,		//!< 0xF	value not found
+		// container
+		NO_ELEMENT,			//!< 0x10	no element available
 		//
-		UNKNOWN,			//!< 0x10	an error occured, but the error isn't wrapped yet
+		UNKNOWN,			//!< 0x11	an error occured, but the error isn't wrapped yet
 		ERROR_COUNT
 	};
 

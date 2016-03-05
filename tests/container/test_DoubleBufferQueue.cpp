@@ -23,6 +23,7 @@
 
 #include "gtest/gtest.h"
 
+using clockUtils::ClockError;
 using clockUtils::container::DoubleBufferQueue;
 
 TEST(DoubleBufferQueue, Simple) {
@@ -42,15 +43,22 @@ TEST(DoubleBufferQueue, Pushing) {
 
 TEST(DoubleBufferQueue, PushPop) {
 	DoubleBufferQueue<int, false, false> q;
+	int value;
+	EXPECT_EQ(ClockError::NO_ELEMENT, q.front(value));
+	EXPECT_EQ(ClockError::NO_ELEMENT, q.pop());
 	for (int i = 0; i < 10; ++i) {
 		q.push(i);
 		EXPECT_FALSE(q.empty());
 		EXPECT_EQ(i + 1, q.size());
-		EXPECT_EQ(0, q.front());
+		int value;
+		EXPECT_EQ(ClockError::SUCCESS, q.front(value));
+		EXPECT_EQ(0, value);
 	}
 	for (int i = 0; i < 10; ++i) {
-		EXPECT_EQ(i, q.front());
-		q.pop();
+		int value;
+		EXPECT_EQ(ClockError::SUCCESS, q.front(value));
+		EXPECT_EQ(i, value);
+		EXPECT_EQ(ClockError::SUCCESS, q.pop());
 		EXPECT_EQ(9 - i, q.size());
 	}
 	EXPECT_TRUE(q.empty());
@@ -62,11 +70,15 @@ TEST(DoubleBufferQueue, Poll) {
 		q.push(i);
 		EXPECT_FALSE(q.empty());
 		EXPECT_EQ(i + 1, q.size());
-		EXPECT_EQ(0, q.front());
+		int value;
+		EXPECT_EQ(ClockError::SUCCESS, q.front(value));
+		EXPECT_EQ(0, value);
 	}
 	for (int i = 0; i < 10; ++i) {
-		int a = q.poll();
-		EXPECT_EQ(i, a);
+		int value;
+		ClockError err = q.poll(value);
+		EXPECT_EQ(ClockError::SUCCESS, err);
+		EXPECT_EQ(i, value);
 		EXPECT_EQ(9 - i, q.size());
 	}
 	EXPECT_TRUE(q.empty());
@@ -79,14 +91,20 @@ TEST(DoubleBufferQueue, PushPoll2) {
 		EXPECT_EQ(1, q.size());
 		q.push(56);
 		EXPECT_EQ(2, q.size());
-		EXPECT_EQ(7, q.poll());
+		int value;
+		EXPECT_EQ(ClockError::SUCCESS, q.poll(value));
+		EXPECT_EQ(7, value);
 		EXPECT_EQ(1, q.size());
 		q.push(23);
 		EXPECT_EQ(2, q.size());
-		EXPECT_EQ(56, q.poll());
-		EXPECT_EQ(23, q.poll());
+		EXPECT_EQ(ClockError::SUCCESS, q.poll(value));
+		EXPECT_EQ(56, value);
+		EXPECT_EQ(ClockError::SUCCESS, q.poll(value));
+		EXPECT_EQ(23, value);
 		EXPECT_TRUE(q.empty());
 	}
+	int value;
+	EXPECT_EQ(ClockError::NO_ELEMENT, q.poll(value));
 }
 
 TEST(DoubleBufferQueue, Clear) {
@@ -115,8 +133,13 @@ void pusher(DoubleBufferQueue<int, true, true> * q, int amount, int value) {
 void popper(DoubleBufferQueue<int, true, true> * qFrom, DoubleBufferQueue<int, true, false> * qTo, int amount) {
 	for (int i = 0; i < amount; ++i) {
 		if (!qFrom->empty()) {
-			int a = qFrom->poll();
-			qTo->push(a);
+			int a;
+			ClockError err = qFrom->poll(a);
+			if (err == ClockError::SUCCESS) {
+				qTo->push(a);
+			} else {
+				i--;
+			}
 		} else {
 			i--;
 		}
@@ -139,7 +162,9 @@ TEST(DoubleBufferQueue, StressTest) {
 		delete v[i];
 	}
 	for (int i = 0; i < 40 * 10000; ++i) {
-		counts[size_t(q2.poll())]++;
+		int a;
+		EXPECT_EQ(ClockError::SUCCESS, q2.poll(a));
+		counts[size_t(a)]++;
 	}
 	for (unsigned int i = 0; i < 40; ++i) {
 		EXPECT_EQ(10000, counts[i]);

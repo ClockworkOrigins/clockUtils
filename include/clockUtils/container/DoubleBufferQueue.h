@@ -28,6 +28,8 @@
 #include <mutex>
 #include <queue>
 
+#include "clockUtils/errors.h"
+
 #include "clockUtils/container/containerParameters.h"
 
 namespace clockUtils {
@@ -68,22 +70,22 @@ namespace container {
 		/**
 		 * \brief removes first entry of the queue
 		 */
-		void pop() {
-			pop(Bool2Type<consumer>());
+		ClockError pop() {
+			return pop(Bool2Type<consumer>());
 		}
 
 		/**
 		 * \brief returns first entry of the queue
 		 */
-		T front() {
-			return front(Bool2Type<consumer>());
+		ClockError front(T & value) {
+			return front(Bool2Type<consumer>(), value);
 		}
 
 		/**
 		 * \brief removes first entry of the queue and returns its value
 		 */
-		T poll() {
-			return poll(Bool2Type<consumer>());
+		ClockError poll(T & value) {
+			return poll(Bool2Type<consumer>(), value);
 		}
 
 		/**
@@ -132,71 +134,93 @@ namespace container {
 		std::mutex _readLock;
 		std::mutex _writeLock;
 
-		void pop(Bool2Type<true>) {
+		ClockError pop(Bool2Type<true>) {
 			static_assert(consumer, "Consumer must be true here");
 			std::lock_guard<std::mutex> lg(_readLock);
 			if (_queueRead->empty()) {
 				swap();
 			}
 
-			// empty queue results in undefined behaviour (same as STL)
-			_queueRead->pop();
+			if (_queueRead->empty()) {
+				return ClockError::NO_ELEMENT;
+			} else {
+				_queueRead->pop();
+				return ClockError::SUCCESS;
+			}
 		}
 
-		void pop(Bool2Type<false>) {
+		ClockError pop(Bool2Type<false>) {
 			static_assert(!consumer, "Consumer must be false here");
 			if (_queueRead->empty()) {
 				swap();
 			}
 
-			// empty queue results in undefined behaviour (same as STL)
-			_queueRead->pop();
+			if (_queueRead->empty()) {
+				return ClockError::NO_ELEMENT;
+			} else {
+				_queueRead->pop();
+				return ClockError::SUCCESS;
+			}
 		}
 
-		T front(Bool2Type<true>) {
+		ClockError front(Bool2Type<true>, T & value) {
 			static_assert(consumer, "Consumer must be true here");
 			std::lock_guard<std::mutex> lg(_readLock);
 			if (_queueRead->empty()) {
 				swap();
 			}
 
-			// empty queue results in undefined behaviour (same as STL)
-			return _queueRead->front();
+			if (_queueRead->empty()) {
+				return ClockError::NO_ELEMENT;
+			} else {
+				value = _queueRead->front();
+				return ClockError::SUCCESS;
+			}
 		}
 
-		T front(Bool2Type<false>) {
+		ClockError front(Bool2Type<false>, T & value) {
 			static_assert(!consumer, "Consumer must be false here");
 			if (_queueRead->empty()) {
 				swap();
 			}
 
-			// empty queue results in undefined behaviour (same as STL)
-			return _queueRead->front();
+			if (_queueRead->empty()) {
+				return ClockError::NO_ELEMENT;
+			} else {
+				value = _queueRead->front();
+				return ClockError::SUCCESS;
+			}
 		}
 
-		T poll(Bool2Type<true> b) {
+		ClockError poll(Bool2Type<true>, T & value) {
 			static_assert(consumer, "Consumer must be true here");
 			std::lock_guard<std::mutex> lg(_readLock);
 			if (_queueRead->empty()) {
 				swap();
 			}
 
-			// empty queue results in undefined behaviour (same as STL)
-			T ret = _queueRead->front();
-			_queueRead->pop();
-			return ret;
+			if (_queueRead->empty()) {
+				return ClockError::NO_ELEMENT;
+			} else {
+				value = _queueRead->front();
+				_queueRead->pop();
+				return ClockError::SUCCESS;
+			}
 		}
 
-		T poll(Bool2Type<false> b) {
+		ClockError poll(Bool2Type<false>, T & value) {
 			static_assert(!consumer, "Consumer must be false here");
 			if (_queueRead->empty()) {
 				swap();
 			}
 
-			// empty queue results in undefined behaviour (same as STL)
-			T ret = _queueRead->front();
-			_queueRead->pop();
-			return ret;
+			if (_queueRead->empty()) {
+				return ClockError::NO_ELEMENT;
+			} else {
+				value = _queueRead->front();
+				_queueRead->pop();
+				return ClockError::SUCCESS;
+			}
 		}
 
 		/**
