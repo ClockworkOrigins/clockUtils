@@ -28,6 +28,7 @@ ELSEIF(UNIX)
 ENDIF()
 
 set(socketsSrc
+	${srcdir}/Commons.cpp
 	${srcdir}/TcpSocket.cpp
 	${srcdir}/UdpSocket.cpp
 	${srcdirPlatform}/TcpSocket.cpp

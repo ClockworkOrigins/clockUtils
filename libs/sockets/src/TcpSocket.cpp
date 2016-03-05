@@ -147,12 +147,12 @@ namespace sockets {
 		}
 	}
 
-	ClockError TcpSocket::connect(const std::string & remoteIP, uint16_t remotePort, unsigned int timeout) {
+	ClockError TcpSocket::connect(const IPv4 remoteIP, uint16_t remotePort, unsigned int timeout) {
 		// check for invalid arguments
 		if (remotePort == 0) {
 			return ClockError::INVALID_PORT;
 		}
-		if (remoteIP.length() < 8) {
+		if (remoteIP == 0) {
 			return ClockError::INVALID_IP;
 		}
 
@@ -160,7 +160,7 @@ namespace sockets {
 		memset(&addr, 0, sizeof(sockaddr_in));
 		addr.sin_family = AF_INET;
 		addr.sin_port = htons(remotePort);
-		addr.sin_addr.s_addr = inet_addr(remoteIP.c_str());
+		addr.sin_addr.s_addr = remoteIP;
 		if (addr.sin_addr.s_addr == INADDR_NONE || addr.sin_addr.s_addr == INADDR_ANY) {
 			return ClockError::INVALID_IP;
 		}
@@ -302,50 +302,6 @@ namespace sockets {
 		socklen_t addressLength = sizeof(localAddress);
 		getsockname(_sock, reinterpret_cast<struct sockaddr *>(&localAddress), &addressLength);
 		return inet_ntoa(localAddress.sin_addr);
-	}
-
-	std::string TcpSocket::getHostnameIP(const std::string & url) {
-		struct addrinfo hints, * servinfo, * p;
-		struct sockaddr_in * h;
-		int rv;
-
-		memset(&hints, 0, sizeof hints);
-		hints.ai_family = AF_UNSPEC; // use AF_INET6 to force IPv6
-		hints.ai_socktype = SOCK_STREAM;
-
-		if ((rv = getaddrinfo(url.c_str(), NULL, NULL, &servinfo)) != 0) {
-			return "";
-		}
-		std::string ip;
-		// loop through all the results and connect to the first we can
-		for (p = servinfo; p != NULL; p = p->ai_next) {
-			h = reinterpret_cast<struct sockaddr_in *>(p->ai_addr);
-			ip = inet_ntoa(h->sin_addr);
-		}
-
-		freeaddrinfo(servinfo); // all done with this structure
-		return ip;
-	}
-
-	std::vector<uint8_t> TcpSocket::convertToVecIP(const std::string & ip) {
-		std::vector<uint8_t> result(4, 0x0);
-		size_t pos = 0;
-		for (size_t i = 0; i < 4; ++i) {
-			size_t bytend = ip.find(".", pos);
-			std::stringstream ss(ip.substr(pos, bytend));
-			int t;
-			ss >> t;
-			result[i] = uint8_t(t);
-			pos = bytend + 1;
-		}
-		return result;
-	}
-
-	std::string TcpSocket::convertToStringIP(const std::vector<uint8_t> & ip) {
-		if (ip.size() != 4) {
-			return "";
-		}
-		return std::to_string(ip[0]) + "." + std::to_string(ip[1]) + "." + std::to_string(ip[2]) + "." + std::to_string(ip[3]);
 	}
 
 	uint16_t TcpSocket::getLocalPort() const {

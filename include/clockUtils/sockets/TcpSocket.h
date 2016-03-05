@@ -37,6 +37,7 @@
 #include "clockUtils/errors.h"
 
 #include "clockUtils/sockets/socketsParameters.h"
+#include "clockUtils/sockets/Commons.h"
 
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 	#include <WinSock2.h>
@@ -56,6 +57,7 @@
 	#define INVALID_SOCKET -1
 #endif
 
+#include <iostream>
 namespace std {
 	class thread;
 } /* namespace std */
@@ -117,27 +119,37 @@ namespace sockets {
 		 * \param[in] remotePort the port of the connection listening
 		 * \param[in] timeout the time in milliseconds a connect request should last in maximum
 		 */
-		ClockError connect(const std::string & remoteIP, uint16_t remotePort, unsigned int timeout);
-
-		/**
-		 * \brief creates a connection to the given pair of IP and port
-		 * \param[in] remoteIP the ip of the connection listening as std::vector<uint8_t>
-		 * \param[in] remotePort the port of the connection listening
-		 * \param[in] timeout the time in milliseconds a connect request should last in maximum
-		 */
-		ClockError connect(const std::vector<uint8_t> & remoteIP, uint16_t remotePort, unsigned int timeout) {
-			return connect(convertToStringIP(remoteIP), remotePort, timeout);
+		ClockError connectToIP(const std::string & remoteIP, uint16_t remotePort, unsigned int timeout) {
+			IPv4 ip = convertIP(remoteIP);
+			if (ip == NO_IP) {
+				// not a valid hostname
+				return ClockError::INVALID_IP;
+			}
+			return connect(ip, remotePort, timeout);
 		}
 
 		/**
 		 * \brief creates a connection to the given pair of hostname and port
-		 * \param[in] remoteHostname the hostname (URL) of the connection listening
+		 * \param[in] remoteHostname the hostname of the connection listening as std::string
 		 * \param[in] remotePort the port of the connection listening
 		 * \param[in] timeout the time in milliseconds a connect request should last in maximum
 		 */
 		ClockError connectToHostname(const std::string & remoteHostname, uint16_t remotePort, unsigned int timeout) {
-			return connect(getHostnameIP(remoteHostname), remotePort, timeout);
+			IPv4 ip = resolveHostname(remoteHostname);
+			if (ip == NO_IP) {
+				// not a valid hostname
+				return ClockError::INVALID_IP;
+			}
+			return connect(ip, remotePort, timeout);
 		}
+
+		/**
+		 * \brief creates a connection to the given pair of IP and port
+		 * \param[in] remoteIP the ip of the connection listening as IPv4 integer
+		 * \param[in] remotePort the port of the connection listening
+		 * \param[in] timeout the time in milliseconds a connect request should last in maximum
+		 */
+		ClockError connect(const IPv4 remoteIP, uint16_t remotePort, unsigned int timeout);
 
 		/**
 		 * \brief closes a connection if socket is connected
@@ -168,21 +180,6 @@ namespace sockets {
 		 * \brief returns the public IP of this socket shown in network
 		 */
 		std::string getPublicIP() const;
-
-		/**
-		 * \brief returns the IP for a given hostname (URL)
-		 */
-		static std::string getHostnameIP(const std::string & url);
-
-		/**
-		 * \brief converts a std::string formatted IP to std::vector<uint8_t>
-		 */
-		static std::vector<uint8_t> convertToVecIP(const std::string & ip);
-
-		/**
-		 * \brief converts a std::vector<uint8_t> formatted IP to std::string
-		 */
-		static std::string convertToStringIP(const std::vector<uint8_t> & ip);
 
 		/**
 		 * \brief returns the port this socket uses for connection
