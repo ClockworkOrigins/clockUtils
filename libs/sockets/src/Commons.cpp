@@ -2,33 +2,30 @@
 
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 	#include <ws2tcpip.h>
-#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_UNIX
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 	#include <arpa/inet.h>
 	#include <netdb.h>
-	#include <sys/socket.h>
-	#include <sys/types.h>
+	#include <cstring>
 #endif
 
 namespace clockUtils {
 namespace sockets {
 
-	IPv4 resolveHostname(const std::string & url) {
+	IPv4 resolveHostname(const std::string & hn) {
 		struct addrinfo hints, * servinfo, * p;
-		struct sockaddr_in * h;
-		int rv;
 
 		memset(&hints, 0, sizeof hints);
 		hints.ai_family = AF_UNSPEC; // use AF_INET6 to force IPv6
 		hints.ai_socktype = SOCK_STREAM;
 
-		if ((rv = getaddrinfo(url.c_str(), nullptr, nullptr, &servinfo)) != 0) {
+		if (getaddrinfo(hn.c_str(), nullptr, nullptr, &servinfo) != 0) {
 			return NO_IP;
 		}
 
-		uint32_t ip;
+		IPv4 ip;
 		// loop through all the results and connect to the first we can
 		for (p = servinfo; p != nullptr; p = p->ai_next) {
-			h = reinterpret_cast<struct sockaddr_in *>(p->ai_addr);
+			struct sockaddr_in * h = reinterpret_cast<struct sockaddr_in *>(p->ai_addr);
 			ip = h->sin_addr.s_addr;
 			//break; // FIXME: we should try the first one first, then the second etc. But the first fails with localhost
 		}
@@ -38,6 +35,7 @@ namespace sockets {
 	}
 
 	IPv4 convertIP(const std::string & ip) {
+		// FIXME: this function is deprecated because the error value INADDR_NONE (-1) is a valid ip
 		return inet_addr(ip.c_str());
 	}
 

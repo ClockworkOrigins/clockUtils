@@ -32,7 +32,7 @@
 
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 	#include <WinSock2.h>
-#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_UNIX
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 	#include <netinet/in.h>
 #endif
 
@@ -44,17 +44,24 @@ namespace sockets {
 	const IPv4 NO_IP = INADDR_NONE;
 
 	/**
-	 * \brief returns the IP for a given hostname (URL)
+	 * \brief returns the IP for a given hostname
+	 * \param[in] hn Hostname to resolve
+	 * \returns the IP or NO_IP upon failure
 	 */
-	CLOCK_SOCKETS_API IPv4 resolveHostname(const std::string & url);
+	CLOCK_SOCKETS_API IPv4 resolveHostname(const std::string & hn);
 
 	/**
-	 * \brief converts a std::string formatted IP to IPv4 integer
+	 * \brief converts an IP in the numbers-and-dots notation into an IPv4 integer
+	 * \param[in] ip to be converted
+	 * \returns the IP or NO_IP if ip was not well-formed
+	 * \note Because of the underlaying function, the ip "255.255.255.255" equals NO_IP, thus converting this ip will appear like an error
 	 */
 	CLOCK_SOCKETS_API IPv4 convertIP(const std::string & ip);
 
 	/**
-	 * \brief converts an IPv4 formatted IP to std::string
+	 * \brief converts an IPv4 formatted IP to the numbers-and-dots notation
+	 * \param[in] ip IPv4 address
+	 * \returns the readable version as a string
 	 */
 	CLOCK_SOCKETS_API std::string convertIP(const IPv4 & ip);
 
