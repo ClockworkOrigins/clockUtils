@@ -23,10 +23,6 @@
 #include <sstream>
 #include <thread>
 
-#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
-	#include <ws2tcpip.h>
-#endif
-
 namespace clockUtils {
 namespace sockets {
 
