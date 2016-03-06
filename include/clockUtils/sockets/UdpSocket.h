@@ -189,8 +189,8 @@ namespace sockets {
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
 		template<typename... T>
-		ClockError writePacketToIP(const std::string & hostname, uint16_t port, T... data) {
-			return writePacket(convertIP(hostname), port, data...);
+		ClockError writePacketToIP(const std::string & ip, uint16_t port, T... data) {
+			return writePacket(convertIP(ip), port, data...);
 		}
 
 		/**
@@ -198,8 +198,8 @@ namespace sockets {
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
 		template<typename... T>
-		ClockError writePacketToIPAsync(const std::string & hostname, uint16_t port, T... data) {
-			return writePacketAsync(convertIP(hostname), port, data...);
+		ClockError writePacketToIPAsync(const std::string & ip, uint16_t port, T... data) {
+			return writePacketAsync(convertIP(ip), port, data...);
 		}
 
 		/**
@@ -207,8 +207,8 @@ namespace sockets {
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
 		template<typename... T>
-		ClockError writeToIP(const std::string & hostname, uint16_t port, T... data) {
-			return write(convertIP(hostname), port, data...);
+		ClockError writeToIP(const std::string & ip, uint16_t port, T... data) {
+			return write(convertIP(ip), port, data...);
 		}
 
 		/**
@@ -216,8 +216,8 @@ namespace sockets {
 		 * \return if packet was sent, the method returns ClockError::SUCCESS, otherwise one of the other error codes. Can also return SUCCESS, if the socket was closed by peer and it wasn't detected yet
 		 */
 		template<typename... T>
-		ClockError writeToIPAsync(const std::string & hostname, uint16_t port, T... data) {
-			return writeAsync(convertIP(hostname), port, data...);
+		ClockError writeToIPAsync(const std::string & ip, uint16_t port, T... data) {
+			return writeAsync(convertIP(ip), port, data...);
 		}
 
 		/**
