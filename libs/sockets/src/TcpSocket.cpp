@@ -143,12 +143,12 @@ namespace sockets {
 		}
 	}
 
-	ClockError TcpSocket::connect(const std::string & remoteIP, uint16_t remotePort, unsigned int timeout) {
+	ClockError TcpSocket::connect(const IPv4 remoteIP, uint16_t remotePort, unsigned int timeout) {
 		// check for invalid arguments
 		if (remotePort == 0) {
 			return ClockError::INVALID_PORT;
 		}
-		if (remoteIP.length() < 8) {
+		if (remoteIP == NO_IP) {
 			return ClockError::INVALID_IP;
 		}
 
@@ -156,7 +156,7 @@ namespace sockets {
 		memset(&addr, 0, sizeof(sockaddr_in));
 		addr.sin_family = AF_INET;
 		addr.sin_port = htons(remotePort);
-		addr.sin_addr.s_addr = inet_addr(remoteIP.c_str());
+		addr.sin_addr.s_addr = remoteIP;
 		if (addr.sin_addr.s_addr == INADDR_NONE || addr.sin_addr.s_addr == INADDR_ANY) {
 			return ClockError::INVALID_IP;
 		}

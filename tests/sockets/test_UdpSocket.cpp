@@ -51,7 +51,7 @@ TEST(UdpSocket, sendRead) { // tests communication between two sockets
 	EXPECT_EQ(ClockError::SUCCESS, sock1.bind(12345));
 	EXPECT_EQ(ClockError::SUCCESS, sock2.bind(12346));
 
-	EXPECT_EQ(ClockError::SUCCESS, sock1.writePacket("127.0.0.1", 12346, message1.c_str(), message1.length()));
+	EXPECT_EQ(ClockError::SUCCESS, sock1.writePacketToIP("127.0.0.1", 12346, message1.c_str(), message1.length()));
 
 	std::string result;
 	std::string ip;
@@ -62,7 +62,7 @@ TEST(UdpSocket, sendRead) { // tests communication between two sockets
 	EXPECT_EQ("127.0.0.1", ip);
 	EXPECT_EQ(12345, port);
 
-	EXPECT_EQ(ClockError::SUCCESS, sock2.writePacket("127.0.0.1", 12345, message2.c_str(), message2.length()));
+	EXPECT_EQ(ClockError::SUCCESS, sock2.writePacketToIP("127.0.0.1", 12345, message2.c_str(), message2.length()));
 
 	EXPECT_EQ(ClockError::SUCCESS, sock1.receivePacket(result, ip, port));
 	EXPECT_EQ(message2, result);
@@ -77,9 +77,9 @@ TEST(UdpSocket, useUnready) {
 	uint16_t port;
 
 	UdpSocket sock1;
-	EXPECT_EQ(ClockError::NOT_READY, sock1.writePacket("127.0.0.1", 12345, buffer));
-	EXPECT_EQ(ClockError::NOT_READY, sock1.writePacket("127.0.0.1", 12345, reinterpret_cast<char *>(&buffer[0]), buffer.size()));
-	EXPECT_EQ(ClockError::NOT_READY, sock1.write("127.0.0.1", 12345, reinterpret_cast<char *>(&buffer[0]), buffer.size()));
+	EXPECT_EQ(ClockError::NOT_READY, sock1.writePacketToIP("127.0.0.1", 12345, buffer));
+	EXPECT_EQ(ClockError::NOT_READY, sock1.writePacketToIP("127.0.0.1", 12345, reinterpret_cast<char *>(&buffer[0]), buffer.size()));
+	EXPECT_EQ(ClockError::NOT_READY, sock1.writeToIP("127.0.0.1", 12345, reinterpret_cast<char *>(&buffer[0]), buffer.size()));
 	EXPECT_EQ(ClockError::NOT_READY, sock1.receivePacket(buffer, ip, port));
 	EXPECT_EQ(ClockError::NOT_READY, sock1.receivePacket(str, ip, port));
 
@@ -102,8 +102,31 @@ TEST(UdpSocket, writePacketMultiple) {
 	sock1.bind(12345);
 	sock2.bind(12346);
 
-	sock1.writePacket("127.0.0.1", 12346, v1);
-	sock1.writePacket("127.0.0.1", 12346, v2);
+	sock1.writePacketToIP("127.0.0.1", 12346, v1);
+	sock1.writePacketToIP("127.0.0.1", 12346, v2);
+
+	std::string ip;
+	uint16_t port;
+
+	std::vector<uint8_t> v3, v4;
+	sock2.receivePacket(v3, ip, port);
+	EXPECT_EQ(v1, v3);
+	sock2.receivePacket(v4, ip, port);
+	EXPECT_EQ(v2, v4);
+	sock1.close();
+	sock2.close();
+}
+
+TEST(UdpSocket, writePacketToHostnameMultiple) {
+	UdpSocket sock1, sock2;
+	std::vector<uint8_t> v1 = { 0x1, 0x2, 0x3, 0x4, 0x5, 0x0, 0x5, 0x4, 0x3, 0x2, 0x1 };
+	std::vector<uint8_t> v2 = { 0x11, 0x12, 0x13, 0x14, 0x15, 0x0, 0x15, 0x14, 0x13, 0x12, 0x11 };
+
+	sock1.bind(12345);
+	sock2.bind(12346);
+
+	sock1.writePacketToHostname("localhost", 12346, v1);
+	sock1.writePacketToHostname("localhost", 12346, v2);
 
 	std::string ip;
 	uint16_t port;
@@ -124,8 +147,8 @@ TEST(UdpSocket, writeMass) {
 
 	ASSERT_EQ(ClockError::SUCCESS, sock1.bind(12345));
 	ASSERT_EQ(ClockError::SUCCESS, sock2.bind(12346));
-	ASSERT_EQ(ClockError::SUCCESS, sock1.writePacket("127.0.0.1", 12346, v1));
-	ASSERT_EQ(ClockError::SUCCESS, sock1.writePacket("127.0.0.1", 12346, v2));
+	ASSERT_EQ(ClockError::SUCCESS, sock1.writePacketToIP("127.0.0.1", 12346, v1));
+	ASSERT_EQ(ClockError::SUCCESS, sock1.writePacketToIP("127.0.0.1", 12346, v2));
 
 	std::string ip;
 	uint16_t port;
@@ -146,13 +169,13 @@ TEST(UdpSocket, receiveCallback) {
 	int received = 0;
 
 	sock1.bind(12345);
-	sock1.receiveCallback([&received](std::vector<uint8_t> packet, std::string ip, uint16_t port, ClockError err) {
+	sock1.receiveCallback([&received](std::vector<uint8_t> packet, std::string ip, uint16_t, ClockError) {
 		received++;
 	});
 	sock2.bind(12346);
 
 	for (std::string s : messages) {
-		EXPECT_EQ(ClockError::SUCCESS, sock2.writePacket("127.0.0.1", 12345, s.c_str(), s.length()));
+		EXPECT_EQ(ClockError::SUCCESS, sock2.writePacketToIP("127.0.0.1", 12345, s.c_str(), s.length()));
 	}
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(20));
@@ -168,7 +191,7 @@ TEST(UdpSocket, receiveCallbackRemove) {
 	int called = 0;
 
 	sock1.bind(12345);
-	sock1.receiveCallback([&called](std::vector<uint8_t> packet, std::string ip, uint16_t port, ClockError err) {
+	sock1.receiveCallback([&called](std::vector<uint8_t> packet, std::string ip, uint16_t, ClockError err) {
 		called++;
 		if (err != ClockError::SUCCESS) {
 			EXPECT_EQ(2, called);
@@ -181,7 +204,7 @@ TEST(UdpSocket, receiveCallbackRemove) {
 
 	std::string s = "Some messsage!";
 
-	EXPECT_EQ(ClockError::SUCCESS, sock2.writePacket("127.0.0.1", 12345, s.c_str(), s.length()));
+	EXPECT_EQ(ClockError::SUCCESS, sock2.writePacketToIP("127.0.0.1", 12345, s.c_str(), s.length()));
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
@@ -203,8 +226,33 @@ TEST(UdpSocket, writePacketAsyncMultiple) {
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
-	sock1.writePacketAsync("127.0.0.1", 12346, v1);
-	sock1.writePacketAsync("127.0.0.1", 12346, v2);
+	sock1.writePacketToIPAsync("127.0.0.1", 12346, v1);
+	sock1.writePacketToIPAsync("127.0.0.1", 12346, v2);
+
+	std::string ip;
+	uint16_t port;
+
+	std::vector<uint8_t> v3, v4;
+	sock2.receivePacket(v3, ip, port);
+	EXPECT_EQ(v1, v3);
+	sock2.receivePacket(v4, ip, port);
+	EXPECT_EQ(v2, v4);
+	sock1.close();
+	sock2.close();
+}
+
+TEST(UdpSocket, writePacketToHostnameAsyncMultiple) {
+	UdpSocket sock1, sock2;
+	std::vector<uint8_t> v1 = { 0x1, 0x2, 0x3, 0x4, 0x5, 0x0, 0x5, 0x4, 0x3, 0x2, 0x1 };
+	std::vector<uint8_t> v2 = { 0x11, 0x12, 0x13, 0x14, 0x15, 0x0, 0x15, 0x14, 0x13, 0x12, 0x11 };
+
+	sock1.bind(12345);
+	sock2.bind(12346);
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+	sock1.writePacketToHostnameAsync("localhost", 12346, v1);
+	sock1.writePacketToHostnameAsync("localhost", 12346, v2);
 
 	std::string ip;
 	uint16_t port;
@@ -225,8 +273,8 @@ TEST(UdpSocket, writePacketAsyncMass) {
 
 	ASSERT_EQ(ClockError::SUCCESS, sock1.bind(12345));
 	ASSERT_EQ(ClockError::SUCCESS, sock2.bind(12346));
-	ASSERT_EQ(ClockError::SUCCESS, sock1.writePacketAsync("127.0.0.1", 12346, v1));
-	ASSERT_EQ(ClockError::SUCCESS, sock1.writePacketAsync("127.0.0.1", 12346, v2));
+	ASSERT_EQ(ClockError::SUCCESS, sock1.writePacketToIPAsync("127.0.0.1", 12346, v1));
+	ASSERT_EQ(ClockError::SUCCESS, sock1.writePacketToIPAsync("127.0.0.1", 12346, v2));
 
 	std::string ip;
 	uint16_t port;
@@ -239,3 +287,4 @@ TEST(UdpSocket, writePacketAsyncMass) {
 	sock1.close();
 	sock2.close();
 }
+

@@ -67,7 +67,7 @@ namespace algorithm {
 		}
 		try {
 			compressed = std::string(sizeof(len_t), 0x0);
-		} catch (std::bad_alloc & ba) {
+		} catch (std::bad_alloc &) {
 			return ClockError::OUT_OF_MEMORY;
 		}
 
@@ -95,7 +95,7 @@ namespace algorithm {
 
 		try {
 			decompressed = std::string(len, 0x0);
-		} catch (std::bad_alloc & ba) {
+		} catch (std::bad_alloc &) {
 			return ClockError::OUT_OF_MEMORY;
 		}
 

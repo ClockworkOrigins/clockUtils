@@ -20,6 +20,7 @@
 #include "clockUtils/sockets/UdpSocket.h"
 
 #include <errno.h>
+#include <sstream>
 #include <thread>
 
 namespace clockUtils {
@@ -55,7 +56,7 @@ namespace sockets {
 		return ClockError::SUCCESS;
 	}
 
-	ClockError UdpSocket::writePacket(const std::string & ip, uint16_t port, const void * str, const size_t length) {
+	ClockError UdpSocket::writePacket(IPv4 ip, uint16_t port, const void * str, const size_t length) {
 		if (_sock == INVALID_SOCKET) {
 			return ClockError::NOT_READY;
 		}
@@ -76,11 +77,11 @@ namespace sockets {
 		return error;
 	}
 
-	ClockError UdpSocket::writePacket(const std::string & ip, uint16_t port, const std::vector<uint8_t> & vec) {
+	ClockError UdpSocket::writePacket(IPv4 ip, uint16_t port, const std::vector<uint8_t> & vec) {
 		return writePacket(ip, port, const_cast<const unsigned char *>(&vec[0]), vec.size());
 	}
 
-	ClockError UdpSocket::write(const std::string & ip, uint16_t port, const void * str, size_t length) {
+	ClockError UdpSocket::write(IPv4 ip, uint16_t port, const void * str, size_t length) {
 		if (_sock == INVALID_SOCKET) {
 			return ClockError::NOT_READY;
 		}
@@ -89,7 +90,7 @@ namespace sockets {
 		memset(reinterpret_cast<char *>(&addr), 0, sizeof(addr));
 		addr.sin_family = AF_INET;
 		addr.sin_port = htons(port);
-		addr.sin_addr.s_addr = inet_addr(ip.c_str());
+		addr.sin_addr.s_addr = ip;
 
 		for (size_t i = 0; i < length / MAX_PACKET_SIZE + 1; i++) {
 			size_t sendLength = (i < length / MAX_PACKET_SIZE) ? MAX_PACKET_SIZE : length - (i * MAX_PACKET_SIZE);
@@ -101,7 +102,7 @@ namespace sockets {
 		return ClockError::SUCCESS;
 	}
 
-	ClockError UdpSocket::writePacketAsync(const std::string & ip, uint16_t port, const void * str, const size_t length) {
+	ClockError UdpSocket::writePacketAsync(IPv4 ip, uint16_t port, const void * str, const size_t length) {
 		if (_sock == INVALID_SOCKET) {
 			return ClockError::NOT_READY;
 		}
@@ -119,7 +120,7 @@ namespace sockets {
 		return ClockError::SUCCESS;
 	}
 
-	ClockError UdpSocket::writePacketAsync(const std::string & ip, uint16_t port, const std::vector<uint8_t> & vec) {
+	ClockError UdpSocket::writePacketAsync(IPv4 ip, uint16_t port, const std::vector<uint8_t> & vec) {
 		if (_sock == INVALID_SOCKET) {
 			return ClockError::NOT_READY;
 		}
@@ -133,7 +134,7 @@ namespace sockets {
 		return ClockError::SUCCESS;
 	}
 
-	ClockError UdpSocket::writeAsync(const std::string & ip, uint16_t port, const void * str, const size_t length) {
+	ClockError UdpSocket::writeAsync(IPv4 ip, uint16_t port, const void * str, const size_t length) {
 		if (_sock == INVALID_SOCKET) {
 			return ClockError::NOT_READY;
 		}
@@ -151,7 +152,7 @@ namespace sockets {
 		return ClockError::SUCCESS;
 	}
 
-	ClockError UdpSocket::writeAsync(const std::string & ip, uint16_t port, const std::vector<uint8_t> & vec) {
+	ClockError UdpSocket::writeAsync(IPv4 ip, uint16_t port, const std::vector<uint8_t> & vec) {
 		if (_sock == INVALID_SOCKET) {
 			return ClockError::NOT_READY;
 		}
@@ -283,7 +284,7 @@ namespace sockets {
 			}
 			_writePacketAsyncLock.lock();
 			while (_writePacketAsyncQueue.size() > 0) {
-				std::tuple<std::vector<uint8_t>, std::string, uint16_t> tmp = std::move(_writePacketAsyncQueue.front());
+				std::tuple<std::vector<uint8_t>, IPv4, uint16_t> tmp = std::move(_writePacketAsyncQueue.front());
 				_writePacketAsyncLock.unlock();
 
 				writePacket(std::get<AsyncQueueInfo::IP>(tmp), std::get<AsyncQueueInfo::Port>(tmp), const_cast<const unsigned char *>(&std::get<AsyncQueueInfo::Message>(tmp)[0]), std::get<AsyncQueueInfo::Message>(tmp).size());
@@ -294,7 +295,7 @@ namespace sockets {
 			_writePacketAsyncLock.unlock();
 			_writeAsyncLock.lock();
 			while (_writeAsyncQueue.size() > 0) {
-				std::tuple<std::vector<uint8_t>, std::string, uint16_t> tmp = std::move(_writeAsyncQueue.front());
+				std::tuple<std::vector<uint8_t>, IPv4, uint16_t> tmp = std::move(_writeAsyncQueue.front());
 				_writeAsyncLock.unlock();
 
 				write(std::get<AsyncQueueInfo::IP>(tmp), std::get<AsyncQueueInfo::Port>(tmp), const_cast<const unsigned char *>(&std::get<AsyncQueueInfo::Message>(tmp)[0]), std::get<AsyncQueueInfo::Message>(tmp).size());

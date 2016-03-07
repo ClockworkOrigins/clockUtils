@@ -37,6 +37,7 @@
 #include "clockUtils/errors.h"
 
 #include "clockUtils/sockets/socketsParameters.h"
+#include "clockUtils/sockets/Commons.h"
 
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 	#include <WinSock2.h>
@@ -113,11 +114,41 @@ namespace sockets {
 
 		/**
 		 * \brief creates a connection to the given pair of IP and port
-		 * \param[in] remoteIP the ip of the connection listening
+		 * \param[in] remoteIP the ip of the connection listening as std::string
 		 * \param[in] remotePort the port of the connection listening
 		 * \param[in] timeout the time in milliseconds a connect request should last in maximum
 		 */
-		ClockError connect(const std::string & remoteIP, uint16_t remotePort, unsigned int timeout);
+		ClockError connectToIP(const std::string & remoteIP, uint16_t remotePort, unsigned int timeout) {
+			IPv4 ip = convertIP(remoteIP);
+			if (ip == NO_IP) {
+				// not a valid hostname
+				return ClockError::INVALID_IP;
+			}
+			return connect(ip, remotePort, timeout);
+		}
+
+		/**
+		 * \brief creates a connection to the given pair of hostname and port
+		 * \param[in] remoteHostname the hostname of the connection listening as std::string
+		 * \param[in] remotePort the port of the connection listening
+		 * \param[in] timeout the time in milliseconds a connect request should last in maximum
+		 */
+		ClockError connectToHostname(const std::string & remoteHostname, uint16_t remotePort, unsigned int timeout) {
+			IPv4 ip = resolveHostname(remoteHostname);
+			if (ip == NO_IP) {
+				// not a valid hostname
+				return ClockError::INVALID_IP;
+			}
+			return connect(ip, remotePort, timeout);
+		}
+
+		/**
+		 * \brief creates a connection to the given pair of IP and port
+		 * \param[in] remoteIP the ip of the connection listening as IPv4 integer
+		 * \param[in] remotePort the port of the connection listening
+		 * \param[in] timeout the time in milliseconds a connect request should last in maximum
+		 */
+		ClockError connect(const IPv4 remoteIP, uint16_t remotePort, unsigned int timeout);
 
 		/**
 		 * \brief closes a connection if socket is connected

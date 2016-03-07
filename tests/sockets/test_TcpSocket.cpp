@@ -23,6 +23,7 @@
 #include <thread>
 
 #include "clockUtils/errors.h"
+#include "clockUtils/sockets/Commons.h"
 #include "clockUtils/sockets/TcpSocket.h"
 
 #include "gtest/gtest.h"
@@ -69,7 +70,7 @@ void connectionAcceptedWrite(TcpSocket * ts, ClockError) {
 
 size_t receivedCounter = 0;
 
-void receiveMessage(const std::vector<uint8_t> & message, TcpSocket * sock, ClockError error) {
+void receiveMessage(const std::vector<uint8_t> & message, TcpSocket *, ClockError error) {
 	if (receivedCounter == messages.size()) {
 		EXPECT_EQ(ClockError::NOT_CONNECTED, error);
 	} else {
@@ -80,19 +81,19 @@ void receiveMessage(const std::vector<uint8_t> & message, TcpSocket * sock, Cloc
 	}
 }
 
-TEST(TcpSocket, connect) { // tests connect with all possible errors
+TEST(TcpSocket, connectStringIP) { // tests connect with ip as string with all possible errors
 	TcpSocket ts;
 
-	ClockError e = ts.connect("1", 12345, 100);
+	ClockError e = ts.connectToIP("1.2.3.4.5", 12345, 100);
 	EXPECT_EQ(ClockError::INVALID_IP, e);
 
-	e = ts.connect("127.0.0.1", 0, 100);
+	e = ts.connectToIP("127.0.0.1", 0, 100);
 	EXPECT_EQ(ClockError::INVALID_PORT, e);
 
-	e = ts.connect("192.168.255.255", 12345, 100);
+	e = ts.connectToIP("192.168.255.255", 12345, 100);
 	EXPECT_EQ(ClockError::TIMEOUT, e);
 
-	e = ts.connect("127.0.0.1", 12345, 100);
+	ts.connectToIP("127.0.0.1", 12345, 100);
 	EXPECT_TRUE(ClockError::CONNECTION_FAILED == e || ClockError::TIMEOUT == e); // two possibilities depending on platform
 
 	TcpSocket server;
@@ -107,19 +108,122 @@ TEST(TcpSocket, connect) { // tests connect with all possible errors
 
 	{
 		std::unique_lock<std::mutex> ul(connectionLock);
-		e = ts.connect("127.0.0.1", 12345, 100);
-		conditionVariable.wait(ul);
-		EXPECT_EQ(ClockError::SUCCESS, e);
+		e = ts.connectToIP("127.0.0.1", 12345, 100);
+		conditionVariable.notify_one();
 	}
+	EXPECT_EQ(ClockError::SUCCESS, e);
 
-	e = ts.connect("127.0.0.1", 12345, 100);
+	e = ts.connectToIP("127.0.0.1", 12345, 100);
 	EXPECT_EQ(ClockError::INVALID_USAGE, e);
 
 	ts.close();
 
 	{
 		std::unique_lock<std::mutex> ul(connectionLock);
-		e = ts.connect("127.0.0.1", 12345, 100);
+		e = ts.connectToIP("127.0.0.1", 12345, 100);
+		EXPECT_EQ(ClockError::SUCCESS, e);
+		conditionVariable.wait(ul);
+	}
+
+	server.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+	_socketList.clear();
+}
+
+TEST(TcpSocket, connectVecIP) { // tests connect with std::vector<uint8_t> ip with all possible errors
+	TcpSocket ts;
+
+	ClockError e = ts.connect(convertIP("127.0.0.1"), 0, 100);
+	EXPECT_EQ(ClockError::INVALID_PORT, e);
+
+	e = ts.connect(convertIP("192.168.255.255"), 12345, 100);
+	EXPECT_EQ(ClockError::TIMEOUT, e);
+
+	ts.connect(convertIP("127.0.0.1"), 12345, 100);
+	EXPECT_EQ(ClockError::TIMEOUT, e);
+
+	TcpSocket server;
+
+	e = server.listen(12345, 1, true, [](TcpSocket * sock, ClockError) {
+		if (sock) {
+			std::unique_lock<std::mutex> ul(connectionLock);
+			_socketList.push_back(sock);
+			conditionVariable.notify_one();
+		}
+	});
+
+	{
+		std::unique_lock<std::mutex> ul(connectionLock);
+		e = ts.connect(convertIP("127.0.0.1"), 12345, 100);
+		conditionVariable.wait(ul);
+	}
+	EXPECT_EQ(ClockError::SUCCESS, e);
+
+	e = ts.connect(convertIP("127.0.0.1"), 12345, 100);
+	EXPECT_EQ(ClockError::SUCCESS, e);
+
+	e = ts.connect(convertIP("127.0.0.1"), 12345, 100);
+	EXPECT_EQ(ClockError::INVALID_USAGE, e);
+
+	ts.close();
+
+	{
+		std::unique_lock<std::mutex> ul(connectionLock);
+		e = ts.connect(convertIP("127.0.0.1"), 12345, 100);
+		conditionVariable.wait(ul);
+	}
+
+	EXPECT_EQ(ClockError::SUCCESS, e);
+	server.close();
+
+	for (TcpSocket * sock : _socketList) {
+		delete sock;
+	}
+	_socketList.clear();
+}
+
+TEST(TcpSocket, connectToHostname) { // tests connect to a hostname with all possible errors
+	TcpSocket ts;
+	ClockError e = ts.connectToIP("1.2.3.4.5", 12345, 100);
+	EXPECT_EQ(ClockError::INVALID_IP, e);
+
+	e = ts.connectToHostname("localhost", 0, 100);
+	EXPECT_EQ(ClockError::INVALID_PORT, e);
+
+	e = ts.connectToHostname("clockwork-origins.de", 12345, 100);
+	EXPECT_TRUE(ClockError::TIMEOUT == e || ClockError::CONNECTION_FAILED == e);
+
+	ts.connectToHostname("localhost", 12345, 100);
+	EXPECT_TRUE(ClockError::TIMEOUT == e || ClockError::CONNECTION_FAILED == e);
+
+	TcpSocket server;
+
+	e = server.listen(12345, 1, true, [](TcpSocket * sock, ClockError) {
+		if (sock) {
+			std::unique_lock<std::mutex> ul(connectionLock);
+			_socketList.push_back(sock);
+			conditionVariable.notify_one();
+		}
+	});
+
+	{
+		std::unique_lock<std::mutex> ul(connectionLock);
+		e = ts.connectToHostname("localhost", 12345, 100);
+		conditionVariable.notify_one();
+	}
+	EXPECT_EQ(ClockError::SUCCESS, e);
+
+	e = ts.connectToHostname("localhost", 12345, 100);
+	EXPECT_EQ(ClockError::INVALID_USAGE, e);
+
+	ts.close();
+
+	{
+		std::unique_lock<std::mutex> ul(connectionLock);
+		e = ts.connectToHostname("localhost", 12345, 100);
 		conditionVariable.wait(ul);
 	}
 
@@ -163,7 +267,7 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 	TcpSocket client1;
 	{
 		std::unique_lock<std::mutex> ul(connectionLock);
-		e = client1.connect("127.0.0.1", 12345, 500);
+		e = client1.connectToIP("127.0.0.1", 12345, 500);
 		EXPECT_EQ(ClockError::SUCCESS, e);
 		conditionVariable.wait(ul);
 		EXPECT_EQ(1, connectCounter);
@@ -172,7 +276,7 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 	TcpSocket client2;
 	{
 		std::unique_lock<std::mutex> ul(connectionLock);
-		e = client2.connect("127.0.0.1", 12345, 500);
+		e = client2.connectToIP("127.0.0.1", 12345, 500);
 		EXPECT_EQ(ClockError::SUCCESS, e);
 		conditionVariable.wait(ul);
 		EXPECT_EQ(2, connectCounter);
@@ -181,7 +285,7 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 	TcpSocket client3;
 	{
 		std::unique_lock<std::mutex> ul(connectionLock);
-		e = client3.connect("127.0.0.1", 12345, 500);
+		e = client3.connectToIP("127.0.0.1", 12345, 500);
 		EXPECT_EQ(ClockError::SUCCESS, e);
 		conditionVariable.wait(ul);
 		EXPECT_EQ(3, connectCounter);
@@ -199,7 +303,7 @@ TEST(TcpSocket, listen) { // tests incoming connections: one thread listening on
 	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	TcpSocket client6;
-	e = client6.connect("127.0.0.1", 12345, 100);
+	e = client6.connectToIP("127.0.0.1", 12345, 100);
 
 	EXPECT_TRUE(ClockError::CONNECTION_FAILED == e || ClockError::TIMEOUT == e); // two possibilities depending on platform
 
@@ -224,7 +328,7 @@ TEST(TcpSocket, sendRead) { // tests communication between two sockets
 
 	EXPECT_EQ(ClockError::SUCCESS, e);
 
-	e = client.connect("127.0.0.1", 12345, 500);
+	e = client.connectToIP("127.0.0.1", 12345, 500);
 
 	EXPECT_EQ(ClockError::SUCCESS, e);
 
@@ -271,12 +375,12 @@ TEST(TcpSocket, sendFromServer) { // tests communication between two sockets
 		});
 	EXPECT_EQ(ClockError::SUCCESS, e);
 
-	e = client.connect("127.0.0.1", 12345, 500);
+	e = client.connectToIP("127.0.0.1", 12345, 500);
 	EXPECT_EQ(ClockError::SUCCESS, e);
 
 	std::vector<uint8_t> recMsg;
 
-	client.receiveCallback([recMsg](const std::vector<uint8_t> & message, TcpSocket * sock, ClockError error) {
+	client.receiveCallback([recMsg](const std::vector<uint8_t> & message, TcpSocket *, ClockError) {
 			for (uint8_t i : message) {
 				receivedMessage += char(i);
 			}
@@ -307,20 +411,20 @@ TEST(TcpSocket, getIP) { // tests IP before and after connection
 		std::string s4 = client->getRemoteIP();
 		std::string s5 = client->getPublicIP();
 
-		EXPECT_NE(0, s4.length());
-		EXPECT_NE(0, s5.length());
+		EXPECT_NE(0u, s4.length());
+		EXPECT_NE(0u, s5.length());
 		EXPECT_EQ("127.0.0.1", s4);
 		conditionVariable.notify_one();
 	});
 
 	{
 		std::unique_lock<std::mutex> ul(connectionLock);
-		ts.connect("127.0.0.1", 12345, 500);
+		ts.connectToIP("127.0.0.1", 12345, 500);
 		s2 = ts.getPublicIP();
 		s3 = ts.getRemoteIP();
 
-		EXPECT_NE(0, s2.length());
-		EXPECT_NE(0, s3.length());
+		EXPECT_NE(0u, s2.length());
+		EXPECT_NE(0u, s3.length());
 		conditionVariable.wait(ul);
 	}
 
@@ -357,7 +461,7 @@ TEST(TcpSocket, getPort) { // tests port before and after connection
 
 	{
 		std::unique_lock<std::mutex> ul(connectionLock);
-		ts.connect("127.0.0.1", 12345, 500);
+		ts.connectToIP("127.0.0.1", 12345, 500);
 		s = ts.getLocalPort();
 		s2 = ts.getRemotePort();
 
@@ -399,20 +503,19 @@ TEST(TcpSocket, invalidParameters) {
 	TcpSocket::acceptCallback acb;
 	EXPECT_EQ(ClockError::INVALID_PORT, sock1.listen(0, 1, true, acb));
 
-	EXPECT_EQ(ClockError::INVALID_PORT, sock1.connect("127.0.0.1", 0, 100));
+	EXPECT_EQ(ClockError::INVALID_PORT, sock1.connectToIP("127.0.0.1", 0, 100));
 
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
-	EXPECT_EQ(ClockError::CONNECTION_FAILED, sock1.connect("127.0.0.1", 1, 100));
+	EXPECT_EQ(ClockError::CONNECTION_FAILED, sock1.connectToIP("127.0.0.1", 1, 100));
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
-	EXPECT_EQ(ClockError::TIMEOUT, sock1.connect("127.0.0.1", 1, 100));
+	EXPECT_EQ(ClockError::TIMEOUT, sock1.connectToIP("127.0.0.1", 1, 100));
 #endif
-	EXPECT_EQ(ClockError::INVALID_IP, sock1.connect("127.0.0.", 1, 100));
-	EXPECT_EQ(ClockError::INVALID_IP, sock1.connect("127.0.0", 1, 100));
-	EXPECT_EQ(ClockError::INVALID_IP, sock1.connect("-12.0.0.1", 1, 100));
-	EXPECT_EQ(ClockError::INVALID_IP, sock1.connect("12.-3.0.1", 1, 100));
-	EXPECT_EQ(ClockError::INVALID_IP, sock1.connect("127.0.0.1.9", 1, 100));
-	EXPECT_EQ(ClockError::INVALID_IP, sock1.connect("256.0.0.1", 1, 100));
-	EXPECT_EQ(ClockError::INVALID_IP, sock1.connect("127.1234.0.1", 1, 100));
+	EXPECT_EQ(ClockError::INVALID_IP, sock1.connectToIP("127.0.0.", 1, 100));
+	EXPECT_EQ(ClockError::INVALID_IP, sock1.connectToHostname("1-12.0.0.1", 1, 100));
+	EXPECT_EQ(ClockError::INVALID_IP, sock1.connectToIP("12.-3.0.1", 1, 100));
+	EXPECT_EQ(ClockError::INVALID_IP, sock1.connectToIP("127.0.0.1.9", 1, 100));
+	EXPECT_EQ(ClockError::INVALID_IP, sock1.connectToHostname("1256.0.0.1", 1, 100));
+	EXPECT_EQ(ClockError::INVALID_IP, sock1.connectToIP("127.1234.0.1", 1, 100));
 
 	for (TcpSocket * sock : _socketList) {
 		delete sock;
@@ -429,7 +532,7 @@ TEST(TcpSocket, invalidUse) {
 		_socketList.push_back(sock);
 	}));
 	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.listen(1025, 1, true, [](TcpSocket *, ClockError) {}));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.connect("127.0.0.1", 1026, 500));
+	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.connectToIP("127.0.0.1", 1026, 500));
 	EXPECT_EQ(ClockError::NOT_READY, sock1.writePacket(buffer));
 	EXPECT_EQ(ClockError::NOT_READY, sock1.writePacket(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
 	EXPECT_EQ(ClockError::NOT_READY, sock1.write(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
@@ -479,7 +582,7 @@ TEST(TcpSocket, connectOnly) {
 	});
 	{
 		std::unique_lock<std::mutex> ul(connectionLock);
-		sock2.connect("127.0.0.1", 12345, 500);
+		sock2.connectToIP("127.0.0.1", 12345, 500);
 		conditionVariable.wait(ul);
 	}
 
@@ -496,9 +599,9 @@ TEST(TcpSocket, connectOnly) {
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-	EXPECT_EQ(ClockError::SUCCESS, sock1.listen(10252, 1, true, [](TcpSocket * sock, ClockError) {}));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.listen(1025, 1, true, [](TcpSocket * sock, ClockError) {}));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.connect("127.0.0.1", 1026, 200));
+	EXPECT_EQ(ClockError::SUCCESS, sock1.listen(10252, 1, true, [](TcpSocket *, ClockError) {}));
+	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.listen(1025, 1, true, [](TcpSocket *, ClockError) {}));
+	EXPECT_EQ(ClockError::INVALID_USAGE, sock1.connectToIP("127.0.0.1", 1026, 200));
 	EXPECT_EQ(ClockError::NOT_READY, sock1.writePacket(buffer));
 	EXPECT_EQ(ClockError::NOT_READY, sock1.writePacket(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
 	EXPECT_EQ(ClockError::NOT_READY, sock1.write(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
@@ -518,11 +621,11 @@ TEST(TcpSocket, connectOnly) {
 	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.writePacket(buffer));
 	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.writePacket(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
 	EXPECT_EQ(ClockError::NOT_CONNECTED, sock2.write(reinterpret_cast<char *>(&buffer[0]), buffer.size()));
-	EXPECT_EQ(ClockError::INVALID_USAGE, sock2.listen(1026, 1, true, [](TcpSocket * sock, ClockError) {}));
+	EXPECT_EQ(ClockError::INVALID_USAGE, sock2.listen(1026, 1, true, [](TcpSocket *, ClockError) {}));
 
 	sock2.close();
 
-	EXPECT_EQ(ClockError::SUCCESS, sock2.listen(10262, 1, true, [](TcpSocket * sock, ClockError) {}));
+	EXPECT_EQ(ClockError::SUCCESS, sock2.listen(10262, 1, true, [](TcpSocket *, ClockError) {}));
 
 	sock1.close();
 	sock2.close();
@@ -545,7 +648,7 @@ TEST(TcpSocket, accept) {
 	});
 	{
 		std::unique_lock<std::mutex> ul(connectionLock);
-		sock2.connect("127.0.0.1", 12345, 500);
+		sock2.connectToIP("127.0.0.1", 12345, 500);
 		conditionVariable.wait(ul);
 	}
 	EXPECT_EQ(1, a);
@@ -566,7 +669,7 @@ TEST(TcpSocket, write) {
 			_socketList.push_back(sock);
 			sock->write(v);
 		});
-	sock2.connect("127.0.0.1", 12345, 500);
+	sock2.connectToIP("127.0.0.1", 12345, 500);
 
 	std::vector<uint8_t> v2;
 	sock2.read(v2);
@@ -599,7 +702,7 @@ TEST(TcpSocket, writeMultiple) {
 	std::vector<uint8_t> v3;
 	{
 		std::unique_lock<std::mutex> ul(connectionLock);
-		sock2.connect("127.0.0.1", 12345, 500);
+		sock2.connectToIP("127.0.0.1", 12345, 500);
 		conditionVariable.wait(ul);
 		sock2.read(v3);
 	}
@@ -622,13 +725,13 @@ TEST(TcpSocket, connectDouble) {
 	}));
 	{
 		std::unique_lock<std::mutex> ul(connectionLock);
-		EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 100));
+		EXPECT_EQ(ClockError::SUCCESS, sock2.connectToIP("127.0.0.1", 12345, 100));
 		conditionVariable.wait(ul);
 	}
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-	ClockError e = sock3.connect("127.0.0.1", 12345, 100);
+	ClockError e = sock3.connectToIP("127.0.0.1", 12345, 100);
 #if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
 	EXPECT_EQ(ClockError::CONNECTION_FAILED, e);
 #elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
@@ -652,7 +755,7 @@ TEST(TcpSocket, writePacket) {
 			_socketList.push_back(sock);
 			sock->writePacket(&v[0], v.length());
 		});
-	sock2.connect("127.0.0.1", 12345, 500);
+	sock2.connectToIP("127.0.0.1", 12345, 500);
 
 	std::string v2;
 	sock2.receivePacket(v2);
@@ -677,7 +780,7 @@ TEST(TcpSocket, writePacketMultiple) {
 			sock->writePacket(v1);
 			sock->writePacket(v2);
 		});
-	sock2.connect("127.0.0.1", 12345, 500);
+	sock2.connectToIP("127.0.0.1", 12345, 500);
 
 	std::vector<uint8_t> v3, v4;
 	sock2.receivePacket(v3);
@@ -711,7 +814,7 @@ TEST(TcpSocket, writePacketMultipleSwapped) {
 	});
 	{
 		std::unique_lock<std::mutex> ul(connectionLock);
-		sock2.connect("127.0.0.1", 12345, 500);
+		sock2.connectToIP("127.0.0.1", 12345, 500);
 
 		sock2.writePacket(v1);
 		sock2.writePacket(v2);
@@ -737,7 +840,7 @@ TEST(TcpSocket, writeMass) {
 		sock->writePacket(v1);
 		sock->writePacket(v2);
 	});
-	sock2.connect("127.0.0.1", 12345, 500);
+	sock2.connectToIP("127.0.0.1", 12345, 500);
 
 	std::vector<uint8_t> v3, v4;
 	sock2.receivePacket(v3);
@@ -775,7 +878,7 @@ TEST(TcpSocket, writeMass2) {
 			EXPECT_EQ(ClockError::SUCCESS, sock->writePacketAsync(v2L));
 		}
 	});
-	sock2.connect("127.0.0.1", 12345, 500);
+	sock2.connectToIP("127.0.0.1", 12345, 500);
 
 	std::vector<uint8_t> v3, v4;
 	for (int i = 0; i < NUM_RUNS; ++i) {
@@ -805,7 +908,7 @@ TEST(TcpSocket, receiveCallback) {
 		_socketList.push_back(sock);
 		sock->receiveCallback(std::bind(receiveMessage, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	});
-	sock2.connect("127.0.0.1", 12345, 500);
+	sock2.connectToIP("127.0.0.1", 12345, 500);
 
 	for (std::string s : messages) {
 		EXPECT_EQ(ClockError::SUCCESS, sock2.writePacket(s.c_str(), s.length()));
@@ -830,7 +933,7 @@ TEST(TcpSocket, receiveCallbackRemove) {
 	TcpSocket sock1, sock2;
 
 	sock1.listen(12345, 1, false, [](TcpSocket * sock, ClockError) {
-		sock->receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
+		sock->receiveCallback([](const std::vector<uint8_t> &, TcpSocket * so, ClockError error) {
 			std::unique_lock<std::mutex> ul(connectionLock);
 			called++;
 			if (error != ClockError::SUCCESS) {
@@ -842,7 +945,7 @@ TEST(TcpSocket, receiveCallbackRemove) {
 			conditionVariable.notify_one();
 		});
 	});
-	sock2.connect("127.0.0.1", 12345, 500);
+	sock2.connectToIP("127.0.0.1", 12345, 500);
 
 
 	std::string s = "Some messsage!";
@@ -880,7 +983,7 @@ TEST(TcpSocket, stopRead) {
 	sock1.listen(12345, 1, false, [](TcpSocket * sock, ClockError) {
 		_socketList.push_back(sock);
 	});
-	sock2.connect("127.0.0.1", 12345, 500);
+	sock2.connectToIP("127.0.0.1", 12345, 500);
 
 	std::thread([&sock2]() {
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -909,8 +1012,8 @@ TEST(TcpSocket, stopReadAsync) {
 		_socketList.push_back(sock);
 		sock->close();
 	});
-	sock2.connect("127.0.0.1", 12345, 500);
-	sock2.receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
+	sock2.connectToIP("127.0.0.1", 12345, 500);
+	sock2.receiveCallback([](const std::vector<uint8_t> &, TcpSocket *, ClockError error) {
 			if (error != ClockError::SUCCESS) {
 				called = 1;
 			}
@@ -945,8 +1048,8 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 			_socketList.push_back(sock);
 			sock->close();
 		});
-		EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
-		sock2.receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
+		EXPECT_EQ(ClockError::SUCCESS, sock2.connectToIP("127.0.0.1", 12345, 500));
+		sock2.receiveCallback([](const std::vector<uint8_t> &, TcpSocket *, ClockError error) {
 				if (error != ClockError::SUCCESS) {
 					called = 1;
 				}
@@ -978,8 +1081,8 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 			sock->close();
 		});
 
-		EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
-		sock2.receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
+		EXPECT_EQ(ClockError::SUCCESS, sock2.connectToIP("127.0.0.1", 12345, 500));
+		sock2.receiveCallback([](const std::vector<uint8_t> &, TcpSocket *, ClockError error) {
 				if (error != ClockError::SUCCESS) {
 					called = 1;
 				}
@@ -1020,8 +1123,8 @@ TEST(TcpSocket, writePacketAsyncMultiple) {
 	});
 	{
 		std::unique_lock<std::mutex> l(connectionLock);
-		EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
-		sock2.receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket * so, ClockError error) {
+		EXPECT_EQ(ClockError::SUCCESS, sock2.connectToIP("127.0.0.1", 12345, 500));
+		sock2.receiveCallback([](const std::vector<uint8_t> & msg, TcpSocket *, ClockError error) {
 			if (error != ClockError::SUCCESS) {
 			} else {
 				if (called < 5000) {
@@ -1064,7 +1167,7 @@ TEST(TcpSocket, writeAsyncMultiple) {
 	});
 	EXPECT_EQ(ClockError::SUCCESS, err);
 
-	EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
+	EXPECT_EQ(ClockError::SUCCESS, sock2.connectToIP("127.0.0.1", 12345, 500));
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
@@ -1088,7 +1191,7 @@ TEST(TcpSocket, writeAsyncMultipleWithFastShutdown) {
 		_socketList.push_back(sock);
 	});
 	TcpSocket * sock2 = new TcpSocket();
-	sock2->connect("127.0.0.1", 12345, 500);
+	sock2->connectToIP("127.0.0.1", 12345, 500);
 
 	for (int i = 0; i < 1000; i++) {
 		sock2->writePacketAsync(v1);
@@ -1118,7 +1221,7 @@ TEST(TcpSocket, streamOperator) {
 		*sock << 1 << std::string("Hello") << StreamTestEnum::Value0 << StreamTestEnum::Value1 << StreamTestEnum::Value2;
 		delete sock;
 	});
-	EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
+	EXPECT_EQ(ClockError::SUCCESS, sock2.connectToIP("127.0.0.1", 12345, 500));
 
 	int i;
 	std::string s;
@@ -1151,7 +1254,7 @@ TEST(TcpSocket, listenCloseError) {
 			conditionVariable.notify_one();
 		}
 	});
-	EXPECT_EQ(ClockError::SUCCESS, sock2.connect("127.0.0.1", 12345, 500));
+	EXPECT_EQ(ClockError::SUCCESS, sock2.connectToIP("127.0.0.1", 12345, 500));
 	{
 		std::unique_lock<std::mutex> ul(connectionLock);
 		sock1.close();
@@ -1163,4 +1266,32 @@ TEST(TcpSocket, listenCloseError) {
 		delete sock;
 	}
 	_socketList.clear();
+}
+
+/**
+ * tests dns lookup
+ */
+TEST(TcpSocket, dnsLookup) {
+	EXPECT_EQ(convertIP("83.169.44.32"), resolveHostname("clockwork-origins.de"));
+	EXPECT_EQ(convertIP("127.0.0.1"), resolveHostname("localhost"));
+	EXPECT_EQ(NO_IP, resolveHostname("lcalhst"));
+}
+
+/**
+ * tests conversion of IPv4 to std::string for IP representation
+ */
+TEST(TcpSocket, convertVecToStringIP) {
+	EXPECT_EQ("83.169.44.32", convertIP(0x202CA953)); // int has reverse order
+	EXPECT_EQ("127.0.0.1", convertIP(0x0100007F));
+}
+
+/**
+* tests conversion of std::string to IPv4 for IP representation
+*/
+TEST(TcpSocket, convertStringToVecIP) {
+	EXPECT_EQ(0x202CA953, convertIP("83.169.44.32"));
+	EXPECT_EQ(0x0100007F, convertIP("127.0.0.1"));
+	EXPECT_EQ(NO_IP, convertIP("127.0.0.1.1"));
+	EXPECT_EQ(NO_IP, convertIP("83.169.44.32.123"));
+	EXPECT_EQ(NO_IP, convertIP("127.256.0.1"));
 }
