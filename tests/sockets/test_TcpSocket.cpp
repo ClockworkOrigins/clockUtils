@@ -143,7 +143,7 @@ TEST(TcpSocket, connectVecIP) { // tests connect with std::vector<uint8_t> ip wi
 	EXPECT_EQ(ClockError::TIMEOUT, e);
 
 	ts.connect(convertIP("127.0.0.1"), 12345, 100);
-	EXPECT_EQ(ClockError::TIMEOUT, e);
+	EXPECT_TRUE(ClockError::CONNECTION_FAILED == e || ClockError::TIMEOUT == e); // two possibilities depending on platform
 
 	TcpSocket server;
 
@@ -160,9 +160,6 @@ TEST(TcpSocket, connectVecIP) { // tests connect with std::vector<uint8_t> ip wi
 		e = ts.connect(convertIP("127.0.0.1"), 12345, 100);
 		conditionVariable.wait(ul);
 	}
-	EXPECT_EQ(ClockError::SUCCESS, e);
-
-	e = ts.connect(convertIP("127.0.0.1"), 12345, 100);
 	EXPECT_EQ(ClockError::SUCCESS, e);
 
 	e = ts.connect(convertIP("127.0.0.1"), 12345, 100);
@@ -194,7 +191,7 @@ TEST(TcpSocket, connectToHostname) { // tests connect to a hostname with all pos
 	EXPECT_EQ(ClockError::INVALID_PORT, e);
 
 	e = ts.connectToHostname("clockwork-origins.de", 12345, 100);
-	EXPECT_TRUE(ClockError::TIMEOUT == e || ClockError::CONNECTION_FAILED == e);
+	EXPECT_TRUE(ClockError::TIMEOUT == e);
 
 	ts.connectToHostname("localhost", 12345, 100);
 	EXPECT_TRUE(ClockError::TIMEOUT == e || ClockError::CONNECTION_FAILED == e);
