@@ -43,9 +43,9 @@ namespace argParser {
 
 	public:
 		/**
-		 * \brief constructor taking the name (= argument in argument list) and a description text for --help, inserts variable into the variableList of the Parser
+		 * \brief constructor taking the longname (= argument in argument list), shortname (= short name for the argument list) and a description text for --help, inserts variable into the variableList of the Parser
 		 */
-		BasicVariable(const std::string & name, const std::string & description);
+		BasicVariable(const std::string & longname, const std::string & shortname, const std::string & description);
 
 		/**
 		 * \brief destructor, removes variable of the variableList of the Parser
@@ -55,8 +55,15 @@ namespace argParser {
 		/**
 		 * \brief returns the argument of the variable
 		 */
-		inline std::string getName() const {
-			return _name;
+		inline std::string getLongname() const {
+			return _longname;
+		}
+
+		/**
+		 * \brief returns the argument of the variable
+		 */
+		inline std::string getShortname() const {
+			return _shortname;
 		}
 
 		/**
@@ -80,7 +87,12 @@ namespace argParser {
 		/**
 		 * \brief argument the argument list is scanned for
 		 */
-		std::string _name;
+		std::string _longname;
+
+		/**
+		 * \brief short argument the argument list is scanned for
+		 */
+		std::string _shortname;
 
 		/**
 		 * \brief description being shown using --help
@@ -102,7 +114,7 @@ namespace argParser {
 		/**
 		 * \brief initializes a new variable taking the argument name, the description text and a default value, calls constructor of BasicVariable
 		 */
-		Variable(const std::string & name, const std::string & description, T value) : BasicVariable(name, description), _value(value) {
+		Variable(const std::string & longname, const std::string & shortname, const std::string & description, T value) : BasicVariable(longname, shortname, description), _value(value) {
 		}
 
 		/**

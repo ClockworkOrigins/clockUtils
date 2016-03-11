@@ -26,15 +26,15 @@
 namespace clockUtils {
 namespace argParser {
 
-	BasicVariable::BasicVariable(const std::string & name, const std::string & description) : _name(name), _description(description), _set(false) {
+	BasicVariable::BasicVariable(const std::string & longname, const std::string & shortname, const std::string & description) : _longname(longname), _shortname(shortname), _description(description), _set(false) {
 		clockUtils::argParser::Parser::variableList.push_back(this);
 	}
 
 	BasicVariable::~BasicVariable() {
 		for (size_t i = 0; i < Parser::variableList.size(); i++) {
-			if (_name == Parser::variableList[i]->getName()) {
+			if (_longname == Parser::variableList[i]->getLongname()) {
 				Parser::variableList.erase(Parser::variableList.begin() + int(i));
-				Parser::helpTexts.erase(_name);
+				Parser::helpTexts.erase(_longname);
 				break;
 			}
 		}

@@ -19,8 +19,6 @@
 
 #include "clockUtils/argParser/Parser.h"
 
-#include <map>
-
 #include "clockUtils/errors.h"
 #include "clockUtils/argParser/BasicVariable.h"
 
@@ -46,56 +44,36 @@ namespace argParser {
 				bool found = false;
 
 				for (BasicVariable * bv : variableList) {
-					if (name.find(bv->getName()) == 0) {
+					std::string longname = "-" + bv->getLongname();
+					std::string shortname = bv->getShortname();
+					if ((name.find(longname) == 0 && longname.length() == name.length()) || (name.find(shortname) == 0 && shortname.length() == name.length())) {
 						found = true;
-						if (bv->isBool()) {
-							if (bv->getName().length() == name.length()) { // boolean is special case: variable name and parsed name are the same, so it can be "-b" or "-b true", which are both valid
-								if (argc > 1 && argv[1][0] != '-') { // case "-b true"
-									if (!bv->setValue(argv[1])) {
-										error = std::string(argv[1]) + std::string(" is not a valid value for variable ") + name;
-										arguments = nullptr;
-										return ClockError::INVALID_USAGE;
-									}
-									if (parsed.find(bv->getName()) != parsed.end()) {
-										arguments = nullptr;
-										return ClockError::INVALID_USAGE;
-									}
-									bv->_set = true;
-									parsed[bv->getName()] = true;
-									argc--;
-									argv++;
-								} else { // case "-b"
-									bv->setValue("1");
-									if (parsed.find(bv->getName()) != parsed.end()) {
-										arguments = nullptr;
-										return ClockError::INVALID_USAGE;
-									}
-									bv->_set = true;
-									parsed[bv->getName()] = true;
-								}
-							} else { // in this case the text has to look like "-b=true"
-								size_t startIndex = bv->getName().length();
-								if (name.at(startIndex) == '=') {
-									startIndex++;
-								}
-								if (!bv->setValue(name.substr(startIndex, name.length()))) {
-									error = name.substr(startIndex, name.length()) + std::string(" is not a valid value for variable ") + name;
+						if (bv->isBool()) { // boolean is special case: variable name and parsed name are the same, so it can be "-b" or "-b true", which are both valid
+							if (argc > 1 && argv[1][0] != '-') { // case "-b true"
+								if (!bv->setValue(argv[1])) {
+									error = std::string(argv[1]) + std::string(" is not a valid value for variable ") + name;
 									arguments = nullptr;
 									return ClockError::INVALID_USAGE;
 								}
+								if (parsed.find(bv->getLongname()) != parsed.end()) {
+									arguments = nullptr;
+									return ClockError::INVALID_USAGE;
+								}
+								bv->_set = true;
+								parsed[bv->getLongname()] = true;
+								argc--;
+								argv++;
+							} else { // case "-b"
+								bv->setValue("1");
+								if (parsed.find(bv->getLongname()) != parsed.end()) {
+									arguments = nullptr;
+									return ClockError::INVALID_USAGE;
+								}
+								bv->_set = true;
+								parsed[bv->getLongname()] = true;
 							}
 						} else {
-							if (name.length() > bv->getName().length()) { // parsed text is longer than variable name, so there is something behind
-								size_t startIndex = bv->getName().length();
-								if (name.at(startIndex) == '=') {
-									startIndex++;
-								}
-								if (!bv->setValue(name.substr(startIndex, name.length()))) {
-									error = name.substr(startIndex, name.length()) + std::string(" is not a valid value for variable ") + name;
-									arguments = nullptr;
-									return ClockError::INVALID_USAGE;
-								}
-							} else if (argc == 1) {
+							if (argc == 1) {
 								error = name + std::string(" requires a value: -") + name + std::string(" <value> or -") + name + std::string("<value> or -") + name + std::string("=<value>");
 								arguments = nullptr;
 								return ClockError::INVALID_USAGE;
@@ -105,12 +83,12 @@ namespace argParser {
 									arguments = nullptr;
 									return ClockError::INVALID_USAGE;
 								}
-								if (parsed.find(bv->getName()) != parsed.end()) {
+								if (parsed.find(bv->getLongname()) != parsed.end()) {
 									arguments = nullptr;
 									return ClockError::INVALID_USAGE;
 								}
 								bv->_set = true;
-								parsed[bv->getName()] = true;
+								parsed[bv->getLongname()] = true;
 								argc--;
 								argv++;
 							}
@@ -120,7 +98,7 @@ namespace argParser {
 				}
 
 				if (!found) {
-					if (name == "-help") {
+					if (name == "-help" || name == "h") {
 						help = true;
 					} else if (errorOnFlag) {
 						error = std::string("argument -") + name + std::string(" not registered!");
