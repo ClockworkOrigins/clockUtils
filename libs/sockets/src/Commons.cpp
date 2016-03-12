@@ -22,7 +22,7 @@ namespace sockets {
 			return NO_IP;
 		}
 
-		IPv4 ip;
+		IPv4 ip = NO_IP;
 		// loop through all the results and connect to the first we can
 		for (p = servinfo; p != nullptr; p = p->ai_next) {
 			struct sockaddr_in * h = reinterpret_cast<struct sockaddr_in *>(p->ai_addr);
