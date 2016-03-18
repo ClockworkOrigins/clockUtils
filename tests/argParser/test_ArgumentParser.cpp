@@ -39,7 +39,7 @@ TEST(ArgumentParser, parseBool) {
 							"\t--bo, -b\t[Default: false]\t\tA test boolean\n"
 							"\t--d, -d\t[Default: false]\t\tA test boolean\n"
 							"\t--foo, -f\t[Default: false]\t\tA test boolean\n"
-							"\t--longname\t[Default: false]\t\tA test boolean\n";
+							"\t--longname\t[Default: false]\t\tA test boolean";
 	EXPECT_EQ(helpText, GETHELPTEXT());
 
 	EXPECT_FALSE(bo);

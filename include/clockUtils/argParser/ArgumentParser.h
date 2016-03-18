@@ -54,11 +54,16 @@
 
 /**
  * \brief registers a variable with a type, the variable and argument name, a default value and a description text for --help
+ * longname is also the variable name, shortname can be set to "" for no shortname
  * variable will be initialized with default value right away
  */
 #define REGISTER_VARIABLE(type, longname, shortname, value, description)\
 	{\
-		clockUtils::argParser::Parser::addHelpTextLine(std::make_pair(#longname, std::string("\t--") + std::string(#longname) + std::string(", -") + std::string(#shortname) + std::string("\t[Default: ") + std::string(#value) + std::string("]\t\t") + std::string(description)));\
+		if (std::string(#shortname) == "\"\"") {\
+			clockUtils::argParser::Parser::addHelpTextLine(std::make_pair(#longname, std::string("\t--") + std::string(#longname) + std::string("\t[Default: ") + std::string(#value) + std::string("]\t\t") + std::string(description)));\
+		} else {\
+			clockUtils::argParser::Parser::addHelpTextLine(std::make_pair(#longname, std::string("\t--") + std::string(#longname) + std::string(", -") + std::string(#shortname) + std::string("\t[Default: ") + std::string(#value) + std::string("]\t\t") + std::string(description)));\
+		}\
 	}\
 	clockUtils::argParser::Variable<type> longname(#longname, #shortname, description, value)
 
