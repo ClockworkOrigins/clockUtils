@@ -9,6 +9,7 @@
  *
  * - argParser: parses the command line arguments of a program to allow the common linux scheme for parameters
  * - compression: allows compression of data
+ * - container: This library is a collection of container classes (currently only one). They serve for special purposes that are not or not easily handled by the STL. E.g. Threadsafe containers or complex structures. If possible, the containers offer at least the same API like the corresponding STL container. This allows a simple exchange without introducing new problems. Semantic changes and additional functionality is explained in the appropriate documentation.
  * - iniParser: to read and write ini files
  * - sockets: simple usage of tcp and udp sockets. We designed this library to solve some problems we faced using the boost sockets. Our sockets support multithreaded access, invalidating the data immediatly after issuing an async write and sending packet and stream style data. Changing from boost to clockUtils significantly reduced our network code size and increased speed by a magnitude.
  *
@@ -16,6 +17,7 @@
  *
  * - \ref page_argParser
  * - \ref page_compression
+ * - \ref page_container
  * - \ref page_iniParser
  * - \ref page_sockets
  * - \ref page_cmake

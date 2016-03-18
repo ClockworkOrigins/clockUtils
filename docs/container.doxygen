@@ -1,0 +1,38 @@
+/**
+ * \addtogroup container
+ * This library is a collection of container classes (currently only one). They serve for special purposes that are not or not easily handled by the STL. E.g. Threadsafe containers or complex structures. If possible, the containers offer at least the same API like the corresponding STL container. This allows a simple exchange without introducing new problems. Semantic changes and additional functionality is explained in the appropriate documentation.
+ * @{
+ */
+ 
+/**
+ * \page page_container How to use the compression library
+ *
+ * Currently the container library consists of only one class.
+ *
+ * \section sec_doubleBufferQueue DoubleBufferQueue
+ *
+ * The DoubleBufferQueue is used for threadsafe queue access. Besides the template parameter for the type you can specify whether there will be written to from multiple threads or not and whether there is read from multiple threads or not, which specifies the locking strategy. The API equals those of the std::queue or std::priority_queue with some exceptions.
+ *
+ * \code{.cpp}
+ * ClockError pop();
+ * \endcode\n
+ *
+ * pop() method basically returns ClockError::SUCCESS, except there is no element in the queue. In this case it returns ClockError::NO_ELEMENT; std::queue just returns void.
+ *
+ * \code{.cpp}
+ * ClockError front(T & value);
+ * \endcode\n
+ *
+ * The front() method has the same return behaviour as the pop() method. The real return value, the front element of the queue if existing, is returned by reference.
+ *
+ * \code{.cpp}
+ * ClockError poll(T & value);
+ * \endcode\n
+ *
+ * The poll() method has the same return behaviour as the pop() method. It returns the front element of the queue by reference as the front() method and pop's it in just one step.
+ *
+ */
+ 
+/**
+ * @}
+ */
