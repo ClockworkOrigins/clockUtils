@@ -58,6 +58,7 @@
  * \brief registers a variable with a type, the variable and argument name, a default value and a description text for --help
  * longname is also the variable name, shortname can be set to "" for no shortname
  * variable will be initialized with default value right away
+ * \note help and h are reserved for internal usage only
  */
 #define REGISTER_VARIABLE(type, longname, shortname, value, description)\
 	{\
