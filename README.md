@@ -19,6 +19,10 @@ clockUtils is a collection of lightweight libraries to solve common tasks. We de
 
  * minimize strings with different compression algorithms
 
+**Container**
+
+ * container classes for special storage and access requirements
+
 **Ini File Parser**
 
  * read and write ini files
