@@ -160,7 +160,7 @@ TEST(DoubleBufferQueue, StressTest) {
 		delete v[i];
 	}
 	for (int i = 0; i < 40 * 10000; ++i) {
-		int a;
+		int a = 0;
 		EXPECT_EQ(ClockError::SUCCESS, q2.poll(a));
 		counts[size_t(a)]++;
 	}

@@ -759,10 +759,6 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = @CMAKE_SOURCE_DIR@/include \
-                         @CMAKE_SOURCE_DIR@/argParser/include \
-                         @CMAKE_SOURCE_DIR@/compression/include \
-                         @CMAKE_SOURCE_DIR@/iniParser/include \
-                         @CMAKE_SOURCE_DIR@/sockets \
                          @CMAKE_SOURCE_DIR@/docs
 
 # This tag can be used to specify the character encoding of the source files

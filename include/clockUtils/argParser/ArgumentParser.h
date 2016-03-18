@@ -27,6 +27,8 @@
 
 #include "clockUtils/argParser/argParserParameters.h"
 
+#include <algorithm>
+
 #include "clockUtils/argParser/ArgumentList.h"
 #include "clockUtils/argParser/BasicVariable.h"
 #include "clockUtils/argParser/Parser.h"
@@ -54,13 +56,26 @@
 
 /**
  * \brief registers a variable with a type, the variable and argument name, a default value and a description text for --help
+ * longname is also the variable name, shortname can be set to "" for no shortname
  * variable will be initialized with default value right away
+ * \note help and h are reserved for internal usage only
  */
-#define REGISTER_VARIABLE(type, name, value, description)\
+#define REGISTER_VARIABLE(type, longname, shortname, value, description)\
 	{\
-		clockUtils::argParser::Parser::addHelpTextLine(std::make_pair(#name, std::string("\t-") + std::string(#name) + std::string("\t[Default: ") + std::string(#value) + std::string("]\t\t") + std::string(description)));\
+		std::string helpText = std::string("\t--") + std::string(#longname);\
+		if (std::string(#shortname) != "\"\"") {\
+			helpText += std::string(", -") + std::string(#shortname);\
+		}\
+		size_t length = helpText.length();\
+		for (; length < 16; length++) {\
+			helpText += " ";\
+		}\
+		helpText += std::string("[Default: ") + std::string(#value) + std::string("]");\
+		helpText += std::string(std::max(0, int(15 - std::string(#value).length())), ' ');\
+		helpText += std::string(description);\
+		clockUtils::argParser::Parser::addHelpTextLine(std::make_pair(#longname, helpText));\
 	}\
-	clockUtils::argParser::Variable<type> name(#name, description, value)
+	clockUtils::argParser::Variable<type> longname(#longname, #shortname, description, value)
 
 /**
  * \brief registers a variable where the arguments at the end are parsed into
