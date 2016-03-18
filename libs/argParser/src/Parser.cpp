@@ -19,6 +19,8 @@
 
 #include "clockUtils/argParser/Parser.h"
 
+#include <cstring>
+
 #include "clockUtils/errors.h"
 #include "clockUtils/argParser/BasicVariable.h"
 

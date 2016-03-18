@@ -3,7 +3,7 @@
  * The Argument Parser can be used to easily parse lists of strings for commands and values
  * @{
  */
- 
+
 /**
  * \page page_argParser How to use the argument parser library
  *
@@ -14,44 +14,57 @@
  *
  * The usage is really simple and contains just two steps:\n\n
  *
- * First you have to register all variables that should be parseable, that means every argument. For this reason there is the macro REGISTER_VARIABLE(type, longname, shortname, value, description). The five arguments it expects are the type of variable, the long and short name of the variable (the long name is for use in the code and also the string being looked for in the list), a default value and a description for the --help/-h functionality explaining what the variable is good for and what it expects.\n
- * If the variable type contains a ',' (Template class with several parameters) create a simple typedef (C++ Preprocessor requirement)\n\n
- * Example:\n
+ * First you have to register all variables that should be parseable, that means every argument. For this reason there is the macro REGISTER_VARIABLE(type, longname, shortname, value, description). The five arguments it expects are the type of variable, the long and short name of the option (the long name is used as the variable name in the code), a default value and a description for the --help/-h functionality.\n
+ * If the variable type contains a comma (e.g. Template class with several parameters) create a typedef (C++ Preprocessor can't handle commas correctly)\n\n
+ * Example :\n
  * \code{.cpp}
- * REGISTER_VARIABLE(bool, boolean, b, false, "a bool value");
+ * REGISTER_VARIABLE(std::string, myStr, s, "english", "a string containing the used language");
+ * REGISTER_VARIABLE(bool, boolOption, b, false, "a bool value");
  * \endcode
- * This line will give you a bool variable being initialized with false. If the argument -b or --boolean is found in the argument list, the variable will be set to true. The bool is a special case because it doesn't expect any value. But you're also able to use -b true to set the value.\n\n
- * \code{.cpp}
- * REGISTER_VARIABLE(std::string, string, s, "english", "a string containing the used language");
+ * The first line will give you a std::string variable with the name \em myStr being initialized with "english". The two possibilities in a command line to change this variable are:\n
+ * \code
+ * myProgram --string german
+ * myProgram -s german
  * \endcode
- * This line will give you a std::string variable being initialized with "english". To change the string just enter:\n
- * --string german\n
- * -s german\n\n
- * The next step is to parse your list. Therefor exist two macros:\n
- * PARSE_COMMANDLINE() parses the arguments of the main method (argc and argv)\n
+ * The boolean option can be change by passing "true" or "false" as the value. Additionally for the case of bool, only the name is sufficient to set it to \em true.
+ * \code
+ * myProgram --boolOption
+ * myProgram -b
+ * \endcode
+ * The second step is to parse your list. Therefor, two macros exist:\n
+ * PARSE_COMMANDLINE() parses the arguments of the main method implicitly assuming (argc and argv)\n
  * PARSE_ARGUMENTS(buffer, length) parses an own list\n
- * If you use the first one, make sure argc and argv are defined.\n\n
  *
- * You can also use the automatically available parameter --help. If --help was entered on commandline, the macro HELPSET() returns true and the text output can be retrieved using GETHELPTEXT()
- * Example:\n
+ * Two options are automatically available for a help output.
+ * \code
+ * --help
+ * -h
+ * \endcode
+ * The macro HELPSET() says whether the help optioon was given and the text output can be retrieved using GETHELPTEXT()\n
+ * Example Usage:\n
  * \code{.cpp}
  * if (HELPSET()) {
  * 	std::cout << GETHELPTEXT() << std::endl;
  * }
  * \endcode
  * \n
- * In some cases you want to ignore additional entries at the end of the commandline or you want a to support more than one parameter e.g. parsing multiple files. Therefore you can register a std::vector<std::string> using REGISTER_VARIABLE_ARGUMENTS(name) where name is the name of the variable. All additional entries are pushed into this vector and they don't cause an error any more as they did before.
+ * In some cases you want to ignore additional entries at the end of the commandline or you want to support more than one parameter e.g. multiple files. Therefore you can register a std::vector<std::string> using REGISTER_VARIABLE_ARGUMENTS(name) where name is the name of the variable. All additional entries are pushed into this vector.\n
  * Example:\n
  * \code{.cpp}
  * int main(int argc, const char ** argv) {
- * 	REGISTER_VARIABLE_ARGUMENTS(files);
- *	PARSE_COMMANDLINE();
+ *  REGISTER_VARIABLE_ARGUMENTS(files);
+ *  PARSE_COMMANDLINE();
+ *  std::cout << "Processing " << files.size() << " files" << std::endl;
  * }
  * \endcode
- * Calling this main compiles to foobar with "./foobar a b c" results in vector files containing entries a, b and c.
+ * When executing the program as follows ...
+ * \code
+ * myProgram a b c
+ * \endcode
+ * ... the \em files vector contains three values.
  *
  */
- 
+
 /**
  * @}
  */
