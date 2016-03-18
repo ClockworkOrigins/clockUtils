@@ -117,13 +117,16 @@ namespace argParser {
 						}
 					}
 				}
-			} else {
+			} else if (std::strlen(argv[0]) > 0) {
 				if (arguments == nullptr) {
 					arguments = nullptr;
 					return ClockError::INVALID_USAGE;
 				} else {
 					arguments->push_back(argv[0]);
 				}
+			} else if (std::strlen(argv[0]) == 0) {
+				error = std::string("parsing empty string not possible!");
+				return ClockError::INVALID_USAGE;
 			}
 
 			argv++;

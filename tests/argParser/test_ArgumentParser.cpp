@@ -82,9 +82,10 @@ TEST(ArgumentParser, parseBool) {
 	const char * buffer4[] = { "" };
 	int length4 = sizeof(buffer4) / sizeof(char *);
 
-	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer4, length4));
+	EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer4, length4)); // invalid because "" causes argv to be not empty, but it only contains an empty string
 
-	EXPECT_TRUE(GETLASTPARSERERROR().empty());
+	EXPECT_FALSE(GETLASTPARSERERROR().empty());
+	EXPECT_EQ("parsing empty string not possible!", GETLASTPARSERERROR());
 	EXPECT_EQ(false, bo);
 	EXPECT_EQ(false, d);
 	EXPECT_EQ(false, foo);
