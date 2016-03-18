@@ -55,9 +55,10 @@ The doxygen documentation can be found on our homepage: http://clockwork-origins
 To build clockUtils from source you need cmake and a C++11 compiler. For a complete library setup just use
 
 $ cmake .
+
 $ make
 
-You can enable/disable all libraries using -DWITH_LIBRARY_<LIBRARYNAME>=ON/OFF. Tests can be enabled using -DWITH_TESTING=ON. This requires gtest on your system (or you build it with the appropriate dependency build script in the dependencies directory).
+You can enable/disable all libraries using -DWITH_LIBRARY_&lt;LIBRARYNAME&gt;=ON/OFF. Tests can be enabled using -DWITH_TESTING=ON. This requires gtest on your system (or you build it with the appropriate dependency build script in the dependencies directory).
 
 ## Contributing Code ##
 
