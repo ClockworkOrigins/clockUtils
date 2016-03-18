@@ -26,46 +26,97 @@
 #include "gtest/gtest.h"
 
 TEST(ArgumentParser, parseBool) {
+	// (Type, long name(and variable), short name, default, desc)
 	REGISTER_VARIABLE(bool, bo, b, false, "A test boolean");
 	REGISTER_VARIABLE(bool, d, d, false, "A test boolean");
 	REGISTER_VARIABLE(bool, foo, f, false, "A test boolean");
-	REGISTER_VARIABLE(bool, bar, a, false, "A test boolean");
+	REGISTER_VARIABLE(bool, bar, a, true, "A test boolean");
+	REGISTER_VARIABLE(bool, longname, "", false, "A test boolean"); // no short flag
 
+	// Check the helptext
+	const char * helpText = ""
+							"\t--bar, -a\t[Default: true]\t\tA test boolean\n"
+							"\t--bo, -b\t[Default: false]\t\tA test boolean\n"
+							"\t--d, -d\t[Default: false]\t\tA test boolean\n"
+							"\t--foo, -f\t[Default: false]\t\tA test boolean\n"
+							"\t--longname\t[Default: false]\t\tA test boolean\n";
+	EXPECT_EQ(helpText, GETHELPTEXT());
+
+	EXPECT_FALSE(bo);
+
+	// Test invalid args
 	const char * buffer1[] = { "-c", "-e", "3" };
 	int length1 = sizeof(buffer1) / sizeof(char *);
 
-	const char * buffer2[] = { "--bo" };
-	int length2 = sizeof(buffer2) / sizeof(char *);
-
-	const char * buffer3[] = { "--bo", "-d", "--foo", "--bar" };
-	int length3 = sizeof(buffer3) / sizeof(char *);
-
-	EXPECT_FALSE(bo);
-
 	EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer1, length1));
-
 	EXPECT_EQ("argument -c not registered!", GETLASTPARSERERROR());
 	EXPECT_FALSE(bo);
+
+	// Test a long flag
+	const char * buffer2[] = { "--bo" };
+	int length2 = sizeof(buffer2) / sizeof(char *);
 
 	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer2, length2));
 
 	EXPECT_TRUE(GETLASTPARSERERROR().empty());
-
 	EXPECT_EQ(true, bo);
 	EXPECT_EQ(false, d);
 	EXPECT_EQ(false, foo);
-	EXPECT_EQ(false, bar);
+	EXPECT_EQ(true, bar);
+	EXPECT_EQ(false, longname);
 
-	bo = false;
+	// Test all set long
+	const char * buffer3[] = { "--bo", "--d", "--foo", "--bar" , "--longname" };
+	int length3 = sizeof(buffer3) / sizeof(char *);
 
 	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer3, length3));
 
 	EXPECT_TRUE(GETLASTPARSERERROR().empty());
-
 	EXPECT_EQ(true, bo);
 	EXPECT_EQ(true, d);
 	EXPECT_EQ(true, foo);
 	EXPECT_EQ(true, bar);
+	EXPECT_EQ(true, longname);
+
+	// Test none set
+	const char * buffer4[] = { "" };
+	int length4 = sizeof(buffer4) / sizeof(char *);
+
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer4, length4));
+
+	EXPECT_TRUE(GETLASTPARSERERROR().empty());
+	EXPECT_EQ(false, bo);
+	EXPECT_EQ(false, d);
+	EXPECT_EQ(false, foo);
+	EXPECT_EQ(true, bar);
+	EXPECT_EQ(false, longname);
+
+	// Test all set short
+	bo = false;
+	const char * buffer5[] = { "-b", "-d", "-a", "-f" };
+	int length5 = sizeof(buffer5) / sizeof(char *);
+
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer5, length5));
+
+	EXPECT_TRUE(GETLASTPARSERERROR().empty());
+	EXPECT_EQ(true, bo);
+	EXPECT_EQ(true, d);
+	EXPECT_EQ(true, foo);
+	EXPECT_EQ(true, bar);
+	EXPECT_EQ(true, longname); // defaulted back
+
+	// Set explicit
+	const char * buffer6[] = { "-b", "true", "-d", "false", "--bar", "true", "--foo", "false", "--longname", "false" };
+	int length6 = sizeof(buffer6) / sizeof(char *);
+
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer6, length6));
+
+	EXPECT_TRUE(GETLASTPARSERERROR().empty());
+	EXPECT_EQ(true, bo);
+	EXPECT_EQ(false, d);
+	EXPECT_EQ(false, foo);
+	EXPECT_EQ(true, bar);
+	EXPECT_EQ(false, longname);
 }
 
 TEST(ArgumentParser, parseString) {
