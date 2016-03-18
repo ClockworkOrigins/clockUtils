@@ -21,7 +21,7 @@ clockUtils is a collection of lightweight libraries to solve common tasks. We de
 
 **Container**
 
- * container classes for special storage and access requirements
+ * This library is a collection of container classes (currently only one). They serve for special purposes that are not or not easily handled by the STL. E.g. Threadsafe containers or complex structures. If possible, the containers offer at least the same API like the corresponding STL container. This allows a simple exchange without introducing new problems. Semantic changes and additional functionality is explained in the appropriate documentation.
 
 **Ini File Parser**
 
