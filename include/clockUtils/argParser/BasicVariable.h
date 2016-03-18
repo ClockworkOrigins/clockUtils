@@ -83,6 +83,11 @@ namespace argParser {
 			return _set;
 		}
 
+		/**
+		 * \brief resets value to default value
+		 */
+		virtual void resetToDefault() = 0;
+
 	private:
 		/**
 		 * \brief argument the argument list is scanned for
@@ -114,7 +119,7 @@ namespace argParser {
 		/**
 		 * \brief initializes a new variable taking the argument name, the description text and a default value, calls constructor of BasicVariable
 		 */
-		Variable(const std::string & longname, const std::string & shortname, const std::string & description, T value) : BasicVariable(longname, shortname, description), _value(value) {
+		Variable(const std::string & longname, const std::string & shortname, const std::string & description, T value) : BasicVariable(longname, shortname, description), _value(value), _defaultValue(value) {
 		}
 
 		/**
@@ -179,6 +184,19 @@ namespace argParser {
 		 * \brief the value this variable contains
 		 */
 		T _value;
+
+		/**
+		 * \brief the default value for this variable
+		 * stored in case it is parsed twice to be able to reset value to default
+		 */
+		T _defaultValue;
+
+		/**
+		 * \brief resets value to default value
+		 */
+		void resetToDefault() override {
+			_value = _defaultValue;
+		}
 	};
 
 	/**

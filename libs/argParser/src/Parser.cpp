@@ -33,6 +33,10 @@ namespace argParser {
 	std::vector<std::string> * Parser::arguments = nullptr;
 
 	ClockError Parser::parseArguments(const char ** argv, int argc) {
+		// reset variables to default value
+		for (BasicVariable * bv : variableList) {
+			bv->resetToDefault();
+		}
 		error = "";
 		help = false;
 		ClockError result = ClockError::SUCCESS;

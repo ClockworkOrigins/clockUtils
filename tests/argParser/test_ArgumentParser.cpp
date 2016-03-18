@@ -103,7 +103,7 @@ TEST(ArgumentParser, parseBool) {
 	EXPECT_EQ(true, d);
 	EXPECT_EQ(true, foo);
 	EXPECT_EQ(true, bar);
-	EXPECT_EQ(true, longname); // defaulted back
+	EXPECT_EQ(false, longname); // defaulted back
 
 	// Set explicit
 	const char * buffer6[] = { "-b", "true", "-d", "false", "--bar", "true", "--foo", "false", "--longname", "false" };
@@ -353,8 +353,8 @@ TEST(ArgumentParser, parseChar) {
 	const char * buffer1[] = { "-c", "x" };
 	const char * buffer2[] = { "-d", "xy" };
 	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer1, 2));
-	EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer2, 2));
 	EXPECT_EQ('x', c);
+	EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer2, 2));
 }
 
 struct Vec3 {
@@ -363,7 +363,6 @@ struct Vec3 {
 	}
 	Vec3(double x, double y, double z) : _x(x), _y(y), _z(z) {
 	}
-	Vec3 & operator=(const Vec3 &) = delete;
 	bool operator==(const Vec3 & other) const {
 		return std::fabs(_x - other._x) < DBL_EPSILON && std::fabs(_y - other._y) < DBL_EPSILON && std::fabs(_z - other._z) < DBL_EPSILON;
 	}
