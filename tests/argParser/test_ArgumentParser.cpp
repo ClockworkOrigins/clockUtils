@@ -35,11 +35,11 @@ TEST(ArgumentParser, parseBool) {
 
 	// Check the helptext
 	const char * helpText = ""
-							"\t--bar, -a\t[Default: true]\t\tA test boolean\n"
-							"\t--bo, -b\t[Default: false]\t\tA test boolean\n"
-							"\t--d, -d\t[Default: false]\t\tA test boolean\n"
-							"\t--foo, -f\t[Default: false]\t\tA test boolean\n"
-							"\t--longname\t[Default: false]\t\tA test boolean";
+							"\t--bar, -a      [Default: true]           A test boolean\n"
+							"\t--bo, -b       [Default: false]          A test boolean\n"
+							"\t--d, -d        [Default: false]          A test boolean\n"
+							"\t--foo, -f      [Default: false]          A test boolean\n"
+							"\t--longname     [Default: false]          A test boolean";
 	EXPECT_EQ(helpText, GETHELPTEXT());
 
 	EXPECT_FALSE(bo);
@@ -405,14 +405,14 @@ TEST(ArgumentParser, help) {
 		const char * buffer[] = { "--help" };
 		EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer, 1));
 		EXPECT_TRUE(HELPSET());
-		std::string helpText = "\t--i, -i\t[Default: 15]\t\tAn integer variable\n\t--s, -s\t[Default: \"\"]\t\tA string variable\n\t--variable, -v\t[Default: 15]\t\tA long and short variable";
+		std::string helpText = "\t--i, -i        [Default: 15]             An integer variable\n\t--s, -s        [Default: \"\"]             A string variable\n\t--variable, -v [Default: 15]             A long and short variable";
 		EXPECT_EQ(helpText, GETHELPTEXT());
 	}
 	{
 		const char * buffer[] = { "-h" };
 		EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer, 1));
 		EXPECT_TRUE(HELPSET());
-		std::string helpText = "\t--i, -i\t[Default: 15]\t\tAn integer variable\n\t--s, -s\t[Default: \"\"]\t\tA string variable\n\t--variable, -v\t[Default: 15]\t\tA long and short variable";
+		std::string helpText = "\t--i, -i        [Default: 15]             An integer variable\n\t--s, -s        [Default: \"\"]             A string variable\n\t--variable, -v [Default: 15]             A long and short variable";
 		EXPECT_EQ(helpText, GETHELPTEXT());
 	}
 }

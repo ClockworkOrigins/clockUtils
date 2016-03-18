@@ -27,6 +27,8 @@
 
 #include "clockUtils/argParser/argParserParameters.h"
 
+#include <algorithm>
+
 #include "clockUtils/argParser/ArgumentList.h"
 #include "clockUtils/argParser/BasicVariable.h"
 #include "clockUtils/argParser/Parser.h"
@@ -59,11 +61,18 @@
  */
 #define REGISTER_VARIABLE(type, longname, shortname, value, description)\
 	{\
-		if (std::string(#shortname) == "\"\"") {\
-			clockUtils::argParser::Parser::addHelpTextLine(std::make_pair(#longname, std::string("\t--") + std::string(#longname) + std::string("\t[Default: ") + std::string(#value) + std::string("]\t\t") + std::string(description)));\
-		} else {\
-			clockUtils::argParser::Parser::addHelpTextLine(std::make_pair(#longname, std::string("\t--") + std::string(#longname) + std::string(", -") + std::string(#shortname) + std::string("\t[Default: ") + std::string(#value) + std::string("]\t\t") + std::string(description)));\
+		std::string helpText = std::string("\t--") + std::string(#longname);\
+		if (std::string(#shortname) != "\"\"") {\
+			helpText += std::string(", -") + std::string(#shortname);\
 		}\
+		size_t length = helpText.length();\
+		for (; length < 16; length++) {\
+			helpText += " ";\
+		}\
+		helpText += std::string("[Default: ") + std::string(#value) + std::string("]");\
+		helpText += std::string(std::max(0, int(15 - std::string(#value).length())), ' ');\
+		helpText += std::string(description);\
+		clockUtils::argParser::Parser::addHelpTextLine(std::make_pair(#longname, helpText));\
 	}\
 	clockUtils::argParser::Variable<type> longname(#longname, #shortname, description, value)
 
