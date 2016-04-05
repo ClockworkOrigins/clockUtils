@@ -135,6 +135,13 @@ namespace argParser {
 			argc--;
 		}
 
+		for (BasicVariable * bv : variableList) {
+			if (bv->isRequired() && !bv->isSet()) {
+				error = std::string("Variable ") + bv->getLongname() + std::string(" required, but not set.");
+				return ClockError::INVALID_USAGE;
+			}
+		}
+
 		arguments = nullptr;
 		return result;
 	}

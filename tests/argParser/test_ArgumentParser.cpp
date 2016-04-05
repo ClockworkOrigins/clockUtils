@@ -495,3 +495,21 @@ TEST(ArgumentParser, longAndShortName) {
 	EXPECT_EQ("foo", string);
 	EXPECT_EQ(42, integer);
 }
+
+TEST(ArgumentParser, requiredVariable) {
+	REGISTER_VARIABLE_REQUIRED(std::string, string, s, "", "Sample");
+	REGISTER_VARIABLE(int, integer, i, 15, "Sample");
+	const char * buffer[] = { "-s", "foo", "--integer", "42" };
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer, 4));
+
+	const char * buffer2[] = { "--integer", "42" };
+	EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer2, 2));
+	EXPECT_EQ("Variable string required, but not set.", GETLASTPARSERERROR());
+}
+
+TEST(ArgumentParser, requiredVariableHelpText) {
+	REGISTER_VARIABLE_REQUIRED(std::string, string, s, "", "Sample");
+	const char * helpText = ""
+		"\t--string, -s   [Default: \"\"]             Sample (required)";
+	EXPECT_EQ(helpText, GETHELPTEXT());
+}

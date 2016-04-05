@@ -45,7 +45,7 @@ namespace argParser {
 		/**
 		 * \brief constructor taking the longname (= argument in argument list), shortname (= short name for the argument list) and a description text for --help, inserts variable into the variableList of the Parser
 		 */
-		BasicVariable(const std::string & longname, const std::string & shortname, const std::string & description);
+		BasicVariable(const std::string & longname, const std::string & shortname, const std::string & description, bool required);
 
 		/**
 		 * \brief destructor, removes variable of the variableList of the Parser
@@ -84,9 +84,22 @@ namespace argParser {
 		}
 
 		/**
+		 * \brief returns true, if this variable is required to be set
+		 */
+		bool isRequired() const {
+			return _required;
+		}
+
+		/**
 		 * \brief resets value to default value
 		 */
 		virtual void resetToDefault() = 0;
+
+	protected:
+		/**
+		 * \brief tells whether the variable was set via command line or not
+		 */
+		bool _set;
 
 	private:
 		/**
@@ -103,11 +116,11 @@ namespace argParser {
 		 * \brief description being shown using --help
 		 */
 		std::string _description;
-
+		
 		/**
-		 * \brief tells whether the variable was set via command line or not
+		 * \brief tells whether the variable has to be set or not
 		 */
-		bool _set;
+		bool _required;
 	};
 
 	/**
@@ -119,7 +132,7 @@ namespace argParser {
 		/**
 		 * \brief initializes a new variable taking the argument name, the description text and a default value, calls constructor of BasicVariable
 		 */
-		Variable(const std::string & longname, const std::string & shortname, const std::string & description, T value) : BasicVariable(longname, shortname, description), _value(value), _defaultValue(value) {
+		Variable(const std::string & longname, const std::string & shortname, const std::string & description, T value, bool required) : BasicVariable(longname, shortname, description, required), _value(value), _defaultValue(value) {
 		}
 
 		/**
@@ -196,6 +209,7 @@ namespace argParser {
 		 */
 		void resetToDefault() override {
 			_value = _defaultValue;
+			_set = false;
 		}
 	};
 
