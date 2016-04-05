@@ -391,10 +391,13 @@ TEST(ArgumentParser, variableSet) {
 	REGISTER_VARIABLE(int, i, i, 15, "Sample");
 	const char * buffer[] = { "-s", "foo" };
 	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer, 2));
-	EXPECT_EQ("foo", s);
-	EXPECT_EQ(15, i);
 	EXPECT_TRUE(s.isSet());
 	EXPECT_FALSE(i.isSet());
+
+	const char * buffer2[] = { "-i", "0" };
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer2, 2));
+	EXPECT_FALSE(s.isSet());
+	EXPECT_TRUE(i.isSet());
 }
 
 TEST(ArgumentParser, help) {
