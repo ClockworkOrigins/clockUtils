@@ -60,7 +60,7 @@
  * variable will be initialized with default value right away
  * \note help and h are reserved for internal usage only
  */
-#define REGISTER_VARIABLE_INTERNAL(type, longname, shortname, value, description, required)\
+#define REGISTER_VARIABLE_INTERNAL(type, longname, shortname, value, description, required, multiple)\
 	{\
 		std::string helpText = std::string("\t--") + std::string(#longname);\
 		if (std::string(#shortname) != "\"\"") {\
@@ -76,9 +76,12 @@
 		if (required) {\
 			helpText += " (required)";\
 		}\
+		if (multiple) {\
+			helpText += " (multiple)";\
+		}\
 		clockUtils::argParser::Parser::addHelpTextLine(std::make_pair(#longname, helpText));\
 	}\
-	clockUtils::argParser::Variable<type> longname(#longname, #shortname, description, value, required)
+	clockUtils::argParser::Variable<type> longname(#longname, #shortname, description, value, required, multiple)
 
 /**
  * \brief registers a variable with a type, the variable and argument name, a default value and a description text for --help being optional
@@ -86,7 +89,7 @@
  * variable will be initialized with default value right away
  * \note help and h are reserved for internal usage only
  */
-#define REGISTER_VARIABLE(type, longname, shortname, value, description) REGISTER_VARIABLE_INTERNAL(type, longname, shortname, value, description, false)
+#define REGISTER_VARIABLE(type, longname, shortname, value, description) REGISTER_VARIABLE_INTERNAL(type, longname, shortname, value, description, false, false)
 
 /**
  * \brief registers a variable with a type, the variable and argument name, a default value and a description text for --help being required
@@ -95,7 +98,26 @@
  * if this variable isn't set, ClockError::INVALID_USAGE is returned
  * \note help and h are reserved for internal usage only
  */
-#define REGISTER_VARIABLE_REQUIRED(type, longname, shortname, value, description) REGISTER_VARIABLE_INTERNAL(type, longname, shortname, value, description, true)
+#define REGISTER_VARIABLE_REQUIRED(type, longname, shortname, value, description) REGISTER_VARIABLE_INTERNAL(type, longname, shortname, value, description, true, false)
+
+/**
+ * \brief registers a variable with a type, the variable and argument name, a default value and a description text for --help
+ * longname is also the variable name, shortname can be set to "" for no shortname
+ * variable will be initialized with default value right away
+ * this variable can be set multiple times, so the registered variable is a list
+ * \note help and h are reserved for internal usage only
+ */
+#define REGISTER_VARIABLE_MULTIPLE(type, longname, shortname, value, description) REGISTER_VARIABLE_INTERNAL(type, longname, shortname, value, description, false, true)
+
+/**
+ * \brief registers a variable with a type, the variable and argument name, a default value and a description text for --help being required
+ * longname is also the variable name, shortname can be set to "" for no shortname
+ * variable will be initialized with default value right away
+ * this variable can be set multiple times, so the registered variable is a list
+ * if this variable isn't set, ClockError::INVALID_USAGE is returned
+ * \note help and h are reserved for internal usage only
+ */
+#define REGISTER_VARIABLE_MULTIPLE_REQUIRED(type, longname, shortname, value, description) REGISTER_VARIABLE_INTERNAL(type, longname, shortname, value, description, true, true)
 
 /**
  * \brief registers a variable where the arguments at the end are parsed into

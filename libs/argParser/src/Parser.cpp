@@ -61,7 +61,7 @@ namespace argParser {
 									arguments = nullptr;
 									return ClockError::INVALID_USAGE;
 								}
-								if (parsed.find(bv->getLongname()) != parsed.end()) {
+								if (!bv->canHaveMultiple() && parsed.find(bv->getLongname()) != parsed.end()) {
 									arguments = nullptr;
 									return ClockError::INVALID_USAGE;
 								}
@@ -71,7 +71,7 @@ namespace argParser {
 								argv++;
 							} else { // case "-b"
 								bv->setValue("1");
-								if (parsed.find(bv->getLongname()) != parsed.end()) {
+								if (!bv->canHaveMultiple() && parsed.find(bv->getLongname()) != parsed.end()) {
 									arguments = nullptr;
 									return ClockError::INVALID_USAGE;
 								}
@@ -80,7 +80,7 @@ namespace argParser {
 							}
 						} else {
 							if (argc == 1) {
-								error = name + std::string(" requires a value: -") + name + std::string(" <value> or -") + name + std::string("<value> or -") + name + std::string("=<value>");
+								error = name + std::string(" requires a value: -") + longname + std::string(" <value> or -") + shortname + std::string(" <value>");
 								arguments = nullptr;
 								return ClockError::INVALID_USAGE;
 							} else {
@@ -89,7 +89,8 @@ namespace argParser {
 									arguments = nullptr;
 									return ClockError::INVALID_USAGE;
 								}
-								if (parsed.find(bv->getLongname()) != parsed.end()) {
+								if (!bv->canHaveMultiple() && parsed.find(bv->getLongname()) != parsed.end()) {
+									error = std::string("variable ") + name + std::string(" doesn't support multiple arguments");
 									arguments = nullptr;
 									return ClockError::INVALID_USAGE;
 								}

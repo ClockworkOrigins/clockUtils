@@ -26,7 +26,7 @@
 namespace clockUtils {
 namespace argParser {
 
-	BasicVariable::BasicVariable(const std::string & longname, const std::string & shortname, const std::string & description, bool required) : _set(false), _longname(longname), _shortname(shortname), _description(description), _required(required) {
+	BasicVariable::BasicVariable(const std::string & longname, const std::string & shortname, const std::string & description, bool required, bool multiple) : _set(false), _longname(longname), _shortname(shortname), _description(description), _required(required), _multiple(multiple) {
 		clockUtils::argParser::Parser::variableList.push_back(this);
 	}
 
@@ -47,7 +47,11 @@ namespace argParser {
 
 	template<>
 	bool Variable<std::string>::setValue(const std::string & value) {
-		_value = value;
+		if (!_set) {
+			_value = value;
+		} else {
+			_values.push_back(value);
+		}
 		return true;
 	}
 
@@ -55,7 +59,11 @@ namespace argParser {
 	bool Variable<char>::setValue(const std::string & value) {
 		bool ret = value.size() == 1;
 		if (ret) {
-			_value = value.at(0);
+			if (!_set) {
+				_value = value.at(0);
+			} else {
+				_values.push_back(value.at(0));
+			}
 		}
 		return ret;
 	}
@@ -65,13 +73,19 @@ namespace argParser {
 		std::string result = value;
 		std::transform(value.begin(), value.end(), result.begin(), ::tolower);
 		bool ret = true;
+		bool val;
 		if (result == "true") {
-			_value = true;
+			val = true;
 		} else if (result == "false") {
-			_value = false;
+			val = false;
 		} else {
 			std::stringstream ss(value);
-			ret = !(ss >> (_value)).fail() && ss.eof();
+			ret = !(ss >> (val)).fail() && ss.eof();
+		}
+		if (!_set) {
+			_value = val;
+		} else {
+			_values.push_back(val);
 		}
 		return ret;
 	}

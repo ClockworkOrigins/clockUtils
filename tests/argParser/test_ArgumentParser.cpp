@@ -152,7 +152,7 @@ TEST(ArgumentParser, parseString) {
 	EXPECT_FALSE(GETLASTPARSERERROR().empty());
 
 	EXPECT_EQ("test", s);
-	EXPECT_EQ("s requires a value: -s <value> or -s<value> or -s=<value>", GETLASTPARSERERROR());
+	EXPECT_EQ("s requires a value: --s <value> or -s <value>", GETLASTPARSERERROR());
 
 	s = "";
 
@@ -212,7 +212,7 @@ TEST(ArgumentParser, parseInt) {
 	EXPECT_EQ(clockUtils::ClockError::INVALID_USAGE, PARSE_ARGUMENTS(buffer2, length2));
 
 	EXPECT_FALSE(GETLASTPARSERERROR().empty());
-	EXPECT_EQ("i requires a value: -i <value> or -i<value> or -i=<value>", GETLASTPARSERERROR());
+	EXPECT_EQ("i requires a value: --i <value> or -i <value>", GETLASTPARSERERROR());
 
 	EXPECT_EQ(-1, i);
 
@@ -514,5 +514,31 @@ TEST(ArgumentParser, requiredVariableHelpText) {
 	REGISTER_VARIABLE_REQUIRED(std::string, string, s, "", "Sample");
 	const char * helpText = ""
 		"\t--string, -s   [Default: \"\"]             Sample (required)";
+	EXPECT_EQ(helpText, GETHELPTEXT());
+}
+
+TEST(ArgumentParser, multipleVariable) {
+	REGISTER_VARIABLE_MULTIPLE(std::string, string, s, "", "Sample");
+	EXPECT_TRUE(string.canHaveMultiple());
+	const char * buffer[] = { "-s", "foo", "-s", "bar", "-s", "bla" };
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer, 6));
+	EXPECT_EQ("foo", string);
+	EXPECT_EQ(3, string.count());
+	EXPECT_EQ("foo", string.at(0));
+	EXPECT_EQ("bar", string.at(1));
+	EXPECT_EQ("bla", string.at(2));
+}
+
+TEST(ArgumentParser, multipleVariableHelpText) {
+	REGISTER_VARIABLE_MULTIPLE(std::string, string, s, "", "Sample");
+	const char * helpText = ""
+		"\t--string, -s   [Default: \"\"]             Sample (multiple)";
+	EXPECT_EQ(helpText, GETHELPTEXT());
+}
+
+TEST(ArgumentParser, multipleRequiredVariableHelpText) {
+	REGISTER_VARIABLE_MULTIPLE_REQUIRED(std::string, string, s, "", "Sample");
+	const char * helpText = ""
+		"\t--string, -s   [Default: \"\"]             Sample (required) (multiple)";
 	EXPECT_EQ(helpText, GETHELPTEXT());
 }
