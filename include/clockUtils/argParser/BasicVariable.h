@@ -145,7 +145,7 @@ namespace argParser {
 		/**
 		 * \brief initializes a new variable taking the argument name, the description text and a default value, calls constructor of BasicVariable
 		 */
-		Variable(const std::string & longname, const std::string & shortname, const std::string & description, T value, bool required, bool multiple) : BasicVariable(longname, shortname, description, required, multiple), _value(value), _defaultValue(value), _values() {
+		Variable(const std::string & longname, const std::string & shortname, const std::string & description, T value, bool required, bool multiple) : BasicVariable(longname, shortname, description, required, multiple), _value(value), _values(), _defaultValue(value) {
 		}
 
 		/**
