@@ -191,7 +191,7 @@ TEST(TcpSocket, connectToHostname) { // tests connect to a hostname with all pos
 	EXPECT_EQ(ClockError::INVALID_PORT, e);
 
 	e = ts.connectToHostname("clockwork-origins.de", 12345, 100);
-	EXPECT_TRUE(ClockError::TIMEOUT == e);
+	EXPECT_TRUE(ClockError::TIMEOUT == e || ClockError::CONNECTION_FAILED == e);
 
 	ts.connectToHostname("localhost", 12345, 100);
 	EXPECT_TRUE(ClockError::TIMEOUT == e || ClockError::CONNECTION_FAILED == e);
