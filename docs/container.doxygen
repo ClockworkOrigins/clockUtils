@@ -5,7 +5,7 @@
  */
  
 /**
- * \page page_container How to use the compression library
+ * \page page_container How to use the container library
  *
  * Currently the container library consists of only one class.
  *
