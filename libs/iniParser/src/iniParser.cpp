@@ -19,8 +19,8 @@
 
 #include "clockUtils/iniParser/iniParser.h"
 
-#include <fstream>
 #include <algorithm>
+#include <fstream>
 
 namespace clockUtils {
 namespace iniParser {
@@ -136,6 +136,14 @@ namespace iniParser {
 
 		value = std::string();
 		return ClockError::VALUE_NOTFOUND;
+	}
+
+	std::vector<std::string> IniParser::getAllSections() const {
+		std::vector<std::string> sections;
+		for (auto it = _allLines.cbegin(); it != _allLines.cend(); it++) {
+			sections.push_back(it->first);
+		}
+		return sections;
 	}
 
 } /* namespace iniParser */

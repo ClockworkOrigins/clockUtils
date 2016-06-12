@@ -151,6 +151,11 @@ namespace iniParser {
 			_allLines[section].push_back(""); // empty line. will be overritten anyways
 		}
 
+		/**
+		 * \brief returns all sections that can be found in this config file
+		 */
+		std::vector<std::string> getAllSections() const;
+
 	private:
 		/**
 		 * \brief enum to identify entries in tuple

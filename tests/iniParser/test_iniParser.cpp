@@ -227,3 +227,35 @@ TEST(IniParser, enumValues) {
 	EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION1", "enumB3", v2));
 	EXPECT_EQ(TestEnumB::ValB3, v2);
 }
+
+TEST(IniParser, GetAllSections) {
+	IniParser i;
+	std::vector<std::string> sections = i.getAllSections();
+	ASSERT_TRUE(sections.empty());
+
+	EXPECT_EQ(ClockError::SUCCESS, i.load("resources/example1.ini"));
+	sections = i.getAllSections();
+	ASSERT_EQ(3, sections.size());
+	EXPECT_EQ("SECTION1", sections[0]);
+	EXPECT_EQ("SECTION2", sections[1]);
+	EXPECT_EQ("global", sections[2]);
+
+	EXPECT_EQ(ClockError::SUCCESS, i.load("resources/example1result2.ini"));
+	sections = i.getAllSections();
+	ASSERT_EQ(4, sections.size());
+	EXPECT_EQ("SECTION1", sections[0]);
+	EXPECT_EQ("SECTION2", sections[1]);
+	EXPECT_EQ("SECTION3", sections[2]);
+	EXPECT_EQ("global", sections[3]);
+
+	EXPECT_EQ(ClockError::SUCCESS, i.load("resources/example2.ini"));
+	sections = i.getAllSections();
+	ASSERT_EQ(2, sections.size());
+	EXPECT_EQ("SECTION1", sections[0]);
+	EXPECT_EQ("global", sections[1]);
+
+	EXPECT_EQ(ClockError::SUCCESS, i.load("resources/NoSection.ini"));
+	sections = i.getAllSections();
+	ASSERT_EQ(1, sections.size());
+	EXPECT_EQ("global", sections[0]);
+}
