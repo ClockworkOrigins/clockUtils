@@ -259,3 +259,27 @@ TEST(IniParser, GetAllSections) {
 	ASSERT_EQ(1, sections.size());
 	EXPECT_EQ("global", sections[0]);
 }
+
+TEST(IniParser, GetAllEntries) {
+	IniParser i;
+	EXPECT_EQ(ClockError::SUCCESS, i.load("resources/example3.ini"));
+	std::vector<std::string> sections = i.getAllSections();
+	ASSERT_EQ(3, sections.size());
+	EXPECT_EQ("SECTION1", sections[0]);
+	EXPECT_EQ("SECTION2", sections[1]);
+	EXPECT_EQ("global", sections[2]);
+
+	std::vector<std::string> entries = i.getAllEntries("global");
+	ASSERT_EQ(1, entries.size());
+	EXPECT_EQ("entryWithoutSection", entries[0]);
+
+	entries = i.getAllEntries("SECTION1");
+	ASSERT_EQ(2, entries.size());
+	EXPECT_EQ("entry1", entries[0]);
+	EXPECT_EQ("entry3", entries[1]);
+
+	entries = i.getAllEntries("SECTION2");
+	ASSERT_EQ(2, entries.size());
+	EXPECT_EQ("entry4", entries[0]);
+	EXPECT_EQ("entry2", entries[1]);
+}

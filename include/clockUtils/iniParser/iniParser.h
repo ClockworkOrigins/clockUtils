@@ -156,6 +156,11 @@ namespace iniParser {
 		 */
 		std::vector<std::string> getAllSections() const;
 
+		/**
+		 * \brief returns all entries of the given section
+		 */
+		std::vector<std::string> getAllEntries(const std::string & section) const;
+
 	private:
 		/**
 		 * \brief enum to identify entries in tuple

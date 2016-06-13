@@ -146,5 +146,16 @@ namespace iniParser {
 		return sections;
 	}
 
+	std::vector<std::string> IniParser::getAllEntries(const std::string & section) const {
+		std::vector<std::string> entries;
+		auto it = _data.find(section);
+		if (it != _data.end()) {
+			for (auto it2 = it->second.cbegin(); it2 != it->second.cend(); it2++) {
+				entries.push_back(std::get<FIELD>(*it2));
+			}
+		}
+		return entries;
+	}
+
 } /* namespace iniParser */
 } /* namespace clockUtils */
