@@ -132,6 +132,14 @@ IF(WIN32)
 		SET(DEP_DIR_BUILD "${DEP_DIR_BUILD}_x86")
 	ENDIF()
 	SET(COMPILER_VERSION ${DEP_DIR_BUILD})
+ELSEIF(UNIX)
+	IF(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
+		SET(DEP_DIR_BUILD "clang")
+	ELSEIF(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
+		SET(DEP_DIR_BUILD "gcc")
+	ELSE()
+		MESSAGE([WARNING] "Toolchain not supported yet!")
+	ENDIF()
 ENDIF(WIN32)
 
 #########################################################################
@@ -141,10 +149,10 @@ ENDIF(WIN32)
 #----------------------------------------------------
 # Pthreads
 #----------------------------------------------------
-IF(NOT WIN32)
+IF(UNIX)
 	find_package(Threads REQUIRED)
 	include_directories(SYSTEM ${PTHREADS_INCLUDE_DIR})
-ENDIF(NOT WIN32)
+ENDIF(UNIX)
 
 #----------------------------------------------------
 # Google Test

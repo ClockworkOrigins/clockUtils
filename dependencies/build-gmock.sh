@@ -21,7 +21,7 @@
 
 cd "$(readlink "$(dirname "${0}")")"
 
-. ./build-common.sh
+. ./build-common.sh ${1}
 
 # googletest
 ARCHIVE="gmock-1.7.0.zip"
@@ -31,7 +31,7 @@ if [ -d ${BUILD_DIR} ]; then
 	rm -rf ${BUILD_DIR}
 fi
 
-PREFIX="${PWD}/gmock/"
+PREFIX="${DEP_OUT_DIR}/gmock/"
 PARALLEL_FLAG=""
 
 if [ ! -z "${BUILD_PARALLEL}" ]; then
@@ -69,6 +69,8 @@ cd "${BUILD_DIR}"
 cmake \
 	-DCMAKE_INSTALL_PREFIX="${PREFIX}" \
 	${BUILD_TYPE} \
+	-DCMAKE_C_COMPILER=${C_COMPILER} \
+	-DCMAKE_CXX_COMPILER=${CXX_COMPILER} \
 	. >/dev/null
 
 status "Building GoogleMock with GoogleTest"
