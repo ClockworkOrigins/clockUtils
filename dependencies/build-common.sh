@@ -86,6 +86,25 @@ DEP_DIR="${PWD}"
 EX_DIR="${PWD}/../externals/libs/"
 PATCH_DIR="${PWD}/../externals/patches/"
 BUILD_ROOT="/tmp/`whoami`"
+C_COMPILER=gcc
+CXX_COMPILER=g++
+
+if [ "${2}" = "--" ] ; then
+	C_COMPILER=gcc
+	CXX_COMPILER=g++
+	DEP_OUT_DIR=${DEP_DIR}/gcc
+fi
+if [ "${2}" = "gcc" ] ; then
+	C_COMPILER=gcc
+	CXX_COMPILER=g++
+	DEP_OUT_DIR=${DEP_DIR}/gcc
+fi
+if [ "${2}" = "clang" ] ; then
+	C_COMPILER=clang
+	CXX_COMPILER=clang++
+	DEP_OUT_DIR=${DEP_DIR}/clang
+fi
+
 
 mkdir -p "${BUILD_ROOT}"
 
