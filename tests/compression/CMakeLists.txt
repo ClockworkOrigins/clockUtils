@@ -20,6 +20,8 @@
 ################################
 
 SET(testSrc
+	main.cpp
+
 	test_Compression.cpp
 )
 
@@ -33,8 +35,8 @@ IF(UNIX)
 	TARGET_LINK_LIBRARIES(CompressionTester pthread)
 ENDIF(UNIX)
 
-IF(WIN32)
+IF(WIN32 AND ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 	add_custom_command(TARGET CompressionTester POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>/CompressionTester.exe ${CMAKE_BINARY_DIR}/bin)
-ENDIF(WIN32)
+ENDIF(WIN32 AND ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 
 ADD_TEST(CompressionTester CompressionTester)

@@ -52,9 +52,9 @@ ELSEIF(UNIX)
 	target_link_libraries(clock_sockets ${CMAKE_THREAD_LIBS_INIT})
 ENDIF()
 
-IF(WIN32)
+IF(WIN32 AND ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 	add_custom_command(TARGET clock_sockets POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>/clock_sockets.dll ${CMAKE_BINARY_DIR}/bin)
-ENDIF(WIN32)
+ENDIF(WIN32 AND ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/clockUtils/sockets
 	DESTINATION ${CMAKE_INSTALL_PREFIX}/include/clockUtils

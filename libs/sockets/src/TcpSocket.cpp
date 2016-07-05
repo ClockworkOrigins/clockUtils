@@ -99,7 +99,12 @@ namespace sockets {
 			return error;
 		}
 
-		struct sockaddr_in name = { AF_INET, htons(listenPort), INADDR_ANY, {0} };
+		struct sockaddr_in name;
+		name.sin_family = AF_INET;
+		name.sin_port = htons(listenPort);
+		memset(&name.sin_addr, INADDR_ANY, sizeof(name.sin_addr));
+		memset(name.sin_zero, 0, 8);
+
 		errno = 0;
 		if (-1 == bind(_sock, reinterpret_cast<struct sockaddr *>(&name), sizeof(name))) {
 			ClockError error = getLastError();
