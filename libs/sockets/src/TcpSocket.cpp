@@ -600,7 +600,7 @@ namespace sockets {
 		// loop until finish is set. This ensures handling the pending writes
 		do {
 			{ // synchronize with destructor. Inside a scope to unlock _condMutex after waiting
-				// aquire the condition mutex
+				// acquire the condition mutex
 				std::unique_lock<std::mutex> ul(_condMutex);
 				// The normal case is waiting for new write request
 				// Exceptions are:
