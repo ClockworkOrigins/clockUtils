@@ -1,4 +1,4 @@
-@echo off
+@echo OFF
 
 REM
 REM clockUtils

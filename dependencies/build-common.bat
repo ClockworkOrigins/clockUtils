@@ -85,7 +85,7 @@ IF [%2] == [] (
 	SET VSBATARCH=x86
 )
 
-IF [%CONIF_BAT_PATH%] == [] EXIT /B
+IF [%CONFIG_BAT_PATH%] == [] EXIT /B
 
 call %CONFIG_BAT_PATH%\vcvarsall.bat %VSBATARCH%
 
