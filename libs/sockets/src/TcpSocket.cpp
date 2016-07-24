@@ -99,7 +99,12 @@ namespace sockets {
 			return error;
 		}
 
-		struct sockaddr_in name = { AF_INET, htons(listenPort), INADDR_ANY, {0} };
+		struct sockaddr_in name;
+		name.sin_family = AF_INET;
+		name.sin_port = htons(listenPort);
+		memset(&name.sin_addr, INADDR_ANY, sizeof(name.sin_addr));
+		memset(name.sin_zero, 0, 8);
+
 		errno = 0;
 		if (-1 == bind(_sock, reinterpret_cast<struct sockaddr *>(&name), sizeof(name))) {
 			ClockError error = getLastError();
@@ -468,7 +473,7 @@ namespace sockets {
 			}
 
 			if (result.size() >= length + 6) {
-				buffer = std::string(result.begin() + 5, result.begin() + 5 + int(length));
+				buffer = std::string(reinterpret_cast<char *>(result.data() + 5), int(length));
 
 				if (result.size() > length + 6) {
 					_buffer = std::vector<uint8_t>(result.begin() + int(length) + 6, result.end());
@@ -595,7 +600,7 @@ namespace sockets {
 		// loop until finish is set. This ensures handling the pending writes
 		do {
 			{ // synchronize with destructor. Inside a scope to unlock _condMutex after waiting
-				// aquire the condition mutex
+				// acquire the condition mutex
 				std::unique_lock<std::mutex> ul(_condMutex);
 				// The normal case is waiting for new write request
 				// Exceptions are:

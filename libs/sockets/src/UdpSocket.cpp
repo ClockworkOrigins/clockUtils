@@ -224,7 +224,7 @@ namespace sockets {
 			}
 
 			if (result.size() >= length + 6) {
-				buffer = std::string(result.begin() + 5, result.begin() + 5 + int(length));
+				buffer = std::string(reinterpret_cast<char *>(result.data() + 5), int(length));
 
 				if (result.size() > length + 6) {
 					_buffer[std::make_pair(ip, port)] = std::vector<uint8_t>(result.begin() + int(length) + 6, result.end());

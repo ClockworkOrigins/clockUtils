@@ -36,9 +36,9 @@ ELSE(CLOCKUTILS_BUILD_SHARED)
 	add_library(clock_compression STATIC ${compressionSrc})
 ENDIF(CLOCKUTILS_BUILD_SHARED)
 
-IF(WIN32)
+IF(WIN32 AND ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 	add_custom_command(TARGET clock_compression POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>/clock_compression.dll ${CMAKE_BINARY_DIR}/bin)
-ENDIF(WIN32)
+ENDIF(WIN32 AND ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/clockUtils/compression
 	DESTINATION ${CMAKE_INSTALL_PREFIX}/include/clockUtils

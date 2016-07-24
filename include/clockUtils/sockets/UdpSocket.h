@@ -290,7 +290,11 @@ namespace sockets {
 
 			buffer.resize(MAX_PACKET_SIZE + 4);
 			int rc = -1;
-			struct sockaddr_in remaddr = { 0, 0, { 0 }, "\0\0\0\0\0\0\0" };
+			struct sockaddr_in remaddr;
+			remaddr.sin_family = 0;
+			remaddr.sin_port = 0;
+			memset(&remaddr.sin_addr, 0, sizeof(remaddr.sin_addr));
+			memset(remaddr.sin_zero, 0, 8);
 			socklen_t addrlen = sizeof(remaddr);
 
 			do {

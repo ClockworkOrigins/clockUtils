@@ -20,6 +20,8 @@
 ################################
 
 SET(testSrc
+	main.cpp
+
 	test_TcpSocket.cpp
 	test_UdpSocket.cpp
 )
@@ -34,8 +36,8 @@ IF(UNIX)
 	target_link_libraries(SocketsTester pthread)
 ENDIF(UNIX)
 
-IF(WIN32)
+IF(WIN32 AND ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 	add_custom_command(TARGET SocketsTester POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>/SocketsTester.exe ${CMAKE_BINARY_DIR}/bin)
-ENDIF(WIN32)
+ENDIF(WIN32 AND ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 
 ADD_TEST(SocketsTester SocketsTester)

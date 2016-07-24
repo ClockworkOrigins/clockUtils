@@ -20,6 +20,8 @@
 ################################
 
 SET(testSrc
+	main.cpp
+
 	test_iniParser.cpp
 )
 
@@ -35,8 +37,8 @@ ENDIF(UNIX)
 
 add_custom_command(TARGET iniParserTester PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resources ${CMAKE_BINARY_DIR}/bin/resources)
 
-IF(WIN32)
+IF(WIN32 AND ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 	add_custom_command(TARGET iniParserTester POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>/iniParserTester.exe ${CMAKE_BINARY_DIR}/bin)
-ENDIF(WIN32)
+ENDIF(WIN32 AND ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 
 ADD_TEST(iniParserTester iniParserTester)
