@@ -19,6 +19,7 @@
 
 #include "clockUtils/sockets/UdpSocket.h"
 
+#include <cassert>
 #include <errno.h>
 #include <sstream>
 #include <thread>
@@ -103,6 +104,7 @@ namespace sockets {
 	}
 
 	ClockError UdpSocket::writePacketAsync(IPv4 ip, uint16_t port, const void * str, const size_t length) {
+		assert(str);
 		if (_sock == INVALID_SOCKET) {
 			return ClockError::NOT_READY;
 		}
@@ -135,6 +137,7 @@ namespace sockets {
 	}
 
 	ClockError UdpSocket::writeAsync(IPv4 ip, uint16_t port, const void * str, const size_t length) {
+		assert(str);
 		if (_sock == INVALID_SOCKET) {
 			return ClockError::NOT_READY;
 		}

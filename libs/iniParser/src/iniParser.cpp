@@ -63,11 +63,6 @@ namespace iniParser {
 					return ClockError::WRONG_SYNTAX;
 				}
 			} else { // found field
-				/*if (currentSection.empty() || currentSection == "global") {
-					// "Couldn't parse ini file! Found field without section"
-					return ClockError::WRONG_SYNTAX;
-				}*/
-
 				size_t n = line.find("=");
 
 				if (n == std::string::npos) {

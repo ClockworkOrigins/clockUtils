@@ -31,7 +31,8 @@ namespace algorithm {
 
 	std::shared_ptr<HuffmanBase::Node> HuffmanBase::buildTree(const std::vector<uint8_t> & header) {
 		struct compare {
-			bool operator() (const std::shared_ptr<Node> & a, const std::shared_ptr<Node> & b) const {
+			bool operator()(const std::shared_ptr<Node> & a, const std::shared_ptr<Node> & b) const {
+				assert(a && b);
 				return a->value > b->value;
 			}
 		};
@@ -65,6 +66,7 @@ namespace algorithm {
 	}
 
 	void HuffmanBase::generateMapping(const std::shared_ptr<Node> & node, const std::vector<bool> & bitSeq, std::vector<std::vector<bool>> & mapping) {
+		assert(node);
 		// reached leaves
 		if (node->left == nullptr) {
 			assert(node->right == nullptr);
@@ -81,6 +83,7 @@ namespace algorithm {
 	}
 
 	ClockError HuffmanBase::getChar(const std::string & compressed, const std::shared_ptr<Node> & root, len_t length, std::string & result) {
+		assert(root);
 		// first bit of first byte, actual bit index in stream is byteIndex * 8 + bitIndex
 		uint8_t bitIndex = 0;
 		len_t byteIndex = 0;

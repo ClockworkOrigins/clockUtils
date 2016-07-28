@@ -19,6 +19,7 @@
 
 #include "clockUtils/sockets/TcpSocket.h"
 
+#include <cassert>
 #include <errno.h>
 #include <thread>
 
@@ -48,6 +49,7 @@ namespace sockets {
 	}
 
 	TcpSocket::TcpSocket(SOCKET fd) : TcpSocket() {
+		assert(fd != INVALID_SOCKET);
 		_sock = fd;
 		_status = SocketStatus::CONNECTED;
 	}
@@ -316,6 +318,7 @@ namespace sockets {
 	}
 
 	ClockError TcpSocket::writePacket(const void * str, const size_t length) {
+		assert(str);
 		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
@@ -344,6 +347,7 @@ namespace sockets {
 	}
 
 	ClockError TcpSocket::writePacketAsync(const void * str, const size_t length) {
+		assert(str);
 		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
@@ -378,6 +382,7 @@ namespace sockets {
 	}
 
 	ClockError TcpSocket::writeAsync(const void * str, const size_t length) {
+		assert(str);
 		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}
@@ -489,6 +494,7 @@ namespace sockets {
 	}
 
 	ClockError TcpSocket::write(const void * str, size_t length) {
+		assert(str);
 		if (_status != SocketStatus::CONNECTED) {
 			return ClockError::NOT_READY;
 		}

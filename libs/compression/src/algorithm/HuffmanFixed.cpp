@@ -110,7 +110,7 @@ namespace algorithm {
 		for (uint8_t c : text) {
 			size_t len = mappings[c].size();
 
-			while ((index + len) / 8 + 1 > result.size()) { // FIXME if index+len % 8 == 0 -> has 1 byte too much
+			while ((index + len) / 8 + 1 > result.size()) { // FIXME if index + len % 8 == 0 -> has 1 byte too much
 				result += char(uint8_t(0x0));
 			}
 
