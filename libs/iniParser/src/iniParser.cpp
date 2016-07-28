@@ -157,5 +157,19 @@ namespace iniParser {
 		return entries;
 	}
 
+	void IniParser::removeEntry(const std::string & section, const std::string & entry) {
+		for (auto it = _data[section].begin(); it != _data[section].end(); it++) {
+			if (std::get<SECTION>(*it) == section && std::get<FIELD>(*it) == entry) {
+				_allLines[section].erase(_allLines[section].begin() + std::get<INDEX>(*it));
+				_data[section].erase(it);
+				break;
+			}
+		}
+		if (_data[section].empty()) {
+			_data.erase(section);
+			_allLines.erase(section);
+		}
+	}
+
 } /* namespace iniParser */
 } /* namespace clockUtils */

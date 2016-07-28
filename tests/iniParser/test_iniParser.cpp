@@ -283,3 +283,19 @@ TEST(IniParser, GetAllEntries) {
 	EXPECT_EQ("entry4", entries[0]);
 	EXPECT_EQ("entry2", entries[1]);
 }
+
+TEST(IniParser, RemoveEntry) {
+	IniParser i;
+	EXPECT_EQ(ClockError::SUCCESS, i.load("resources/example3.ini"));
+
+	i.removeEntry("SECTION1", "entry1");
+
+	std::string entry;
+	EXPECT_NE(ClockError::SUCCESS, i.getValue("SECTION1", "entry1", entry));
+
+	i.removeEntry("SECTION1", "entry3");
+
+	EXPECT_NE(ClockError::SUCCESS, i.getValue("SECTION1", "entry3", entry));
+
+	EXPECT_EQ(2, i.getAllSections().size());
+}

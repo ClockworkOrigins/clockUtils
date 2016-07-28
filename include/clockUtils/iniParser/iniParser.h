@@ -161,6 +161,12 @@ namespace iniParser {
 		 */
 		std::vector<std::string> getAllEntries(const std::string & section) const;
 
+		/**
+		 * \brief removes the given entry from the section
+		 * if this was the last entry for this section, also the section is removed
+		 */
+		void removeEntry(const std::string & section, const std::string & entry);
+
 	private:
 		/**
 		 * \brief enum to identify entries in tuple
