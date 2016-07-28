@@ -542,3 +542,9 @@ TEST(ArgumentParser, multipleRequiredVariableHelpText) {
 		"\t--string, -s   [Default: \"\"]             Sample (required) (multiple)";
 	EXPECT_EQ(helpText, GETHELPTEXT());
 }
+
+TEST(ArgumentParser, requiredVariableQueryHelpText) {
+	REGISTER_VARIABLE_REQUIRED(std::string, string, s, "", "Sample");
+	const char * buffer[] = { "--help" };
+	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer, 1)) << GETLASTPARSERERROR();
+}
