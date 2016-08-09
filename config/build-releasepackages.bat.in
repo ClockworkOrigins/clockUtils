@@ -15,6 +15,7 @@ xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/tests" "@CMAKE_BINARY_DIR@/%sourcePackage%/te
 
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/cmake_modules" "@CMAKE_BINARY_DIR@/%sourcePackage%/cmake_modules"
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/config" "@CMAKE_BINARY_DIR@/%sourcePackage%/config"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/copyright" "@CMAKE_BINARY_DIR@/%sourcePackage%/copyright"
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/docs" "@CMAKE_BINARY_DIR@/%sourcePackage%/docs"
 xcopy /F "@CMAKE_SOURCE_DIR@/CMakeLists.txt" "@CMAKE_BINARY_DIR@/%sourcePackage%/CMakeLists.txt*"
 xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE" "@CMAKE_BINARY_DIR@/%sourcePackage%/LICENSE*"
@@ -45,5 +46,6 @@ RD /S /Q %testDir%
 cd %currentDir%
 
 xcopy /F "@CMAKE_SOURCE_DIR@/LICENSE" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/LICENSE*"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/copyright" "@CMAKE_BINARY_DIR@/%prebuiltPackage%/copyright"
 
 winrar a -afzip -df @CMAKE_BINARY_DIR@\%prebuiltPackage%.zip %prebuiltPackage%
