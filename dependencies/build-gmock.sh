@@ -32,65 +32,43 @@ if [ -d ${BUILD_DIR} ]; then
 fi
 
 PREFIX="${DEP_OUT_DIR}/gmock/"
-PARALLEL_FLAG=""
 
 if [ -d ${PREFIX} ]; then
 	exit 0
 fi
 
-if [ ! -z "${BUILD_PARALLEL}" ]; then
-	PARALLEL_FLAG="-j ${BUILD_PARALLEL}"
-fi
-
-DEBUG_FLAG="-DCMAKE_OSX_ARCHITECTURES=i386;x86_64 -DCMAKE_BUILD_TYPE=Debug"
-RELEASE_FLAG="-DCMAKE_OSX_ARCHITECTURES=i386;x86_64 -DCMAKE_BUILD_TYPE=Release"
-if [ -z "${DEBUG}" ]; then
-	BUILD_TYPE="${RELEASE_FLAG}"
-else
-	BUILD_TYPE="${DEBUG_FLAG}"
-fi
-
-if [ ! -z "${CLEAN}" ]; then
-	status "Cleaning GoogleMock with GoogleTest"
-	rm -rf "${PREFIX}"
-	exit 0
-fi
-
 title "Compile GoogleMock with GoogleTest"
 
-if ! uptodate "${EX_DIR}/${ARCHIVE}" "${PREFIX}"; then
-	status "GoogleMock/Test seems to be up to date, skipping build"
-	exit 0
-fi
+./download-dependency.sh ${ARCHIVE}
 
 status "Extracting GoogleMock with GoogleTest"
 cd "${BUILD_ROOT}"
-unzip "${EX_DIR}/${ARCHIVE}" >/dev/null
+unzip "${ARCHIVE}"
 
 status "Configuring GoogleMock with GoogleTest"
 cd "${BUILD_DIR}"
 
 cmake \
 	-DCMAKE_INSTALL_PREFIX="${PREFIX}" \
-	${BUILD_TYPE} \
+	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_C_COMPILER=${C_COMPILER} \
 	-DCMAKE_CXX_COMPILER=${CXX_COMPILER} \
-	. >/dev/null
+	.
 
 status "Building GoogleMock with GoogleTest"
-make ${PARALLEL_FLAG} >/dev/null
+make
 
 status "Installing GoogleMock with GoogleTest"
-mkdir -p ${PREFIX}/lib >/dev/null
-cp libgmock.a ${PREFIX}/lib >/dev/null
-cp gtest/libgtest.a ${PREFIX}/lib >/dev/null
-cp libgmock_main.a ${PREFIX}/lib >/dev/null
-cp gtest/libgtest_main.a ${PREFIX}/lib >/dev/null
-cp -R include ${PREFIX} >/dev/null
-cp -R gtest/include ${PREFIX} >/dev/null
+mkdir -p ${PREFIX}/lib
+cp libgmock.a ${PREFIX}/lib
+cp gtest/libgtest.a ${PREFIX}/lib
+cp libgmock_main.a ${PREFIX}/lib
+cp gtest/libgtest_main.a ${PREFIX}/lib
+cp -R include ${PREFIX}
+cp -R gtest/include ${PREFIX}
 
 status "Cleaning up"
 cd "${DEP_DIR}"
-rm -rf "${BUILD_DIR}" >/dev/null
+rm -rf "${BUILD_ROOT}"
 
 touch "${PREFIX}"
