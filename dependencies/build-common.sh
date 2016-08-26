@@ -32,6 +32,7 @@ DEP_DIR="${PWD}"
 BUILD_ROOT="/tmp/`whoami`/clockUtils"
 C_COMPILER=gcc
 CXX_COMPILER=g++
+DEP_OUT_DIR=${DEP_DIR}/gcc
 
 if [ "${2}" = "--" ] ; then
 	C_COMPILER=gcc
