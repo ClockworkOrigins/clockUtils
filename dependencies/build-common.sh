@@ -33,25 +33,25 @@ BUILD_ROOT="/tmp/`whoami`/clockUtils"
 C_COMPILER=gcc
 CXX_COMPILER=g++
 DEP_OUT_DIR=${DEP_DIR}/gcc
+CPU_CORES=`grep -c processor /proc/cpuinfo`
 
-if [ "${2}" = "--" ] ; then
+mkdir -p "${BUILD_ROOT}"
+
+if [ "${1}" = "--" ] ; then
 	C_COMPILER=gcc
 	CXX_COMPILER=g++
 	DEP_OUT_DIR=${DEP_DIR}/gcc
 fi
-if [ "${2}" = "gcc" ] ; then
+if [ "${1}" = "gcc" ] ; then
 	C_COMPILER=gcc
 	CXX_COMPILER=g++
 	DEP_OUT_DIR=${DEP_DIR}/gcc
 fi
-if [ "${2}" = "clang" ] ; then
+if [ "${1}" = "clang" ] ; then
 	C_COMPILER=clang
 	CXX_COMPILER=clang++
 	DEP_OUT_DIR=${DEP_DIR}/clang
 fi
-
-
-mkdir -p "${BUILD_ROOT}"
 
 # print titles
 title() {

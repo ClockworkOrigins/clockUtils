@@ -27,10 +27,6 @@ cd "$(readlink "$(dirname "${0}")")"
 ARCHIVE="gmock-1.7.0.zip"
 BUILD_DIR="${BUILD_ROOT}/gmock-1.7.0"
 
-if [ -d ${BUILD_DIR} ]; then
-	rm -rf ${BUILD_DIR}
-fi
-
 PREFIX="${DEP_OUT_DIR}/gmock/"
 
 if [ -d ${PREFIX} ]; then
@@ -39,7 +35,7 @@ fi
 
 title "Compile GoogleMock with GoogleTest"
 
-./download-dependency.sh ${ARCHIVE}
+. ./download-dependency.sh ${ARCHIVE}
 
 status "Extracting GoogleMock with GoogleTest"
 cd "${BUILD_ROOT}"
@@ -56,7 +52,7 @@ cmake \
 	.
 
 status "Building GoogleMock with GoogleTest"
-make
+make -j ${CPU_CORES}
 
 status "Installing GoogleMock with GoogleTest"
 mkdir -p ${PREFIX}/lib
@@ -68,6 +64,7 @@ cp -R include ${PREFIX}
 cp -R gtest/include ${PREFIX}
 
 status "Cleaning up"
+
 cd "${DEP_DIR}"
 rm -rf "${BUILD_ROOT}"
 
