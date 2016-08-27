@@ -36,7 +36,7 @@ namespace algorithm {
 
 		compressed = std::string(header.begin(), header.end());
 
-		len_t len = uncompressed.length();
+		len_t len = len_t(uncompressed.length());
 		for (size_t i = 0; i < sizeof(len_t); i++) {
 			compressed += uint8_t((len >> (8 * (sizeof(len_t) - 1 - i))) & 0xFF);
 		}
