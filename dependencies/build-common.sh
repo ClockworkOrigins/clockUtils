@@ -47,6 +47,11 @@ if [ "${1}" = "gcc" ] ; then
 	CXX_COMPILER=g++
 	DEP_OUT_DIR=${DEP_DIR}/gcc
 fi
+if [ "${1}" = "gcc-4.7" ] ; then
+	C_COMPILER=gcc-4.7
+	CXX_COMPILER=g++-4.7
+	DEP_OUT_DIR=${DEP_DIR}/gcc-4.7
+fi
 if [ "${1}" = "clang" ] ; then
 	C_COMPILER=clang
 	CXX_COMPILER=clang++

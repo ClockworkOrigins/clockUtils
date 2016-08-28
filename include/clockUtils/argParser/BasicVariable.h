@@ -151,14 +151,14 @@ namespace argParser {
 		/**
 		 * \brief returns true, if T is bool, otherwise false. Default implementation always returns false, for bool this method is specialized
 		 */
-		bool isBool() const {
+		bool isBool() const override {
 			return false;
 		}
 
 		/**
 		 * \brief sets the parsed value of the argument and returns true, if value was valid, otherwise false
 		 */
-		bool setValue(const std::string & value) {
+		bool setValue(const std::string & value) override {
 			std::stringstream ss(value);
 			T val;
 			bool ret = !(ss >> (val)).fail() && ss.eof();

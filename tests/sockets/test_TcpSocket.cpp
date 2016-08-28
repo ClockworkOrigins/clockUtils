@@ -1157,14 +1157,19 @@ TEST(TcpSocket, writeAsyncMultiple) {
 	std::vector<uint8_t> vSum = v1;
 	vSum.insert(vSum.end(), v2.begin(), v2.end());
 
+	std::unique_lock<std::mutex> ul(connectionLock);
 	ClockError err = sock1.listen(12345, 1, false, [v1, v2](TcpSocket * sock, ClockError) {
+		std::unique_lock<std::mutex> ul2(connectionLock);
 		_socketList.push_back(sock);
 		sock->writeAsync(v1);
 		sock->writeAsync(v2);
+		conditionVariable.notify_one();
 	});
 	EXPECT_EQ(ClockError::SUCCESS, err);
 
 	EXPECT_EQ(ClockError::SUCCESS, sock2.connectToIP("127.0.0.1", 12345, 500));
+
+	conditionVariable.wait(ul);
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
