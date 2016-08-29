@@ -585,7 +585,7 @@ TEST(TcpSocket, connectOnly) {
 
 	EXPECT_EQ(12345, sock2.getRemotePort());
 	EXPECT_EQ(_socketList[0]->getLocalPort(), sock2.getRemotePort());
-	EXPECT_EQ(sock2.getLocalPort(), _socketList[0]->getRemotePort());
+	EXPECT_EQ(sock2.getLocalPort(), _socketList[0]->getRemotePort()); // is this always true? a test failed because of this, line above was okay
 
 	sock1.close();
 
@@ -645,7 +645,7 @@ TEST(TcpSocket, accept) {
 	});
 	{
 		std::unique_lock<std::mutex> ul(connectionLock);
-		sock2.connectToIP("127.0.0.1", 12345, 500);
+		EXPECT_EQ(clockUtils::ClockError::SUCCESS, sock2.connectToIP("127.0.0.1", 12345, 500));
 		conditionVariable.wait(ul);
 	}
 	EXPECT_EQ(1, a);

@@ -59,11 +59,11 @@ TEST(ArgumentParser, parseBool) {
 	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer2, length2));
 
 	EXPECT_TRUE(GETLASTPARSERERROR().empty());
-	EXPECT_EQ(true, bo);
-	EXPECT_EQ(false, d);
-	EXPECT_EQ(false, foo);
-	EXPECT_EQ(true, bar);
-	EXPECT_EQ(false, longname);
+	EXPECT_TRUE(bo);
+	EXPECT_FALSE(d);
+	EXPECT_FALSE(foo);
+	EXPECT_TRUE(bar);
+	EXPECT_FALSE(longname);
 
 	// Test all set long
 	const char * buffer3[] = { "--bo", "--d", "--foo", "--bar" , "--longname" };
@@ -86,11 +86,11 @@ TEST(ArgumentParser, parseBool) {
 
 	EXPECT_FALSE(GETLASTPARSERERROR().empty());
 	EXPECT_EQ("parsing empty string not possible!", GETLASTPARSERERROR());
-	EXPECT_EQ(false, bo);
-	EXPECT_EQ(false, d);
-	EXPECT_EQ(false, foo);
-	EXPECT_EQ(true, bar);
-	EXPECT_EQ(false, longname);
+	EXPECT_FALSE(bo);
+	EXPECT_FALSE(d);
+	EXPECT_FALSE(foo);
+	EXPECT_TRUE(bar);
+	EXPECT_FALSE(longname);
 
 	// Test all set short
 	bo = false;
@@ -100,11 +100,11 @@ TEST(ArgumentParser, parseBool) {
 	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer5, length5));
 
 	EXPECT_TRUE(GETLASTPARSERERROR().empty());
-	EXPECT_EQ(true, bo);
-	EXPECT_EQ(true, d);
-	EXPECT_EQ(true, foo);
-	EXPECT_EQ(true, bar);
-	EXPECT_EQ(false, longname); // defaulted back
+	EXPECT_TRUE(bo);
+	EXPECT_TRUE(d);
+	EXPECT_TRUE(foo);
+	EXPECT_TRUE(bar);
+	EXPECT_FALSE(longname); // defaulted back
 
 	// Set explicit
 	const char * buffer6[] = { "-b", "true", "-d", "false", "--bar", "true", "--foo", "false", "--longname", "false" };
@@ -113,11 +113,11 @@ TEST(ArgumentParser, parseBool) {
 	EXPECT_EQ(clockUtils::ClockError::SUCCESS, PARSE_ARGUMENTS(buffer6, length6));
 
 	EXPECT_TRUE(GETLASTPARSERERROR().empty());
-	EXPECT_EQ(true, bo);
-	EXPECT_EQ(false, d);
-	EXPECT_EQ(false, foo);
-	EXPECT_EQ(true, bar);
-	EXPECT_EQ(false, longname);
+	EXPECT_TRUE(bo);
+	EXPECT_FALSE(d);
+	EXPECT_FALSE(foo);
+	EXPECT_TRUE(bar);
+	EXPECT_FALSE(longname);
 }
 
 TEST(ArgumentParser, parseString) {
