@@ -365,24 +365,30 @@ TEST(TcpSocket, sendFromServer) { // tests communication between two sockets
 	TcpSocket client;
 
 	ClockError e = server.listen(12345, 10, false, [](TcpSocket * ts, ClockError) {
-			ClockError e2 = ts->writePacket("test", 4);
-			EXPECT_EQ(ClockError::SUCCESS, e2);
-			ts->close();
-			delete ts;
-		});
+		std::unique_lock<std::mutex> ul(connectionLock);
+		ClockError e2 = ts->writePacket("test", 4);
+		EXPECT_EQ(ClockError::SUCCESS, e2);
+		ts->close();
+		delete ts;
+		conditionVariable.notify_one();
+	});
 	EXPECT_EQ(ClockError::SUCCESS, e);
 
+	std::unique_lock<std::mutex> ul(connectionLock);
 	e = client.connectToIP("127.0.0.1", 12345, 500);
 	EXPECT_EQ(ClockError::SUCCESS, e);
 
 	std::vector<uint8_t> recMsg;
 
-	client.receiveCallback([recMsg](const std::vector<uint8_t> & message, TcpSocket *, ClockError) {
+	client.receiveCallback([recMsg](const std::vector<uint8_t> & message, TcpSocket *, ClockError err) {
+		if (err == ClockError::SUCCESS) {
 			for (uint8_t i : message) {
 				receivedMessage += char(i);
 			}
-		});
+		}
+	});
 
+	conditionVariable.wait(ul);
 	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	EXPECT_EQ("test", receivedMessage);
@@ -661,12 +667,18 @@ TEST(TcpSocket, accept) {
 TEST(TcpSocket, write) {
 	TcpSocket sock1, sock2;
 	std::vector<uint8_t> v = {0x1, 0x2, 0x3, 0x4, 0x5, 0x0, 0x5, 0x4, 0x3, 0x2, 0x1};
-	sock1.listen(12345, 1, false, [v](TcpSocket * sock, ClockError)
-		{
-			_socketList.push_back(sock);
-			sock->write(v);
-		});
-	sock2.connectToIP("127.0.0.1", 12345, 500);
+	sock1.listen(12345, 1, false, [v](TcpSocket * sock, ClockError) {
+		std::unique_lock<std::mutex> ul(connectionLock);
+		_socketList.push_back(sock);
+		sock->write(v);
+		conditionVariable.notify_one();
+	});
+
+	{
+		std::unique_lock<std::mutex> ul(connectionLock);
+		sock2.connectToIP("127.0.0.1", 12345, 500);
+		conditionVariable.wait(ul);
+	}
 
 	std::vector<uint8_t> v2;
 	sock2.read(v2);
@@ -982,11 +994,15 @@ TEST(TcpSocket, stopRead) {
 	});
 	sock2.connectToIP("127.0.0.1", 12345, 500);
 
+	std::unique_lock<std::mutex> l(connectionLock);
 	std::thread([&sock2]() {
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
-			sock2.close();
-		}).detach();
+		std::unique_lock<std::mutex> ul(connectionLock);
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		sock2.close();
+		conditionVariable.notify_one();
+	}).detach();
 	std::string buffer;
+	conditionVariable.wait(l);
 	sock2.receivePacket(buffer);
 
 	sock1.close();
