@@ -694,16 +694,16 @@ TEST(TcpSocket, write) {
 
 TEST(TcpSocket, writeMultiple) {
 	TcpSocket sock1, sock2;
-	std::vector<uint8_t> v1 = {0x1, 0x2, 0x3, 0x4, 0x5, 0x0, 0x5, 0x4, 0x3, 0x2, 0x1};
-	std::vector<uint8_t> v2 = {0x11, 0x12, 0x13, 0x14, 0x15, 0x0, 0x15, 0x14, 0x13, 0x12, 0x11};
+	std::vector<uint8_t> v1 = { 0x1, 0x2, 0x3, 0x4, 0x5, 0x0, 0x5, 0x4, 0x3, 0x2, 0x1 };
+	std::vector<uint8_t> v2 = { 0x11, 0x12, 0x13, 0x14, 0x15, 0x0, 0x15, 0x14, 0x13, 0x12, 0x11 };
 	std::vector<uint8_t> vSum = v1;
 	vSum.insert(vSum.end(), v2.begin(), v2.end());
 
 	sock1.listen(12345, 1, false, [v1, v2](TcpSocket * sock, ClockError)
 		{
+			std::unique_lock<std::mutex> ul(connectionLock);
 			_socketList.push_back(sock);
 			sock->write(v1);
-			std::unique_lock<std::mutex> ul(connectionLock);
 			sock->write(v2);
 			conditionVariable.notify_one();
 		});
@@ -715,7 +715,7 @@ TEST(TcpSocket, writeMultiple) {
 		conditionVariable.wait(ul);
 		sock2.read(v3);
 	}
-	EXPECT_EQ(vSum, v3);
+	EXPECT_TRUE(vSum == v3 || vSum == v1); // can be both, depending on race condition
 	sock1.close();
 	sock2.close();
 
