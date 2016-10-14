@@ -41,11 +41,6 @@ namespace argParser {
 	}
 
 	template<>
-	bool Variable<bool>::isBool() const {
-		return true;
-	}
-
-	template<>
 	bool Variable<std::string>::setValue(const std::string & value) {
 		if (!_set) {
 			_value = value;

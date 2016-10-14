@@ -152,7 +152,7 @@ namespace argParser {
 		 * \brief returns true, if T is bool, otherwise false. Default implementation always returns false, for bool this method is specialized
 		 */
 		bool isBool() const override {
-			return false;
+			return std::is_same<T, bool>::value;
 		}
 
 		/**
@@ -254,12 +254,6 @@ namespace argParser {
 	};
 
 	/**
-	 * \brief specialization of isBool method for type bool, returns always true
-	 */
-	template<>
-	bool CLOCK_ARGPARSER_API Variable<bool>::isBool() const;
-
-	/**
 	 * \brief specialization of setValue for std::string so it can work with strings containing spaces
 	 */
 	template<>
@@ -276,6 +270,15 @@ namespace argParser {
 	 */
 	template<>
 	bool CLOCK_ARGPARSER_API Variable<bool>::setValue(const std::string & value);
+
+	template
+	class CLOCK_ARGPARSER_API Variable<bool>;
+
+	template
+	class CLOCK_ARGPARSER_API Variable<char>;
+
+	template
+	class CLOCK_ARGPARSER_API Variable<std::string>;
 
 } /* namespace argParser */
 } /* namespace clockUtils */
