@@ -85,5 +85,14 @@ namespace argParser {
 		return ret;
 	}
 
+	template
+	class Variable<bool>;
+
+	template
+	class Variable<char>;
+
+	template
+	class Variable<std::string>;
+
 } /* namespace argParser */
 } /* namespace clockUtils */
