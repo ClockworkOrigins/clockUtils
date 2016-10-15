@@ -10,8 +10,28 @@
 
 namespace clockUtils {
 namespace sockets {
+namespace {
+
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+	class WSAHelper {
+	public:
+		WSAHelper() {
+			WSADATA wsa;
+			WSAStartup(MAKEWORD(2, 2), &wsa);
+		}
+
+		~WSAHelper() {
+			WSACleanup();
+		}
+	};
+#endif
+
+}
 
 	IPv4 resolveHostname(const std::string & hn) {
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
+		static WSAHelper wsa;
+#endif
 		struct addrinfo hints, * servinfo, * p;
 
 		memset(&hints, 0, sizeof hints);

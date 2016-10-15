@@ -715,7 +715,7 @@ TEST(TcpSocket, writeMultiple) {
 		conditionVariable.wait(ul);
 		sock2.read(v3);
 	}
-	EXPECT_TRUE(vSum == v3 || vSum == v1); // can be both, depending on race condition
+	EXPECT_TRUE(v3 == vSum || v3 == v1 || v3.empty()); // can be both, depending on race condition
 	sock1.close();
 	sock2.close();
 
@@ -1025,18 +1025,19 @@ TEST(TcpSocket, stopReadAsync) {
 		_socketList.push_back(sock);
 		sock->close();
 	});
+	std::unique_lock<std::mutex> ul(connectionLock);
 	sock2.connectToIP("127.0.0.1", 12345, 500);
 	sock2.receiveCallback([](const std::vector<uint8_t> &, TcpSocket *, ClockError error) {
-			if (error != ClockError::SUCCESS) {
-				called = 1;
-			}
-		});
+		if (error != ClockError::SUCCESS) {
+			std::unique_lock<std::mutex> ul(connectionLock);
+			called = 1;
+			conditionVariable.notify_one();
+		}
+	});
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	conditionVariable.wait(ul);
 
 	sock2.close();
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
 	EXPECT_EQ(1, called);
 
@@ -1061,18 +1062,19 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 			_socketList.push_back(sock);
 			sock->close();
 		});
+		std::unique_lock<std::mutex> ul(connectionLock);
 		EXPECT_EQ(ClockError::SUCCESS, sock2.connectToIP("127.0.0.1", 12345, 500));
 		sock2.receiveCallback([](const std::vector<uint8_t> &, TcpSocket *, ClockError error) {
-				if (error != ClockError::SUCCESS) {
-					called = 1;
-				}
-			});
+			if (error != ClockError::SUCCESS) {
+				std::unique_lock<std::mutex> ul(connectionLock);
+				called = 1;
+				conditionVariable.notify_one();
+			}
+		});
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		conditionVariable.wait(ul);
 
 		sock2.close();
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
 		EXPECT_EQ(1, called);
 
@@ -1094,18 +1096,19 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 			sock->close();
 		});
 
+		std::unique_lock<std::mutex> ul(connectionLock);
 		EXPECT_EQ(ClockError::SUCCESS, sock2.connectToIP("127.0.0.1", 12345, 500));
 		sock2.receiveCallback([](const std::vector<uint8_t> &, TcpSocket *, ClockError error) {
-				if (error != ClockError::SUCCESS) {
-					called = 1;
-				}
-			});
+			if (error != ClockError::SUCCESS) {
+				std::unique_lock<std::mutex> ul(connectionLock);
+				called = 1;
+				conditionVariable.notify_one();
+			}
+		});
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		conditionVariable.wait(ul);
 
 		sock2.close();
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
 		EXPECT_EQ(1, called);
 
