@@ -701,7 +701,7 @@ TEST(TcpSocket, writeMultiple) {
 
 	sock1.listen(12345, 1, false, [v1, v2](TcpSocket * sock, ClockError)
 		{
-			std::unique_lock<std::mutex> ul(connectionLock);
+			std::unique_lock<std::mutex> l(connectionLock);
 			_socketList.push_back(sock);
 			sock->write(v1);
 			sock->write(v2);
@@ -1029,7 +1029,7 @@ TEST(TcpSocket, stopReadAsync) {
 	sock2.connectToIP("127.0.0.1", 12345, 500);
 	sock2.receiveCallback([](const std::vector<uint8_t> &, TcpSocket *, ClockError error) {
 		if (error != ClockError::SUCCESS) {
-			std::unique_lock<std::mutex> ul(connectionLock);
+			std::unique_lock<std::mutex> l(connectionLock);
 			called = 1;
 			conditionVariable.notify_one();
 		}
@@ -1066,7 +1066,7 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 		EXPECT_EQ(ClockError::SUCCESS, sock2.connectToIP("127.0.0.1", 12345, 500));
 		sock2.receiveCallback([](const std::vector<uint8_t> &, TcpSocket *, ClockError error) {
 			if (error != ClockError::SUCCESS) {
-				std::unique_lock<std::mutex> ul(connectionLock);
+				std::unique_lock<std::mutex> l(connectionLock);
 				called = 1;
 				conditionVariable.notify_one();
 			}
@@ -1100,7 +1100,7 @@ TEST(TcpSocket, createSocketAfterDeletion) {
 		EXPECT_EQ(ClockError::SUCCESS, sock2.connectToIP("127.0.0.1", 12345, 500));
 		sock2.receiveCallback([](const std::vector<uint8_t> &, TcpSocket *, ClockError error) {
 			if (error != ClockError::SUCCESS) {
-				std::unique_lock<std::mutex> ul(connectionLock);
+				std::unique_lock<std::mutex> l(connectionLock);
 				called = 1;
 				conditionVariable.notify_one();
 			}
