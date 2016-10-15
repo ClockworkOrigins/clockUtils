@@ -1191,7 +1191,7 @@ TEST(TcpSocket, writeAsyncMultiple) {
 
 	std::vector<uint8_t> v3;
 	EXPECT_EQ(ClockError::SUCCESS, sock2.read(v3));
-	EXPECT_TRUE(vSum == v3 || vSum == v1);
+	EXPECT_TRUE(v3 == vSum || v3 == v1 || v3.empty());
 	sock1.close();
 	sock2.close();
 
