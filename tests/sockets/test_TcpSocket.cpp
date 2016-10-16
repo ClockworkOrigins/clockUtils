@@ -31,11 +31,13 @@
 using namespace clockUtils;
 using namespace clockUtils::sockets;
 
-int connectCounter = 0;
-std::mutex connectionLock;
-std::condition_variable conditionVariable;
-std::vector<std::string> messages = { "Hello", "World!", "This is a super nice message", "111elf!!!" };
-std::vector<TcpSocket *> _socketList;
+namespace {
+	int connectCounter = 0;
+	std::mutex connectionLock;
+	std::condition_variable conditionVariable;
+	std::vector<std::string> messages = { "Hello", "World!", "This is a super nice message", "111elf!!!" };
+	std::vector<TcpSocket *> _socketList;
+}
 
 void connectionAccepted(TcpSocket * sock, ClockError error) {
 	if (error == ClockError::SUCCESS) {
@@ -365,12 +367,10 @@ TEST(TcpSocket, sendFromServer) { // tests communication between two sockets
 	TcpSocket client;
 
 	ClockError e = server.listen(12345, 10, false, [](TcpSocket * ts, ClockError) {
-		std::unique_lock<std::mutex> ul(connectionLock);
 		ClockError e2 = ts->writePacket("test", 4);
 		EXPECT_EQ(ClockError::SUCCESS, e2);
 		ts->close();
 		delete ts;
-		conditionVariable.notify_one();
 	});
 	EXPECT_EQ(ClockError::SUCCESS, e);
 
@@ -382,9 +382,11 @@ TEST(TcpSocket, sendFromServer) { // tests communication between two sockets
 
 	client.receiveCallback([recMsg](const std::vector<uint8_t> & message, TcpSocket *, ClockError err) {
 		if (err == ClockError::SUCCESS) {
+			std::unique_lock<std::mutex> l(connectionLock);
 			for (uint8_t i : message) {
 				receivedMessage += char(i);
 			}
+			conditionVariable.notify_one();
 		}
 	});
 

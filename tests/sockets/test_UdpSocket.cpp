@@ -30,6 +30,11 @@
 using namespace clockUtils;
 using namespace clockUtils::sockets;
 
+namespace {
+	std::mutex connectionLock;
+	std::condition_variable conditionVariable;
+}
+
 TEST(UdpSocket, bind) { // tests binding a socket to a port
 	UdpSocket server;
 	UdpSocket server2;
@@ -170,15 +175,17 @@ TEST(UdpSocket, receiveCallback) {
 
 	sock1.bind(12345);
 	sock1.receiveCallback([&received](std::vector<uint8_t> packet, std::string ip, uint16_t, ClockError) {
+		std::unique_lock<std::mutex> ul(connectionLock);
 		received++;
+		conditionVariable.notify_one();
 	});
 	sock2.bind(12346);
 
 	for (std::string s : messages) {
+		std::unique_lock<std::mutex> ul(connectionLock);
 		EXPECT_EQ(ClockError::SUCCESS, sock2.writePacketToIP("127.0.0.1", 12345, s.c_str(), s.length()));
+		conditionVariable.wait(ul);
 	}
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
 	EXPECT_EQ(messages.size(), received);
 
@@ -196,24 +203,24 @@ TEST(UdpSocket, receiveCallbackRemove) {
 		if (err != ClockError::SUCCESS) {
 			EXPECT_EQ(2, called);
 		} else {
+			std::unique_lock<std::mutex> l(connectionLock);
 			EXPECT_EQ(1, called);
+			conditionVariable.notify_one();
 		}
 	});
 	sock2.bind(12346);
-
-
+	
 	std::string s = "Some messsage!";
 
-	EXPECT_EQ(ClockError::SUCCESS, sock2.writePacketToIP("127.0.0.1", 12345, s.c_str(), s.length()));
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
+	{
+		std::unique_lock<std::mutex> ul(connectionLock);
+		EXPECT_EQ(ClockError::SUCCESS, sock2.writePacketToIP("127.0.0.1", 12345, s));
+		conditionVariable.wait(ul);
+	}
 	sock1.close();
 	sock2.close();
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
-	EXPECT_EQ(2, called);
+	EXPECT_LE(1, called);
 }
 
 TEST(UdpSocket, writePacketAsyncMultiple) {
