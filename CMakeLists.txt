@@ -34,13 +34,7 @@ option(WITH_LIBRARY_CONTAINER "builds container library" ON)
 option(WITH_LIBRARY_INIPARSER "builds iniParser library" ON)
 option(WITH_LIBRARY_SOCKETS "builds sockets library" ON)
 option(32BIT "builds as 32Bit library" OFF)
-
-IF(WITH_TESTING AND NOT WIN32)
-	# static for gmock
-	option(CLOCKUTILS_BUILD_SHARED "build project with shared libraries" OFF)
-ELSE(WITH_TESTING AND NOT WIN32)
-	option(CLOCKUTILS_BUILD_SHARED "build project with shared libraries" ON)
-ENDIF(WITH_TESTING AND NOT WIN32)
+option(CLOCKUTILS_BUILD_SHARED "build project with shared libraries" ON)
 
 project(clockUtils)
 
