@@ -123,7 +123,7 @@ TEST(LockFreeQueue, Clear) {
 }
 
 const int PUSH_THREADS = 40;
-const int AMOUNT = 1;
+const int AMOUNT = 1000;
 
 void pusher(LockFreeQueue<int, PUSH_THREADS * AMOUNT> * q, int amount, int value) {
 	for (int i = 0; i < amount; ++i) {
@@ -164,7 +164,7 @@ TEST(LockFreeQueue, StressTest) {
 	}
 	for (int i = 0; i < PUSH_THREADS * AMOUNT; ++i) {
 		int a = 0;
-		EXPECT_EQ(ClockError::SUCCESS, q1.poll(a));
+		EXPECT_EQ(ClockError::SUCCESS, q2.poll(a));
 		counts[size_t(a)]++;
 	}
 	for (unsigned int i = 0; i < PUSH_THREADS; ++i) {

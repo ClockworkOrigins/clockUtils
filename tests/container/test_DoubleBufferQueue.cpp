@@ -145,27 +145,30 @@ void popper(DoubleBufferQueue<int, true, true> * qFrom, DoubleBufferQueue<int, t
 }
 
 TEST(DoubleBufferQueue, StressTest) {
+	const int PUSH_THREADS = 40;
+	const int AMOUNT = 1000;
+
 	DoubleBufferQueue<int, true, true> q1;
 	DoubleBufferQueue<int, true, false> q2;
 	std::vector<std::thread *> v;
-	for (int i = 0; i < 40; ++i) {
-		v.push_back(new std::thread(std::bind(pusher, &q1, 1000, i)));
+	for (int i = 0; i < PUSH_THREADS; ++i) {
+		v.push_back(new std::thread(std::bind(pusher, &q1, AMOUNT, i)));
 	}
-	for (int i = 0; i < 80; ++i) {
-		v.push_back(new std::thread(std::bind(popper, &q1, &q2, 500)));
+	for (int i = 0; i < PUSH_THREADS * 2; ++i) {
+		v.push_back(new std::thread(std::bind(popper, &q1, &q2, AMOUNT / 2)));
 	}
-	std::vector<int> counts(40);
-	for (unsigned int i = 0; i < 120; ++i) {
+	std::vector<int> counts(PUSH_THREADS);
+	for (unsigned int i = 0; i < v.size(); ++i) {
 		v[i]->join();
 		delete v[i];
 	}
-	for (int i = 0; i < 40 * 1000; ++i) {
+	for (int i = 0; i < PUSH_THREADS * AMOUNT; ++i) {
 		int a = 0;
 		EXPECT_EQ(ClockError::SUCCESS, q2.poll(a));
 		counts[size_t(a)]++;
 	}
-	for (unsigned int i = 0; i < 40; ++i) {
-		EXPECT_EQ(1000, counts[i]);
+	for (unsigned int i = 0; i < PUSH_THREADS; ++i) {
+		EXPECT_EQ(AMOUNT, counts[i]);
 	}
 	EXPECT_TRUE(q1.empty());
 	EXPECT_TRUE(q2.empty());
