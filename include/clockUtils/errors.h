@@ -49,8 +49,9 @@ namespace clockUtils {
 		VALUE_NOTFOUND,		//!< 0xF	value not found
 		// container
 		NO_ELEMENT,			//!< 0x10	no element available
+		NO_SPACE_AVAILABLE,	//!< 0x11	no more space available in container
 		//
-		UNKNOWN,			//!< 0x11	an error occured, but the error isn't wrapped yet
+		UNKNOWN,			//!< 0x12	an error occured, but the error isn't wrapped yet
 		ERROR_COUNT
 	};
 

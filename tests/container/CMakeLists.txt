@@ -21,8 +21,9 @@
 
 SET(testSrc
 	main.cpp
-
+	
 	test_DoubleBufferQueue.cpp
+	test_LockFreeQueue.cpp
 )
 
 add_executable(ContainerTester ${testSrc})
