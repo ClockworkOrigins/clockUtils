@@ -75,7 +75,7 @@ namespace container {
 		}
 
 		/**
-		 * \brief returns first entry of the queue
+		 * \brief returns first entry of the queue, but keeps it in the queue
 		 */
 		ClockError front(T & value) {
 			return front(Bool2Type<consumer>(), value);
