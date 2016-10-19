@@ -167,7 +167,7 @@ TEST(DoubleBufferQueue, StressTest) {
 		EXPECT_EQ(ClockError::SUCCESS, q2.poll(a));
 		counts[size_t(a)]++;
 	}
-	for (unsigned int i = 0; i < PUSH_THREADS; ++i) {
+	for (int i = 0; i < PUSH_THREADS; ++i) {
 		EXPECT_EQ(AMOUNT, counts[i]);
 	}
 	EXPECT_TRUE(q1.empty());
