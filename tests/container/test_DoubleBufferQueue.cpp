@@ -173,3 +173,33 @@ TEST(DoubleBufferQueue, StressTest) {
 	EXPECT_TRUE(q1.empty());
 	EXPECT_TRUE(q2.empty());
 }
+
+TEST(DoubleBufferQueue, StressTest2) {
+	const int PUSH_THREADS = 4;
+	const int AMOUNT = 100000;
+
+	DoubleBufferQueue<int, true, true> q1;
+	DoubleBufferQueue<int, true, false> q2;
+	std::vector<std::thread *> v;
+	for (int i = 0; i < PUSH_THREADS; ++i) {
+		v.push_back(new std::thread(std::bind(pusher, &q1, AMOUNT, i)));
+	}
+	for (int i = 0; i < PUSH_THREADS * 2; ++i) {
+		v.push_back(new std::thread(std::bind(popper, &q1, &q2, AMOUNT / 2)));
+	}
+	std::vector<int> counts(PUSH_THREADS);
+	for (unsigned int i = 0; i < v.size(); ++i) {
+		v[i]->join();
+		delete v[i];
+	}
+	for (int i = 0; i < PUSH_THREADS * AMOUNT; ++i) {
+		int a = 0;
+		EXPECT_EQ(ClockError::SUCCESS, q2.poll(a));
+		counts[size_t(a)]++;
+	}
+	for (int i = 0; i < PUSH_THREADS; ++i) {
+		EXPECT_EQ(AMOUNT, counts[i]);
+	}
+	EXPECT_TRUE(q1.empty());
+	EXPECT_TRUE(q2.empty());
+}

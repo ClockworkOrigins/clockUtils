@@ -47,22 +47,29 @@ namespace container {
 		/**
 		 * \brief default constructor
 		 */
-		LockFreeQueue() : _readIndex(0), _writeIndex(0), _data() {
+		LockFreeQueue() : _readIndex(0), _writeIndex(0), _data(), _enqueuing(false), _dequeuing(false) {
 		}
 
 		/**
 		 * \brief pushes the given value into the queue
 		 */
 		ClockError push(const T & value) {
-			uint64_t writeIndex = _writeIndex.fetch_add(1);
+			bool enqueueing = false;
+			while (!std::atomic_compare_exchange_strong(&_enqueuing, &enqueueing, true)) {
+				enqueueing = false;
+			}
+			assert(!enqueueing);
+			assert(_enqueuing);
 			uint64_t readIndex = _readIndex;
+			uint64_t writeIndex = _writeIndex;
 			ClockError err = ClockError::SUCCESS;
-			if (writeIndex - readIndex < SIZE) {
+			if (writeIndex - readIndex < SIZE || readIndex > writeIndex) {
 				_data[writeIndex % SIZE] = value;
+				_writeIndex.fetch_add(1);
 			} else {
-				_writeIndex.fetch_sub(1);
 				err = ClockError::NO_SPACE_AVAILABLE;
 			}
+			_enqueuing.exchange(false);
 			return err;
 		}
 
@@ -70,13 +77,20 @@ namespace container {
 		 * \brief removes first entry of the queue
 		 */
 		ClockError pop() {
-			uint64_t writeIndex = _writeIndex;
-			uint64_t readIndex = _readIndex.fetch_add(1);
-			ClockError err = ClockError::SUCCESS;
-			if (writeIndex <= readIndex) {
-				_readIndex.fetch_sub(1);
-				err = ClockError::NO_ELEMENT;
+			bool dequeueing = false;
+			while (!std::atomic_compare_exchange_strong(&_dequeuing, &dequeueing, true)) {
+				dequeueing = false;
 			}
+			assert(!dequeueing);
+			assert(_dequeuing);
+			uint64_t writeIndex = _writeIndex;
+			ClockError err = ClockError::SUCCESS;
+			if (writeIndex <= _readIndex) {
+				err = ClockError::NO_ELEMENT;
+			} else {
+				_readIndex.fetch_add(1);
+			}
+			_dequeuing.exchange(false);
 			return err;
 		}
 
@@ -84,6 +98,12 @@ namespace container {
 		 * \brief returns first entry of the queue, but keeps it in the queue
 		 */
 		ClockError front(T & value) {
+			bool dequeueing = false;
+			while (!std::atomic_compare_exchange_strong(&_dequeuing, &dequeueing, true)) {
+				dequeueing = false;
+			}
+			assert(!dequeueing);
+			assert(_dequeuing);
 			uint64_t writeIndex = _writeIndex;
 			uint64_t readIndex = _readIndex;
 			ClockError err = ClockError::SUCCESS;
@@ -92,6 +112,7 @@ namespace container {
 			} else {
 				err = ClockError::NO_ELEMENT;
 			}
+			_dequeuing.exchange(false);
 			return err;
 		}
 
@@ -99,15 +120,22 @@ namespace container {
 		 * \brief removes first entry of the queue and returns its value
 		 */
 		ClockError poll(T & value) {
+			bool dequeueing = false;
+			while (!std::atomic_compare_exchange_strong(&_dequeuing, &dequeueing, true)) {
+				dequeueing = false;
+			}
+			assert(!dequeueing);
+			assert(_dequeuing);
 			uint64_t writeIndex = _writeIndex;
-			uint64_t readIndex = _readIndex.fetch_add(1);
+			uint64_t readIndex = _readIndex;
 			ClockError err = ClockError::SUCCESS;
 			if (writeIndex > readIndex) {
 				value = _data[readIndex % SIZE];
+				_readIndex.fetch_add(1);
 			} else {
-				_readIndex.fetch_sub(1);
 				err = ClockError::NO_ELEMENT;
 			}
+			_dequeuing.exchange(false);
 			return err;
 		}
 
@@ -139,6 +167,8 @@ namespace container {
 	private:
 		std::atomic<uint64_t> _readIndex;
 		std::atomic<uint64_t> _writeIndex;
+		std::atomic<bool> _enqueuing;
+		std::atomic<bool> _dequeuing;
 
 		std::array<T, SIZE> _data;
 
