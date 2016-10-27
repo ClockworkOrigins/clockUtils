@@ -33,7 +33,7 @@
  *
  * \section sec_lockFreeQueue LockFreeQueue
  *
- * The LockFreeQueue is used for threadsafe queue access without locking. Besides the template parameter for the type you must specify the fixed size of the queue. The API equals those of the std::queue or std::priority_queue with some exceptions. Compared to the DoubleBufferQueue the LockFreeQueue should be much faster as it doesn't lock access which is very expensive. Comparing the execution speed of the unit tests (LockFreeQueue and DoubleBufferQueue use exactly the same tests except that there are two more for the LockFreeQueue to test some special cases) shows a speedup of up to a factor of 10 to 20 using LockFreeQueue instead of DoubleBufferQueue.
+ * The LockFreeQueue is used for threadsafe queue access without locking. Besides the template parameter for the type you must specify the fixed size of the queue. The API equals those of the std::queue or std::priority_queue with some exceptions. Compared to the DoubleBufferQueue the LockFreeQueue should be faster as it doesn't lock access which is very expensive. Comparing the execution speed of the unit tests (LockFreeQueue and DoubleBufferQueue use exactly the same tests except that there are three more for the LockFreeQueue to test some special cases) shows a speedup of up to a factor of 2 to 3 using LockFreeQueue instead of DoubleBufferQueue.
  *
  * \code{.cpp}
  * ClockError push();
