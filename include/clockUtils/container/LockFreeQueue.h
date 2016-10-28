@@ -48,7 +48,7 @@ namespace container {
 		/**
 		 * \brief default constructor
 		 */
-		LockFreeQueue() : _readIndex(0), _writeIndex(0), _data(), _enqueuing(false), _dequeuing(false) {
+		LockFreeQueue() : _readIndex(0), _writeIndex(0), _enqueuing(false), _dequeuing(false), _data() {
 		}
 
 		/**
