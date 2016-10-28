@@ -27,6 +27,7 @@
 
 #include <array>
 #include <atomic>
+#include <cassert>
 
 #include "clockUtils/errors.h"
 
