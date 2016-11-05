@@ -1,5 +1,3 @@
-#!/bin/bash
-
 ##
 # clockUtils
 # Copyright (2015) Michael Baer, Daniel Bonrath, All rights reserved.
@@ -19,14 +17,15 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ##
 
-cd "$(readlink -f "$(dirname "${0}")")"
-
-FILE=${1}
-URL=http://www.clockwork-origins.de/dependencies/
-if [ -n "$2" ]; then
-	URL=${2}
-fi
-
-if ! [ -f "${BUILD_ROOT}/${FILE}" ]; then
-	wget ${URL}/${FILE} -P ${BUILD_ROOT}
-fi
+IF(WIN32)
+	file(GLOB_RECURSE files "${CLOCKUTILS_DEP_DIR}/*.dll")
+	foreach(filename ${files})
+		execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${filename} ${CMAKE_BINARY_DIR}/bin)
+	endforeach()
+ENDIF(WIN32)
+IF(UNIX)
+	file(GLOB_RECURSE files "${CLOCKUTILS_DEP_DIR}/*.so")
+	foreach(filename ${files})
+		execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${filename} ${CMAKE_BINARY_DIR}/bin/${filename_pure})
+	endforeach()
+ENDIF(UNIX)

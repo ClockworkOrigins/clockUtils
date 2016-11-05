@@ -19,14 +19,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ##
 
-cd "$(readlink -f "$(dirname "${0}")")"
+set -e
 
-FILE=${1}
-URL=http://www.clockwork-origins.de/dependencies/
-if [ -n "$2" ]; then
-	URL=${2}
-fi
-
-if ! [ -f "${BUILD_ROOT}/${FILE}" ]; then
-	wget ${URL}/${FILE} -P ${BUILD_ROOT}
-fi
+. ./build-gmock.sh ${1}
