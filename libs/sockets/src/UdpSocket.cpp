@@ -95,7 +95,7 @@ namespace sockets {
 
 		for (size_t i = 0; i < length / MAX_PACKET_SIZE + 1; i++) {
 			size_t sendLength = (i < length / MAX_PACKET_SIZE) ? MAX_PACKET_SIZE : length - (i * MAX_PACKET_SIZE);
-			if (sendto(_sock, &reinterpret_cast<const char *>(str)[i * MAX_PACKET_SIZE], int(sendLength), 0, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
+			if (sendto(_sock, &reinterpret_cast<const char *>(str)[i * MAX_PACKET_SIZE], int(sendLength), 0, reinterpret_cast<struct sockaddr *>(&addr), sizeof(addr)) < 0) {
 				ClockError error = getLastError();
 				return error;
 			}
