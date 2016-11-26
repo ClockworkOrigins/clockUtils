@@ -70,3 +70,29 @@ status() {
 	echo "	${text}"
 }
 
+# downloads and unpacks a dependency
+downloadAndUnpack() {
+	FILE=${1}
+	URL=http://www.clockwork-origins.de/dependencies/
+	if [ -n "$2" ]; then
+		URL=${2}
+	fi
+
+	if ! [ -f "${BUILD_ROOT}/${FILE}" ]; then
+		wget ${URL}/${FILE} -P ${BUILD_ROOT}
+	fi
+	FILENAME=$(basename "${FILE}")
+	EXTENSION="${FILENAME##*.}"
+	
+	cd "${BUILD_ROOT}"
+	if [ "${EXTENSION}" == "zip" ]; then
+		unzip "${FILE}"
+	fi
+	if [ "${EXTENSION}" == "gz" ]; then
+		tar xfz "${FILE}"
+	fi
+	if [ "${EXTENSION}" == "bz2" ]; then
+		tar xfj "${FILE}"
+	fi
+}
+

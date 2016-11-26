@@ -33,12 +33,9 @@ fi
 
 title "Compile GoogleMock with GoogleTest"
 
-. ./download-dependency.sh ${ARCHIVE}
-
 status "Extracting GoogleMock with GoogleTest"
 
-cd "${BUILD_ROOT}"
-unzip "${ARCHIVE}"
+downloadAndUnpack ${ARCHIVE}
 
 status "Configuring GoogleMock with GoogleTest"
 

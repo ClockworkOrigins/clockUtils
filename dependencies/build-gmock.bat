@@ -40,17 +40,17 @@ cmake -DCMAKE_INSTALL_PREFIX=%PREFIX% -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_
 
 echo "Building GoogleMock with GoogleTest"
 
-MSBuild.exe gmock.sln /p:Configuration=Release
+MSBuild.exe gmock.sln /m:%NUMBER_OF_PROCESSORS% /p:Configuration=Release
 
 echo "Installing GoogleMock with GoogleTest"
 
 mkdir "%PREFIX%"
 mkdir "%PREFIX%/include"
 mkdir "%PREFIX%/lib"
-xcopy /S /Y "%BUILD_DIR%/gtest/include" "%PREFIX%/include" > NUL
-xcopy /S /Y "%BUILD_DIR%/include" "%PREFIX%/include" > NUL
-xcopy /S /Y "%BUILD_DIR%/gtest/Release" "%PREFIX%/lib" > NUL
-xcopy /S /Y "%BUILD_DIR%/Release" "%PREFIX%/lib" > NUL
+xcopy /S /Y "%BUILD_DIR%/gtest/include" "%PREFIX%/include"
+xcopy /S /Y "%BUILD_DIR%/include" "%PREFIX%/include"
+xcopy /S /Y "%BUILD_DIR%/gtest/Release" "%PREFIX%/lib"
+xcopy /S /Y "%BUILD_DIR%/Release" "%PREFIX%/lib"
 
 echo "Cleaning up"
 

@@ -74,7 +74,7 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 
 # Sets appropriate Compilerflags
 
-SET(CXX_FLAGS "-pedantic -Wall -Wextra -Wold-style-cast -Woverloaded-virtual -Wnon-virtual-dtor -Wformat=2 -Winit-self -Wswitch-default -Wfloat-equal -Wshadow -Wredundant-decls -Wctor-dtor-privacy -Wno-sign-conversion -Wno-unused-parameter -Wno-long-long -std=c++11")
+SET(CXX_FLAGS "-pedantic -Wall -Wextra -Wold-style-cast -Woverloaded-virtual -Wnon-virtual-dtor -Wformat=2 -Winit-self -Wswitch-default -Wfloat-equal -Wshadow -Wredundant-decls -Wctor-dtor-privacy -Wno-sign-conversion -Wno-unused-parameter -Wno-long-long -fPIC -std=c++11")
 SET(CLANG_FLAGS "-Wstring-plus-int")
 
 IF(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
