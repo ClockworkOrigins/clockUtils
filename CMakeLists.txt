@@ -76,6 +76,8 @@ install(DIRECTORY ${CMAKE_BINARY_DIR}/include
 	DESTINATION ${CMAKE_INSTALL_PREFIX}
 	COMPONENT devel)
 
+install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION ${CMAKE_INSTALL_PREFIX})
+
 add_subdirectory(libs)
 
 ###############################################################################
