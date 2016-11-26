@@ -84,7 +84,7 @@ ENDIF()
 # Setting current version
 SET(VERSION_MAJOR 1)
 SET(VERSION_MINOR 1)
-SET(VERSION_PATCH 0)
+SET(VERSION_PATCH 1)
 SET(DESCRIPTION "A lightweight c++ library for commonly needed tasks. Optimized for simplicity and speed.")
 
 #########################################################################
@@ -214,6 +214,8 @@ include_directories(${CMAKE_BINARY_DIR}/include/)
 install(DIRECTORY ${CMAKE_BINARY_DIR}/include
 	DESTINATION ${CMAKE_INSTALL_PREFIX}
 	COMPONENT devel)
+
+install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 add_subdirectory(libs)
 
