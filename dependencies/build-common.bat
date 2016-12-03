@@ -25,16 +25,22 @@ SET TMP_DIR=%cd%\tmp
 IF "%1" == "downloadAndUnpack" (goto downloadAndUnpack)
 
 IF [%1] == [msvc13] (
-	SET VSCOMPILER=Visual Studio 12
+	SET VSCOMPILER=Visual Studio 12 2013
 	SET BOOSTCOMPILER=msvc-12.0
 	SET ARCH_DIR=msvc13_
 	SET CONFIG_BAT_PATH="%VS12%"
 )
 IF [%1] == [msvc15] (
-	SET VSCOMPILER=Visual Studio 14
+	SET VSCOMPILER=Visual Studio 14 2015
 	SET BOOSTCOMPILER=msvc-14.0
 	SET ARCH_DIR=msvc15_
 	SET CONFIG_BAT_PATH="%VS15%"
+)
+IF [%1] == [msvc17] (
+	SET VSCOMPILER=Visual Studio 15
+	SET BOOSTCOMPILER=msvc-17.0
+	SET ARCH_DIR=msvc17_
+	SET CONFIG_BAT_PATH="%VS17%"
 )
 IF [%1] == [android] (
 	SET ARCH_DIR=android
@@ -57,7 +63,7 @@ IF [%CONFIG_BAT_PATH%] == [] EXIT /B
 
 FOR %%X IN (MSBuild.exe) DO (SET FOUND=%%~$PATH:X)
 IF NOT DEFINED FOUND (
-	CALL %CONFIG_BAT_PATH%\vcvarsall.bat %VSBATARCH%
+	CALL %CONFIG_BAT_PATH% %VSBATARCH%
 )
 
 EXIT /B
