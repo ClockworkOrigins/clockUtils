@@ -15,26 +15,28 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-IF(WITH_LIBRARY_ARGPARSER)
-	ADD_SUBDIRECTORY(argParser)
-ENDIF(WITH_LIBRARY_ARGPARSER)
+################################
+# Logs testing cmake
+################################
 
-IF(WITH_LIBRARY_COMPRESSION)
-	ADD_SUBDIRECTORY(compression)
-ENDIF(WITH_LIBRARY_COMPRESSION)
+SET(testSrc
+	main.cpp
 
-IF(WITH_LIBRARY_CONTAINER)
-	ADD_SUBDIRECTORY(container)
-ENDIF(WITH_LIBRARY_CONTAINER)
+	test_log.cpp
+)
 
-IF(WITH_LIBRARY_INIPARSER)
-	ADD_SUBDIRECTORY(iniParser)
-ENDIF(WITH_LIBRARY_INIPARSER)
+add_executable(LogTester ${testSrc})
 
-IF(WITH_LIBRARY_LOG)
-	ADD_SUBDIRECTORY(log)
-ENDIF(WITH_LIBRARY_LOG)
+SET_TARGET_PROPERTIES(LogTester PROPERTIES LINKER_LANGUAGE CXX)
 
-IF(WITH_LIBRARY_SOCKETS)
-	ADD_SUBDIRECTORY(sockets)
-ENDIF(WITH_LIBRARY_SOCKETS)
+target_link_libraries(LogTester clock_log ${GTEST_LIBRARIES})
+
+IF(UNIX)
+	target_link_libraries(LogTester pthread)
+ENDIF(UNIX)
+
+IF(WIN32 AND ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
+	add_custom_command(TARGET LogTester POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/bin/$<CONFIGURATION>/LogTester.exe ${CMAKE_BINARY_DIR}/bin)
+ENDIF(WIN32 AND ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
+
+ADD_TEST(LogTester LogTester)

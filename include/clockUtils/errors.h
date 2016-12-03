@@ -50,8 +50,11 @@ namespace clockUtils {
 		// container
 		NO_ELEMENT,			//!< 0x10	no element available
 		NO_SPACE_AVAILABLE,	//!< 0x11	no more space available in container
+		// log
+		SINK_ALREADY_INSERTED, //!> 0x12	the sink was already inserted
+		NO_VALID_SINK,		//!> 0x13	the sink doesn't override << operator
 		//
-		UNKNOWN,			//!< 0x12	an error occured, but the error isn't wrapped yet
+		UNKNOWN,			//!< 0x14	an error occured, but the error isn't wrapped yet
 		ERROR_COUNT
 	};
 
