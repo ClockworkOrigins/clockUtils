@@ -41,7 +41,11 @@ namespace sockets {
 
 	typedef uint32_t IPv4;
 
+#if CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_WIN32
 	const IPv4 NO_IP = INADDR_NONE;
+#elif CLOCKUTILS_PLATFORM == CLOCKUTILS_PLATFORM_LINUX
+	const IPv4 NO_IP = 0xffffffff;
+#endif
 
 	/**
 	 * \brief returns the IP for a given hostname
