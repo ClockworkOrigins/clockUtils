@@ -128,10 +128,10 @@ TEST_F(LogTest, setLogLevel) {
 }
 
 TEST_F(LogTest, logStream) {
-	std::stringstream ss;
-	ASSERT_EQ(ClockError::SUCCESS, Logger::addSink(&ss));
+	std::stringstream ssSink;
+	ASSERT_EQ(ClockError::SUCCESS, Logger::addSink(&ssSink));
 
 	LOGINFO("Foobar " << 2);
 
-	ASSERT_EQ("Foobar 2\n", ss.str());
+	ASSERT_EQ("Foobar 2\n", ssSink.str());
 }
