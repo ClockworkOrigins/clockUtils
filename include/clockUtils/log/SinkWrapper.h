@@ -25,6 +25,8 @@
 #ifndef __CLOCKUTILS_LOG_SINKWRAPPER_H__
 #define __CLOCKUTILS_LOG_SINKWRAPPER_H__
 
+#include <string>
+
 #include "clockUtils/log/LogParameters.h"
 
 namespace clockUtils {
