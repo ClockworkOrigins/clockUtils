@@ -1,6 +1,6 @@
 /*
  * clockUtils
- * Copyright (2015) Michael Baer, Daniel Bonrath, All rights reserved.
+ * Copyright (2016) Michael Baer, Daniel Bonrath, All rights reserved.
  *
  * This file is part of clockUtils; clockUtils is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
