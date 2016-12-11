@@ -33,29 +33,45 @@ namespace clockUtils {
 namespace log {
 
 	/**
-	 * \brief this class is used for parsing configuration files
+	 * \brief this class is the abstract interface wrapping sinks
+	 * every sink has just to implement the stream operator using std::string as parameter
 	 */
 	class SinkWrapper {
 	public:
 		virtual ~SinkWrapper() {
 		}
 
+		/**
+		 * \brief called when logging something
+		 */
 		virtual SinkWrapper & operator<<(const std::string &) = 0;
 
+		/**
+		 * \brief check whether two sinks are the same so e.g. two times std::cout isn't added twice
+		 */
 		virtual bool isSame(void * sink) const = 0;
 	};
 
+	/**
+	 * \brief templated implementation of SinkWrapper
+	 */
 	template<typename T>
 	class SinkWrapperImplementation : public SinkWrapper {
 	public:
 		SinkWrapperImplementation(T * sink) : SinkWrapper(), _sink(sink) {
 		}
 
+		/**
+		 * \brief forwards message to concrete sink implementation
+		 */
 		SinkWrapper & operator<<(const std::string & message) override {
 			*_sink << message;
 			return *this;
 		}
 
+		/**
+		 * \brief compares stored sink with parameter
+		 */
 		bool isSame(void * sink) const override {
 			return sink == _sink;
 		}

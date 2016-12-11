@@ -29,7 +29,7 @@ namespace clockUtils {
 namespace log {
 
 	/**
-	 * \brief this class is used for parsing configuration files
+	 * \brief this enums describes all possible log levels
 	 */
 	enum class LogLevel {
 		LOG_DEBUG,

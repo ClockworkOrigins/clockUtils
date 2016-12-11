@@ -38,6 +38,9 @@ namespace log {
 	enum class LogLevel;
 
 namespace detail {
+	/**
+	 * \brief helper class to check whether class provides an stream operator
+	 */
 	template<typename S, typename T>
 	class isStreamable {
 	public:
@@ -52,10 +55,16 @@ namespace detail {
 } /* namespace detail */
 
 	/**
-	 * \brief this class is used for parsing configuration files
+	 * \brief this class is used for logging to arbitrary sinks
 	 */
 	class CLOCK_LOG_API Logger {
 	public:
+		/**
+		 * \brief adds a sink to the logger
+		 * every sink needs to override operator<<(std:string) to be accepted
+		 * returns either ClockError::SUCCESS if successfully added or ClockError::SINK_ALREADY_INSERTED in case the sink was already added
+		 * if sink isn't valid because of not override stream operator ClockError::NO_VALID_SINK is called
+		 */
 		template<typename T>
 		static typename std::enable_if<detail::isStreamable<T, std::string>::value, ClockError>::type addSink(T * sink) {
 			if (sinks.end() == std::find_if(sinks.begin(), sinks.end(), [sink](SinkWrapper * sw) { return sw->isSame(sink); })) {
@@ -71,8 +80,20 @@ namespace detail {
 			return ClockError::NO_VALID_SINK;
 		}
 
+		/**
+		 * \brief logs output with specified log level
+		 */
 		static void log(LogLevel level, const std::string & message);
+
+		/**
+		 * \brief removes all registered output
+		 */
 		static void reset();
+
+		/**
+		 * \brief sets log level to given level
+		 * all log messages with lower level are dropped
+		 */
 		static void setLogLevel(LogLevel level);
 
 	private:
