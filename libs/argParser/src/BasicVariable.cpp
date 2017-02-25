@@ -66,7 +66,7 @@ namespace argParser {
 	template<>
 	bool Variable<bool>::setValue(const std::string & value) {
 		std::string result = value;
-		std::transform(value.begin(), value.end(), result.begin(), ::tolower);
+		std::transform(value.begin(), value.end(), result.begin(), [](const char c) { return static_cast<char>(::tolower(c)); });
 		bool ret = true;
 		bool val;
 		if (result == "true") {
