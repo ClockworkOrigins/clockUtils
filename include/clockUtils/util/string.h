@@ -24,7 +24,8 @@ namespace clockUtils {
 	 */
 	static inline void ltrim(std::string & s) {
 		// careful with ::iswspace. There is a second version outside namespace std with different types
-		s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+		auto it =  std::find_if( s.begin() , s.end() , [](char ch){ return !std::isspace<char>(ch , std::locale::classic() ) ; } );
+		s.erase( s.begin() , it);
 	}
 
 	/**
@@ -32,7 +33,8 @@ namespace clockUtils {
 	 */
 	static inline void rtrim(std::string & s) {
 		// careful with ::iswspace. There is a second version outside namespace std with different types
-		s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+		auto it =  std::find_if( s.rbegin() , s.rend() , [](char ch){ return !std::isspace<char>(ch , std::locale::classic() ) ; } );
+		s.erase( it.base() , s.end() );
 	}
 
 	/**
