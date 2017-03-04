@@ -22,6 +22,8 @@
 #include <algorithm>
 #include <fstream>
 
+#include "clockUtils/util/string.h"
+
 namespace clockUtils {
 namespace iniParser {
 
@@ -47,12 +49,18 @@ namespace iniParser {
 		while (fs.good()) {
 			getline(fs, line);
 
+			// only trim from left to avoid killing value spaces
+			ltrim(line);
+
 			if (line.empty() || line.length() == 1 || line.at(0) == ';') {
 				_allLines[currentSection].push_back(line);
 				continue; // no entry found
 			}
 
 			if (line.at(0) == '[') { // section or error
+				// now trim right side as well
+				rtrim(line);
+
 				if (line.at(line.length() - 1) != ']') {
 					// "Couldn't parse ini file! Section not closed!"
 					return ClockError::WRONG_SYNTAX;
@@ -69,14 +77,20 @@ namespace iniParser {
 					// "Couldn't parse ini file! Found field without ="
 					return ClockError::WRONG_SYNTAX;
 				}
+
 				std::string key = line.substr(0, n);
+				trim(key);
+
 				for (auto & t : _data[currentSection]) {
 					if (std::get<FIELD>(t) == key) {
+						// already exists
 						return ClockError::WRONG_SYNTAX;
 					}
 				}
 
-				_data[currentSection].push_back(std::make_tuple(currentSection, key, _allLines[currentSection].size(), line.substr(n + 1, line.length() - n - 1)));
+				// do not trim value. everything is significant
+				std::string value = line.substr(n + 1, line.length() - n - 1);
+				_data[currentSection].push_back(std::make_tuple(currentSection, key, _allLines[currentSection].size(), value));
 			}
 			_allLines[currentSection].push_back(line);
 		}

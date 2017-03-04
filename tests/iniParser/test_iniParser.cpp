@@ -356,7 +356,7 @@ TEST(IniParser, SpaceHandling) {
 TEST(IniParser, DoubleEquals) {
 	{
 		IniParser i;
-		EXPECT_EQ(ClockError::SUCCESS, i.load("resources/doubleEquals.ini")); // Contains to = in one line, e.g. entry=x=y, imo it has to be valid, you might wanna store equations and in a string = is valid
+		EXPECT_EQ(ClockError::SUCCESS, i.load("resources/DoubleEquals.ini")); // Contains to = in one line, e.g. entry=x=y, imo it has to be valid, you might wanna store equations and in a string = is valid
 		std::string entry;
 		EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION", "entry", entry));
 		EXPECT_EQ("x=y", entry);
