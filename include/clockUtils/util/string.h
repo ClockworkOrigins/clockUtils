@@ -1,6 +1,6 @@
 /*
  * clockUtils
- * Copyright (2015) Michael Baer, Daniel Bonrath, All rights reserved.
+ * Copyright (2017) Michael Baer, Daniel Bonrath, All rights reserved.
  *
  * This file is part of clockUtils; clockUtils is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,8 +27,8 @@ namespace clockUtils {
 	 */
 	static inline void ltrim(std::string & s) {
 		// careful with ::iswspace. There is a second version outside namespace std with different types
-		auto it =  std::find_if( s.begin() , s.end() , [](char ch){ return !std::isspace<char>(ch , std::locale::classic() ) ; } );
-		s.erase( s.begin() , it);
+		auto it =  std::find_if(s.begin(), s.end(), [](char ch) { return !std::isspace<char>(ch , std::locale::classic()); });
+		s.erase(s.begin(), it);
 	}
 
 	/**
@@ -36,8 +36,8 @@ namespace clockUtils {
 	 */
 	static inline void rtrim(std::string & s) {
 		// careful with ::iswspace. There is a second version outside namespace std with different types
-		auto it =  std::find_if( s.rbegin() , s.rend() , [](char ch){ return !std::isspace<char>(ch , std::locale::classic() ) ; } );
-		s.erase( it.base() , s.end() );
+		auto it =  std::find_if(s.rbegin(), s.rend(), [](char ch) { return !std::isspace<char>(ch , std::locale::classic()); });
+		s.erase(it.base(), s.end());
 	}
 
 	/**
