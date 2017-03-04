@@ -299,3 +299,86 @@ TEST(IniParser, RemoveEntry) {
 
 	EXPECT_EQ(2, i.getAllSections().size());
 }
+
+TEST(IniParser, SpaceHandling) {
+	{
+		IniParser i;
+		EXPECT_EQ(ClockError::SUCCESS, i.load("resources/space1.ini")); // Space before or after Section, e.g. " [SECTION]" or "[SECTION] "
+		int entry = 0;
+		EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION1", "entry1", entry));
+		EXPECT_EQ(1, entry);
+		EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION2", "entry2", entry));
+		EXPECT_EQ(2, entry);
+		EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION3", "entry3", entry));
+		EXPECT_EQ(3, entry);
+	}
+	{
+		IniParser i;
+		EXPECT_EQ(ClockError::SUCCESS, i.load("resources/space2.ini")); // Spaces around identifier
+		int entry = 0;
+		EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION", "entry1", entry));
+		EXPECT_EQ(1, entry);
+		EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION", "entry2", entry));
+		EXPECT_EQ(2, entry);
+		EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION", "entry3", entry));
+		EXPECT_EQ(3, entry);
+	}
+	{
+		IniParser i;
+		EXPECT_EQ(ClockError::SUCCESS, i.load("resources/space3.ini")); // Spaces around entry
+		std::string entry;
+		EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION", "entry1", entry)); // in strings the space should be kept imo because it might be relevant
+		EXPECT_EQ(" value", entry);
+		EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION", "entry2", entry));
+		EXPECT_EQ(" value ", entry);
+		EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION", "entry3", entry));
+		EXPECT_EQ("value ", entry);
+		int entry2 = 0;
+		EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION", "entry4", entry2)); // for integer the spaces can be removed, at least in the beginning and the end
+		EXPECT_EQ(2, entry2);
+	}
+	{
+		IniParser i;
+		EXPECT_EQ(ClockError::SUCCESS, i.load("resources/space4.ini")); // Spaces in key
+		std::string entry;
+		EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION", "key with spaces", entry)); // within the identifier, keys should be allowed? I'm not sure about it, but I would say yes now
+		EXPECT_EQ("value", entry);
+	}
+	{
+		IniParser i;
+		EXPECT_EQ(ClockError::SUCCESS, i.load("resources/space5.ini")); // Spaces in section name
+		std::string entry;
+		EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION WITH SPACE", "entry", entry)); // if we allow in in keys, we should also allow it in sections. In general, I'm not sure about it
+		EXPECT_EQ("value", entry);
+	}
+}
+
+TEST(IniParser, DoubleEquals) {
+	{
+		IniParser i;
+		EXPECT_EQ(ClockError::SUCCESS, i.load("resources/doubleEquals.ini")); // Contains to = in one line, e.g. entry=x=y, imo it has to be valid, you might wanna store equations and in a string = is valid
+		std::string entry;
+		EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION", "entry", entry));
+		EXPECT_EQ("x=y", entry);
+	}
+}
+
+TEST(IniParser, Quotes) {
+	{
+		IniParser i;
+		EXPECT_EQ(ClockError::SUCCESS, i.load("resources/quotes.ini")); // value contains quotes, e.g. entry="value", is allowed
+		std::string entry;
+		EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION", "entry", entry));
+		EXPECT_EQ("\"value\"", entry);
+	}
+}
+
+TEST(IniParser, EmptyValue) {
+	{
+		IniParser i;
+		EXPECT_EQ(ClockError::SUCCESS, i.load("resources/emptyValue.ini")); // value is empty, e.g. entry=, is allowed
+		std::string entry = "123";
+		EXPECT_EQ(ClockError::SUCCESS, i.getValue("SECTION", "entry", entry));
+		EXPECT_TRUE(entry.empty());
+	}
+}
