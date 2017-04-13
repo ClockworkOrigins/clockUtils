@@ -13,7 +13,7 @@ xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/include" "@CMAKE_BINARY_DIR@/%sourcePackage%/
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/libs" "@CMAKE_BINARY_DIR@/%sourcePackage%/libs"
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/tests" "@CMAKE_BINARY_DIR@/%sourcePackage%/tests"
 
-xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/cmake_modules" "@CMAKE_BINARY_DIR@/%sourcePackage%/cmake_modules"
+xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/cmake" "@CMAKE_BINARY_DIR@/%sourcePackage%/cmake"
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/config" "@CMAKE_BINARY_DIR@/%sourcePackage%/config"
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/copyright" "@CMAKE_BINARY_DIR@/%sourcePackage%/copyright"
 xcopy /S /Y /I "@CMAKE_SOURCE_DIR@/docs" "@CMAKE_BINARY_DIR@/%sourcePackage%/docs"

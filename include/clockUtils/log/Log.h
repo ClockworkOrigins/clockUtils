@@ -25,6 +25,8 @@
 #ifndef __CLOCKUTILS_LOG_LOG_H__
 #define __CLOCKUTILS_LOG_LOG_H__
 
+#include <sstream>
+
 #include "clockUtils/log/Logger.h"
 #include "clockUtils/log/LogLevel.h"
 
