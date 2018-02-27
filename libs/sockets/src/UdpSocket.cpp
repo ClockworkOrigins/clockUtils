@@ -253,7 +253,7 @@ namespace sockets {
 			while (_sock != INVALID_SOCKET) {
 				std::vector<uint8_t> buffer;
 				std::string ip;
-				uint16_t port;
+				uint16_t port = 0;
 				ClockError err = receivePacket(buffer, ip, port);
 				pcb(buffer, ip, port, err);
 				if (err != ClockError::SUCCESS) {
