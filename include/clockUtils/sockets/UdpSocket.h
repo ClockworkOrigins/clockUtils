@@ -75,6 +75,7 @@ namespace sockets {
 	public:
 		/**
 		 * \brief this function type is used receiving a packet using receiveCallback and is called for every packet
+		 * If err is not ClockError::SUCCESS, all information in packet, ip and port may be invalid and should not be used
 		 */
 		typedef std::function<void(std::vector<uint8_t> packet, std::string ip, uint16_t port, ClockError err)> packetCallback;
 
