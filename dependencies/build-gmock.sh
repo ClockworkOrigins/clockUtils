@@ -53,13 +53,13 @@ make -j ${CPU_CORES}
 
 status "Installing GoogleMock with GoogleTest"
 
-mkdir -p ${PREFIX}/lib
-cp libgmock.a ${PREFIX}/lib
-cp gtest/libgtest.a ${PREFIX}/lib
-cp libgmock_main.a ${PREFIX}/lib
-cp gtest/libgtest_main.a ${PREFIX}/lib
-cp -R include ${PREFIX}
-cp -R gtest/include ${PREFIX}
+mkdir -p "${PREFIX}/lib"
+cp libgmock.a "${PREFIX}/lib"
+cp gtest/libgtest.a "${PREFIX}/lib"
+cp libgmock_main.a "${PREFIX}/lib"
+cp gtest/libgtest_main.a "${PREFIX}/lib"
+cp -R include "${PREFIX}"
+cp -R gtest/include "${PREFIX}"
 
 status "Cleaning up"
 
