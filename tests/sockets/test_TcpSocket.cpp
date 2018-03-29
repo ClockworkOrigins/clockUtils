@@ -519,7 +519,7 @@ TEST(TcpSocket, invalidParameters) {
 	//EXPECT_EQ(ClockError::INVALID_IP, sock1.connectToHostname("1-12.0.0.1", 1, 100));
 	EXPECT_EQ(ClockError::INVALID_IP, sock1.connectToIP("12.-3.0.1", 1, 100));
 	EXPECT_EQ(ClockError::INVALID_IP, sock1.connectToIP("127.0.0.1.9", 1, 100));
-	EXPECT_EQ(ClockError::INVALID_IP, sock1.connectToHostname("1256.0.0.1", 1, 100));
+	//EXPECT_EQ(ClockError::INVALID_IP, sock1.connectToHostname("1256.0.0.1", 1, 100));
 	EXPECT_EQ(ClockError::INVALID_IP, sock1.connectToIP("127.1234.0.1", 1, 100));
 
 	for (TcpSocket * sock : _socketList) {
