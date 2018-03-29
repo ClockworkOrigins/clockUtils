@@ -77,6 +77,7 @@ IF NOT EXIST %TMP_DIR%\%2 (bitsadmin /transfer "myDownloadJob%2" /download /prio
 CD %TMP_DIR%
 IF EXIST %3 RD /S /Q "%2"
 winrar.exe x -ibck %2
+IF NOT EXIST %3 7z x %2
 IF NOT EXIST %3 EXIT /B
 EXIT /B 0
 

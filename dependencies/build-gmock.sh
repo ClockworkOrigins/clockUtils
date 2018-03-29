@@ -27,7 +27,7 @@ ARCHIVE="gmock-1.7.0.zip"
 BUILD_DIR="${BUILD_ROOT}/gmock-1.7.0"
 PREFIX="${DEP_OUT_DIR}/gmock/"
 
-if [ -d ${PREFIX} ]; then
+if [ -d "${PREFIX}" ]; then
 	exit 0
 fi
 

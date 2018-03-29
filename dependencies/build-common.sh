@@ -94,5 +94,11 @@ downloadAndUnpack() {
 	if [ "${EXTENSION}" == "bz2" ]; then
 		tar xfj "${FILE}"
 	fi
+	if [ "${EXTENSION}" == "xz" ]; then
+		tar xJf "${FILE}"
+	fi
+	if [ "${EXTENSION}" == "rar" ]; then
+		unrar x "${FILE}"
+	fi
 }
 
