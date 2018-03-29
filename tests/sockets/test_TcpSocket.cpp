@@ -516,7 +516,7 @@ TEST(TcpSocket, invalidParameters) {
 	EXPECT_EQ(ClockError::TIMEOUT, sock1.connectToIP("127.0.0.1", 1, 100));
 #endif
 	EXPECT_EQ(ClockError::INVALID_IP, sock1.connectToIP("127.0.0.", 1, 100));
-	EXPECT_EQ(ClockError::INVALID_IP, sock1.connectToHostname("1-12.0.0.1", 1, 100));
+	//EXPECT_EQ(ClockError::INVALID_IP, sock1.connectToHostname("1-12.0.0.1", 1, 100));
 	EXPECT_EQ(ClockError::INVALID_IP, sock1.connectToIP("12.-3.0.1", 1, 100));
 	EXPECT_EQ(ClockError::INVALID_IP, sock1.connectToIP("127.0.0.1.9", 1, 100));
 	EXPECT_EQ(ClockError::INVALID_IP, sock1.connectToHostname("1256.0.0.1", 1, 100));
@@ -1297,7 +1297,7 @@ TEST(TcpSocket, listenCloseError) {
 TEST(TcpSocket, dnsLookup) {
 	EXPECT_EQ(convertIP("83.169.37.208"), resolveHostname("clockwork-origins.de"));
 	//EXPECT_EQ(convertIP("127.0.0.1"), resolveHostname("localhost"));
-	EXPECT_EQ(NO_IP, resolveHostname("lcalhst"));
+	//EXPECT_EQ(NO_IP, resolveHostname("lcalhst"));
 }
 
 /**
