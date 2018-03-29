@@ -19,6 +19,7 @@
 
 #include "clockUtils/container/DoubleBufferQueue.h"
 
+#include <functional>
 #include <thread>
 
 #include "gtest/gtest.h"
