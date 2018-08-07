@@ -23,7 +23,7 @@ set(srcdir ./src)
 
 IF(WIN32)
 	set(srcdirPlatform ./src/windows)
-ELSEIF(UNIX)
+ELSEIF(UNIX OR APPLE)
 	set(srcdirPlatform ./src/linux)
 ENDIF()
 

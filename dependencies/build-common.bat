@@ -51,12 +51,14 @@ IF [%2] == [32] (
 	SET BOOSTARCH=32
 	SET ARCH_DIR=%ARCH_DIR%32
 	SET VSBATARCH=x86
+	SET VSSOLUTIONARCH=Win32
 )
 IF [%2] == [64] (
 	SET VSARCH= Win64
 	SET BOOSTARCH=64
 	SET ARCH_DIR=%ARCH_DIR%64
 	SET VSBATARCH=amd64
+	SET VSSOLUTIONARCH=x64
 )
 
 IF [%CONFIG_BAT_PATH%] == [] EXIT /B
@@ -77,7 +79,15 @@ IF NOT EXIST %TMP_DIR%\%2 (bitsadmin /transfer "myDownloadJob%2" /download /prio
 CD %TMP_DIR%
 IF EXIST %3 RD /S /Q "%2"
 winrar.exe x -ibck %2
-IF NOT EXIST %3 7z x %2
+IF NOT EXIST %3 (
+	if "%%2:~-6%" neq "tar.gz" (
+		SET ARCHIVE=%2
+		SET NEXTARCHIVE=%ARCHIVE:~0,-3%
+		7z x %ARCHIVE% && 7z x %NEXTARCHIVE%
+	) else (
+		7z x %2
+	)
+)
 IF NOT EXIST %3 EXIT /B
 EXIT /B 0
 
