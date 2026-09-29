@@ -25,6 +25,7 @@
 #ifndef __CLOCKUTILS_COMPRESSION_ALGORITHM_HUFFMANBASE_H__
 #define __CLOCKUTILS_COMPRESSION_ALGORITHM_HUFFMANBASE_H__
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
